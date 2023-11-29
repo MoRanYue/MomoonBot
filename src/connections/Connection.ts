@@ -1,4 +1,4 @@
-import { CustomEventEmitter } from "src/tools/CustomEventEmitter"
+import { CustomEventEmitter } from "../tools/CustomEventEmitter"
 
 export abstract class Connection {
   protected server: unknown

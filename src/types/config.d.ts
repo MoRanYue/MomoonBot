@@ -4,6 +4,11 @@ enum ConnectionType {
   http = "http"
 }
 
+export enum SupportedProtocol {
+  onebotV12 = "onebot/v12",
+  shamrock = "shamrock"
+}
+
 interface HttpMiddleware {
   api: string
   host: string
@@ -21,6 +26,7 @@ interface ReverseWsMiddleware {
 interface ConnectionMiddlewareConfig {
   type: ConnectionType
   server: HttpMiddleware | WsMiddleware | ReverseWsMiddleware
+  protocol: SupportedProtocol
   backupAccounts?: number[]
   switchAccountWhenUnavailable?: boolean
 }

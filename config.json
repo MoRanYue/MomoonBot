@@ -2,9 +2,10 @@
   "connections": [
     {
       "type": "http",
+      "protocol": "onebot/v12",
       "server": {
         "host": "0.0.0.0",
-        "api": "http://127.0.0.1:3007",
+        "api": "http://127.0.0.1:3002",
         "port": 3006
       }
     }

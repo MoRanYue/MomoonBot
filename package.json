@@ -1,6 +1,6 @@
 {
   "scripts": {
-    "start": "ts-node ./src/app.ts"
+    "start": "npx ts-node ./index.ts"
   },
   "version": "1.0.0",
   "author": "MoRanYue",
