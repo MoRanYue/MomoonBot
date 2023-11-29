@@ -1,9 +1,19 @@
-export abstract class Connection {
-  protected host?: string
-  protected port?: number
-  protected clientAddress?: string
+import { CustomEventEmitter } from "src/tools/CustomEventEmitter"
 
-  public abstract createServer(): typeof this
+export abstract class Connection {
+  protected server: unknown
+  
+  readonly ev: CustomEventEmitter
+
+  constructor() {
+    this.ev = new CustomEventEmitter()
+  }
+
+  public abstract createServer(port: number): this
+  public abstract createServer(port: number, host?: string): this
+  public abstract createServer(port: number, host?: string, cb?: VoidFunction): this
+
   public abstract connect(address: string): boolean
-  public abstract send(): boolean
+
+  public abstract send(): unknown
 }
