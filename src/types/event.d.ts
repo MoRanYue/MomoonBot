@@ -1,4 +1,4 @@
-import type { MessageSegment } from "./Message"
+import type { MessageSegment } from "./message"
 
 export namespace Event {
   enum EventType {
@@ -219,4 +219,8 @@ export namespace Event {
     approve: boolean
     reason: string
   }
+
+  type Notice = unknown
+  type Request = unknown
+  type Unknown = Reported
 }

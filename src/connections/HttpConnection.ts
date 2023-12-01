@@ -5,6 +5,7 @@ import { ResponseContent } from "../tools/ResponseContent";
 import { CustomIncomingMessage } from "../types/http";
 import { ConnectionEventEmitter } from "../types/CustomEventEmitter";
 import { Utils } from "../tools/Utils";
+import { Event } from "../types/event";
 
 export class HttpConnection extends Connection {
   declare protected server: http.Server
@@ -22,8 +23,26 @@ export class HttpConnection extends Connection {
         console.log("       Received Event Report")
         console.log("Client: ", req.socket.remoteAddress)
         console.log("Content: ", req.body)
-      
-        this.ev.emit("message", Utils.jsonToData(req.body))
+        
+        const data = <Event.Reported>Utils.jsonToData(req.body)
+        switch (data.post_type) {
+          case Event.EventType.message:
+            this.ev.emit("message", <Event.Message>data)
+            break;
+        
+          case Event.EventType.notice:
+            this.ev.emit("notice", <Event.Notice>data)
+            break;
+
+          case Event.EventType.request:
+            this.ev.emit("request", <Event.Request>data)
+            break;
+        
+        
+          default:
+            this.ev.emit("unknown", <Event.Unknown>data)
+            break;
+        }
 
         res.end(Utils.dataToJson(ResponseContent.httpClient()))
       })
