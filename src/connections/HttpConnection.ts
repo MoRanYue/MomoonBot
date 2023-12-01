@@ -1,9 +1,14 @@
 import { Connection } from "./Connection";
 import http from "node:http"
 import url from "node:url"
+import { ResponseContent } from "../tools/ResponseContent";
+import { CustomIncomingMessage } from "../types/http";
+import { ConnectionEventEmitter } from "../types/CustomEventEmitter";
+import { Utils } from "../tools/Utils";
 
 export class HttpConnection extends Connection {
   declare protected server: http.Server
+  declare readonly ev: ConnectionEventEmitter.HttpEventEmitter
   public clientAddresses: string[] = []
 
   public createServer(port: number): this
@@ -11,14 +16,20 @@ export class HttpConnection extends Connection {
   public createServer(port: number, host?: string, cb?: () => void): this {
     this.server = http.createServer()
     
-    const self = this
-    this.server.on("request", (req: http.IncomingMessage, res: http.Response) => self.receiveRequest(req, res, async (req, res) => {
-      console.log("Received Req", JSON.stringify(JSON.parse(req.body))))
+    this.server.on("request", (req: http.IncomingMessage, res: http.ServerResponse) => {
+      this.receiveRequest(req, res, async (req, res) => {
+        console.log("=======================================")
+        console.log("       Received Event Report")
+        console.log("Client: ", req.socket.remoteAddress)
+        console.log("Content: ", req.body)
       
-      self.ev.emit("nessage", JSON.parse(req.body))
-    }))
+        this.ev.emit("message", Utils.jsonToData(req.body))
+
+        res.end(Utils.dataToJson(ResponseContent.httpClient()))
+      })
+    })
     
-    this.server.listen(port, host ?? "0.0.0.0", cb ?? undefined)
+    this.server.listen(port, host, cb)
 
     return this
   }
@@ -32,16 +43,25 @@ export class HttpConnection extends Connection {
       http.request(address, this.receivePacket)
     })
   }
+
+  public addClient(...address: string[]): void {
+    this.clientAddresses.push(...address)
+  }
   
-  private receiveRequest(req: http.IncomingMessage, res: http.Response, cb: (req: http.IncomingMessage, res: http.Response) => void) {
-    req.query = new url.URL(req.url).searchParams
+  private receiveRequest(req: http.IncomingMessage, res: http.ServerResponse, cb: (req: CustomIncomingMessage, res: http.ServerResponse) => void) {
+    const msg = <CustomIncomingMessage>req
+    msg.query = new url.URL(req.url!, `http://${msg.headers.host}`).searchParams
+
+    res.setHeader("Content-Type", "application/json;charset=utf-8")
+    res.setHeader("Cache-Control", "no-cache")
+    res.statusCode = 200
   
-    if (req.method.toLowerCase() == "post") {
+    if (msg.method!.toLowerCase() == 'post') {
       let data: string = ""
-      req.on("data", async (chunk: string) => data += chunk)
-      req.on("end", () => {
-        req.body = data
-        cb(req, res)
+      msg.on("data", async (chunk: string) => data += chunk)
+      msg.on("end", () => {
+        msg.body = data
+        cb(msg, res)
       })
     }
     else {

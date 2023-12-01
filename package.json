@@ -2,13 +2,13 @@
   "scripts": {
     "start": "npx ts-node ./index.ts"
   },
-  "version": "1.0.0",
+  "version": "0.1.0",
   "author": "MoRanYue",
-  "description": "Momoon Bot",
+  "description": "Momoon Bot → OpenShamrock",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": ""
+    "url": "https://github.com/MoRanYue/MomoonBot"
   },
   "devDependencies": {
     "@types/node": "^20.10.0",

@@ -1,6 +1,6 @@
 import { HttpConnection } from "../connections/HttpConnection"
 import type { Connection } from "../connections/Connection"
-import type { SupportedProtocol, ConnectionType } from "../types/config.d.ts"
+import type { ConnectionType } from "../types/config.d.ts"
 import config from "../config"
 
 export class Launcher {
@@ -23,6 +23,7 @@ export class Launcher {
       case "http":
         const connection = new HttpConnection()
         connection.createServer(port, host)
+        connection.ev.on('message', ev => {})
         
         return connection
       
