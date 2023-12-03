@@ -1,36 +1,37 @@
-enum ConnectionType {
-  ws = "ws",
-  reverseWs = "reversews",
-  http = "http"
-}
+import type { ConfigEnum } from "./enums"
 
-export enum SupportedProtocol {
-  onebotV12 = "onebot/v12",
-  shamrock = "shamrock"
-}
-
-interface HttpMiddleware {
+export interface HttpMiddleware {
   api: string
   host: string
   port: number
 }
-interface WsMiddleware {
+export interface WsMiddleware {
   api?: string
   universe: string
 }
-interface ReverseWsMiddleware {
+export interface ReverseWsMiddleware {
   host: string
   port: number
 }
 
 interface ConnectionMiddlewareConfig {
-  type: ConnectionType
+  type: ConfigEnum.ConnectionType
   server: HttpMiddleware | WsMiddleware | ReverseWsMiddleware
-  protocol: SupportedProtocol
+  protocol: ConfigEnum.SupportedProtocol
   backupAccounts?: number[]
   switchAccountWhenUnavailable?: boolean
 }
 
+interface CommandListenerConfig {
+  separator: string[]
+  prompt: string[]
+  ignoreBlanks: boolean
+}
+interface ListenerConfig {
+  command: CommandListenerConfig
+}
+
 export interface Config {
   connections: ConnectionMiddlewareConfig[]
+  listener: ListenerConfig
 }

@@ -1,13 +1,11 @@
-import { CustomEventEmitter } from "../tools/CustomEventEmitter"
+import type { ConnectionEnum } from "src/types/enums"
+import type { CustomEventEmitter } from "../tools/CustomEventEmitter"
+import type { ConnectionContent } from "src/types/connectionContent"
 
 export abstract class Connection {
-  protected server: unknown
+  protected abstract server: unknown
   
-  readonly ev: CustomEventEmitter
-
-  constructor() {
-    this.ev = new CustomEventEmitter()
-  }
+  abstract readonly ev: CustomEventEmitter
 
   public abstract createServer(port: number): this
   public abstract createServer(port: number, host?: string): this
@@ -15,5 +13,5 @@ export abstract class Connection {
 
   public abstract connect(address: string): boolean
 
-  public abstract send(): unknown
+  public abstract send(action: ConnectionEnum.Action, data: Record<string, any>): Promise<void>
 }

@@ -1,52 +1,7 @@
 import type { MessageSegment } from "./message"
+import { EventEnum, MessageSegmentEnum } from "./enums"
 
 export namespace Event {
-  enum EventType {
-    message = "message",
-    messageSent = "message_sent",
-    notice = "notice",
-    request = "request"
-  }
-  enum MessageType {
-    private = "private",
-    group = "group"
-  }
-  enum MessageSubType {
-    friend = "friend",
-    normal = "normal",
-    anonymous = "anonymous",
-    group = "group",
-    groupSelf = "group_self",
-    notice = "notice"
-  }
-  enum NoticeType {
-    groupUpload = "group_upload",
-    groupAdmin = "group_admin",
-    groupDecrease = "group_decrease",
-    groupIncrease = "group_increase",
-    groupBan = "group_ban",
-    groupRecall = "group_recall",
-    groupCard = "group_card",
-    essence = "essence",
-
-    friendAdd = "friend_add",
-    friendRecall = "friend_recall",
-    offlineFile = "offline_file",
-    clientStatus = "client_status",
-
-    notify = "notify"
-  }
-  enum NotifySubType {
-    honor = "honor",
-    poke = "poke",
-    luckyKing = "lucky_king",
-    title = "title"
-  }
-  enum RequestType {
-    friend = "friend",
-    group = "group"
-  }
-  
   interface PrivateMessageSender {
     user_id: number
     nickname: string
@@ -62,15 +17,16 @@ export namespace Event {
   interface Reported {
     time: number
     self_id: number
-    post_type: EventType
+    post_type: EventEnum.EventType
   }
   interface Message extends Reported {
-    message_type: MessageType
-    sub_type: MessageSubType
+    message_type: EventEnum.MessageType
+    sub_type: EventEnum.MessageSubType
     message_id: number
     user_id: number
-    message: MessageSegment[]
+    message: MessageSegment.Segment[]
     raw_message: string
+    temp_source: EventEnum.MessageTempSource
     font: number
     sender: MessageSender
     group_id: number
@@ -220,7 +176,25 @@ export namespace Event {
     reason: string
   }
 
-  type Notice = unknown
-  type Request = unknown
+  interface MetaEvent extends Reported {
+    meta_event_type: EventEnum.MetaEventType
+    sub_type: EventEnum.MetaEventSubType
+    interval: number
+    status: {
+      self: {
+        platform: string
+        user_id: number
+      }
+      online: boolean
+      good: boolean
+      "qq.status": string
+    }
+  }
+
+  type Notice = PrivateRecall | GroupRecall | GroupMemberIncrease | GroupMemberDecrease | GroupAdminChange | 
+  GroupFileUpload | PrivateFileUpload | GroupBan | GroupCardChange | FriendAdd | OfflineFile | Title | 
+  Essence | ClientStatus | Poke | LuckyKing | Honor
+  type Request = FriendRequest | GroupRequest
+  type Operation = MessageQuickOperation | MessageQuickReply | GroupRequestQuickOperation | FriendRequestQuickOperation
   type Unknown = Reported
 }

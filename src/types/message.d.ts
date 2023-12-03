@@ -1,58 +1,36 @@
+import { MessageSegmentEnum } from "./enums"
+
 export namespace MessageSegment {
-  enum SegmentType {
-    text = "text",
-    at = "at",
-    face = "face",
-    reply = "reply",
-    file = "file",
-    image = "image",
-    record = "record",
-    video = "video",
-    poke = "poke",
-    touch = "touch",
-    music = "music",
-    weather = "weather",
-    location = "location",
-    share = "share",
-    gift = "gift",
-    json = "json",
-
-    mergedForward = "",
-    mergedForwardNode = "",
-    xml = "",
-    textToSpeech = ""
-  }
-
   interface Segment {
-    type: SegmentType
+    type: MessageSegmentEnum.SegmentType
     data: object
   }
   interface TextSegment implements Segment {
-    type: SegmentType.text
+    type: MessageSegmentEnum.SegmentType.text
     data: {
       text: string
     }
   }
   interface AtSegment implements Segment {
-    type: SegmentType.at
+    type: MessageSegmentEnum.SegmentType.at
     data: {
       qq: number
     }
   }
   interface FaceSegment implements Segment {
-    type: SegmentType.face
+    type: MessageSegmentEnum.SegmentType.face
     data: {
       id: number
     }
   }
   interface ReplySegment implements Segment {
-    type: SegmentType.reply
+    type: MessageSegmentEnum.SegmentType.reply
     data: {
       id: number
     }
   }
   interface FileSegment implements Segment {
-    type: SegmentType.file
+    type: MessageSegmentEnum.SegmentType.file
     data: {
       sub: string
       biz: number
@@ -64,14 +42,14 @@ export namespace MessageSegment {
     }
   }
   interface ImageSegment implements Segment {
-    type: SegmentType.image
+    type: MessageSegmentEnum.SegmentType.image
     data: {
       file: string
       url?: string
     }
   }
   interface RecordSegment implements Segment {
-    type: SegmentType.record
+    type: MessageSegmentEnum.SegmentType.record
     data: {
       file?: string
       url: string
@@ -79,13 +57,13 @@ export namespace MessageSegment {
     }
   }
   interface VideoSegment implements Segment {
-    type: SegmentType.video
+    type: MessageSegmentEnum.SegmentType.video
     data: {
       file?: string
     }
   }
   interface PokeSegment implements Segment {
-    type: SegmentType.poke
+    type: MessageSegmentEnum.SegmentType.poke
     data: {
       type: number
       id: number
@@ -93,20 +71,20 @@ export namespace MessageSegment {
     }
   }
   interface TouchSegment implements Segment {
-    type: SegmentType.touch
+    type: MessageSegmentEnum.SegmentType.touch
     data: {
       id: number
     }
   }
   interface MusicSegment implements Segment {
-    type: SegmentType.music
+    type: MessageSegmentEnum.SegmentType.music
     data: {
       type: "qq" | "163"
       id: number
     }
   }
   interface CustomMusicSegment extends MusicSegment {
-    type: SegmentType.music
+    type: MessageSegmentEnum.SegmentType.music
     data: {
       type: "custom"
       url: string
@@ -117,14 +95,14 @@ export namespace MessageSegment {
     }
   }
   interface WeatherSegment implements Segment {
-    type: SegmentType.weather
+    type: MessageSegmentEnum.SegmentType.weather
     data: {
       city: string
       code: string
     }
   }
   interface LocationSegment implements Segment {
-    type: SegmentType.location
+    type: MessageSegmentEnum.SegmentType.location
     data: {
       lat: number
       lon: number
@@ -133,7 +111,7 @@ export namespace MessageSegment {
     }
   }
   interface ShareSegment implements Segment {
-    type: SegmentType.share
+    type: MessageSegmentEnum.SegmentType.share
     data: {
       url: string
       title?: string
@@ -143,14 +121,14 @@ export namespace MessageSegment {
     }
   }
   interface GiftSegment implements Segment {
-    type: SegmentType.gift
+    type: MessageSegmentEnum.SegmentType.gift
     data: {
       qq: number
       id: number
     }
   }
   interface JsonSegment implements Segment {
-    type: SegmentType.json
+    type: MessageSegmentEnum.SegmentType.json
     data: {
       data: string
     }

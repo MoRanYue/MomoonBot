@@ -1,3 +1,6 @@
 import config from '../config.json'
+import { Config } from './types/config'
 
-export default config
+const cfg: Config = <Config>config
+
+export default cfg
