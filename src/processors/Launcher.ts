@@ -5,9 +5,7 @@ import type { HttpMiddleware, ReverseWsMiddleware, WsMiddleware } from "../types
 import { ConfigEnum } from "../types/enums"
 import config from "../config"
 import { MessageEvent } from "../events/MessageEvent"
-import { Plugin, type Plugin_ } from "./Plugin"
 import { PluginLoader } from "./PluginLoader"
-import path from "node:path"
 
 export class Launcher {
   protected connections: Connection[] = []
@@ -23,7 +21,7 @@ export class Launcher {
     })
 
     this.loader = new PluginLoader()
-    this.loadFromFolder()
+    this.loader.loadFromDefaultFolder()
     
     config.connections.forEach(conn => {
       console.log(`尝试启动“${conn.type}”（协议：“${conn.protocol}”）服务器`)
@@ -35,12 +33,6 @@ export class Launcher {
     })
     
     console.log("启动完毕")
-  }
-
-  private async loadFromFolder() {
-    const a: unknown = (await import("../plugins/BuiltInPlugin.js")).default.default
-    this.loader.load(<typeof Plugin_>a)
-    // path.resolve("./")
   }
   
   private launchConnection(type: ConfigEnum.ConnectionType, port?: number, host?: string) {

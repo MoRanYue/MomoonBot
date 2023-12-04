@@ -41,8 +41,6 @@ export abstract class Plugin {
         const maybeArgs = this.matchCommand(plainText, command)
 
         if (maybeArgs) {
-          console.log("Args:", maybeArgs)
-
           if (commandListeners.has(command)) {
             const listeners = commandListeners.get(command)!
             
@@ -56,8 +54,8 @@ export abstract class Plugin {
     })
   }
 
-  public onMessage(message: DataType.ListenedMessage, cb: DataType.ListenedMessageFunc, priority: number = 0, block: boolean = false, usage?: string): Listener {
-    const listener = new MessageListener(cb, priority, block)
+  public onMessage(message: DataType.ListenedMessage, cb: DataType.ListenedMessageFunc, priority: number = 0, block: boolean = false, ignoreCase: boolean = true, usage?: string): Listener {
+    const listener = new MessageListener(cb, priority, block, ignoreCase, usage)
 
     const messageListeners = this.listeners.message
 
@@ -82,8 +80,8 @@ export abstract class Plugin {
 
     return listener
   }
-  public onCommand(command: DataType.ListenedMessage, cb: DataType.ListenedCommandFunc, priority: number = 0, block: boolean = false, usage?: string): Listener {
-    const listener = new CommandListener(cb, priority, block)
+  public onCommand(command: DataType.ListenedMessage, cb: DataType.ListenedCommandFunc, priority: number = 0, block: boolean = false, ignoreCase: boolean = true, usage?: string): Listener {
+    const listener = new CommandListener(cb, priority, block, ignoreCase, usage)
 
     const commandListeners = this.listeners.command
 
@@ -111,10 +109,11 @@ export abstract class Plugin {
     return 0
   }
 
-  private matchMessage(str: string, pattern: DataType.ListenedMessage): boolean {
-    return (typeof pattern == "string" && str.includes(<string>pattern)) || (pattern instanceof RegExp && pattern.test(str))
+  private matchMessage(str: string, pattern: DataType.ListenedMessage, ignoreCase: boolean = true): boolean {
+    return (typeof pattern == "string" && (ignoreCase ? str.toLowerCase().includes(<string>pattern.toLowerCase()) : str.includes(<string>pattern))) || 
+    (pattern instanceof RegExp && pattern.test(str))
   }
-  private matchCommand(str: string, command: DataType.ListenedMessage): string[] | undefined {
+  private matchCommand(str: string, command: DataType.ListenedMessage, ignoreCase: boolean = true): string[] | undefined {
     let i: number = -1
     let char: string | undefined
     function advance() {
@@ -161,7 +160,7 @@ export abstract class Plugin {
       }
 
       const cmd = segments.shift()
-      if (cmd && this.matchMessage(cmd, command)) {
+      if (cmd && this.matchMessage(cmd, command, ignoreCase)) {
         return segments
       }
     }

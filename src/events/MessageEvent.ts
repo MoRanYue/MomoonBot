@@ -1,11 +1,12 @@
 import { Event as Ev } from "./Event";
 import { Event } from "../types/event";
-import { EventEnum, MessageSegmentEnum } from "../types/enums";
+import { ConnectionEnum, EventEnum, MessageSegmentEnum } from "../types/enums";
 import { WrongEventTypeError } from "../exceptions/exceptions";
-import { type Segment } from "./messages/MessageSegment";
+import { Segment } from "./messages/MessageSegment";
 import type { MessageSegment } from "../types/message";
 import { MessageUtils } from "../tools/MessageUtils";
 import type { Connection } from "../connections/Connection";
+import type { ConnectionContent } from "src/types/connectionContent";
 
 export class MessageEvent extends Ev {
   public time: number
@@ -59,13 +60,23 @@ export class MessageEvent extends Ev {
     return text
   }
   public messageToObject(): MessageSegment.Segment[] {
-    let message: MessageSegment.Segment[] = []
-    this.message.forEach(seg => {
-      message.push(seg.toObject())
-    })
-    return message
+    return MessageUtils.segmentsToObject(this.message)
   }
 
-  public quickReply() {}
+  public quickReply(message: string | MessageSegment.Segment | MessageSegment.Segment[] | Segment | Segment[]) {
+    if (Array.isArray(message) && message.length != 0 && message[0] instanceof Segment) {
+      message = MessageUtils.segmentsToObject(<Segment[]>message)
+    }
+    else if (message instanceof Segment) {
+      message = message.toObject()
+    }
+    this.conn!.send(ConnectionEnum.Action.sendMsg, <ConnectionContent.Params.SendMsg>{
+      message_type: this.messageType,
+      group_id: this.groupId,
+      user_id: this.userId,
+      message,
+      auto_escape: false
+    })
+  }
   public quickOperation() {}
 }

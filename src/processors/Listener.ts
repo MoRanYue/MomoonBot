@@ -13,13 +13,17 @@ abstract class Listener {
 class MessageListener extends Listener {
   protected callback: DataType.ListenedMessageFunc;
   protected messageGetters: DataType.ListenedMessageFunc[] = []
+  protected usage?: string
+  protected ignoreCase?: boolean
 
-  constructor(cb: DataType.ListenedMessageFunc, priority: number = 0, block: boolean = false) {
+  constructor(cb: DataType.ListenedMessageFunc, priority: number = 0, block: boolean = false, ignoreCase: boolean = true, usage?: string) {
     super()
 
     this.callback = cb
     this.priority = priority
     this.block = block
+    this.usage = usage
+    this.ignoreCase = ignoreCase
   }
 
   public trigger(ev: MessageEvent, state: DataType.State) {
@@ -29,23 +33,36 @@ class MessageListener extends Listener {
   public get(): this {
     return this
   }
+
+  public get instruction(): string | undefined {
+    return this.usage
+  }
 }
 
 class CommandListener extends Listener {
   protected callback: DataType.ListenedCommandFunc;
   protected messageGetters: DataType.ListenedCommandFunc[] = []
+  protected usage?: string
+  protected ignoreCase?: boolean
 
-  constructor(cb: DataType.ListenedCommandFunc, priority: number = 0, block: boolean = false) {
+  constructor(cb: DataType.ListenedCommandFunc, priority: number = 0, block: boolean = false, ignoreCase: boolean = true, usage?: string) {
     super()
 
     this.callback = cb
     this.priority = priority
     this.block = block
+    this.usage = usage
+    this.ignoreCase = ignoreCase
   }
 
   public trigger(ev: MessageEvent, state: DataType.State, args: string[]) {
     return this.callback(ev, state, args)
   }
+  
+  public get instruction(): string | undefined {
+    return this.usage
+  }
+  
 }
 
 export {

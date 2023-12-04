@@ -30,4 +30,10 @@ export class MessageUtils {
         return MsgSegment.Unknown.fromObject(seg)
     }
   }
+
+  public static segmentsToObject(segments: Segment[]): MessageSegment.Segment[] {
+    let message: MessageSegment.Segment[] = []
+    segments.forEach(seg => message.push(seg.toObject()))
+    return message
+  }
 }

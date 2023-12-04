@@ -1,6 +1,8 @@
 import { CustomEventEmitter as EventEmitter } from "../tools/CustomEventEmitter";
 import { CustomEventEmitter } from "src/types/CustomEventEmitter";
 import { Plugin, Plugin_ } from "./Plugin";
+import path from "node:path"
+import fs from "node:fs"
 
 export class PluginLoader {
   public ev: CustomEventEmitter.PluginLoaderEventEmitter = new EventEmitter()
@@ -43,6 +45,30 @@ export class PluginLoader {
         return plugin
       }
     }
+  }
+
+  public loadFromDefaultFolder(): void {
+    const defaultPluginFolder = "./src/plugins/"
+
+    fs.readdirSync(defaultPluginFolder).forEach(plugin => {
+      const filePath = path.join(defaultPluginFolder, plugin)
+      fs.lstat(filePath, async (err, stats) => {
+        if (err) {
+          throw err
+        }
+
+        if (stats.isFile() && plugin.endsWith(".js")) {
+          const pluginClass = <typeof Plugin_>(await import("../plugins/" + plugin)).default.default
+          console.log(`正在加载“${plugin}”`)
+          this.load(pluginClass)
+        }
+        else if (stats.isDirectory()) {
+          const pluginClass = <typeof Plugin_>(await import(path.join("../plugins/" + plugin + "/plugin.js"))).default.default
+          console.log(`正在加载“${plugin}”`)
+          this.load(pluginClass)
+        }
+      })
+    })
   }
 
   public loadedPlugins() {
