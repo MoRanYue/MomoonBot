@@ -13,19 +13,19 @@ export default class TodayNumber extends Plugin {
   constructor() {
     super();
 
-    let numbers: Record<string, number> = {}
+    let numbers: Record<number, number> = {}
     setInterval(() => numbers = {}, 863990000)
 
     const handle: DataType.ListenedCommandFunc = ev => {
-      const id: string = ev.userId.toString()
+      const id = ev.userId
       if (!Object.hasOwn(numbers, id)) {
-        numbers[id] = Utils.randomInt(0, 100)
+        numbers[id] = Utils.randomInt(1, 100)
       }
-      ev.quickReply([new MessageSegment.At(ev.userId), new MessageSegment.Text(` 今天的数字是：${numbers[id]}`)])
+      ev.quickReply([new MessageSegment.At(ev.userId), new MessageSegment.Text(`今天的数字是：${numbers[id]}`)])
     }
 
-    this.onCommand("今日数字", handle, -1)
-    this.onCommand("jrsz", handle, -1)
-    this.onCommand("todaynumber", handle, -1)
+    this.onCommand("今日数字", handle)
+    this.onCommand("jrsz", handle)
+    this.onCommand("todaynumber", handle)
   }
 }

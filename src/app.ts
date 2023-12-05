@@ -1,8 +1,10 @@
 import { Launcher } from "./processors/Launcher"
 
+const launcher = new Launcher()
+
 function start() {
-  const launcher = new Launcher()
   launcher.launch()
 }
 
 export default start
+export { launcher }

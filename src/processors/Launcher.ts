@@ -34,6 +34,10 @@ export class Launcher {
     
     console.log("启动完毕")
   }
+
+  public getConnections() {
+    return this.connections
+  }
   
   private launchConnection(type: ConfigEnum.ConnectionType, port?: number, host?: string) {
     switch (type) {

@@ -27,7 +27,11 @@ interface CommandListenerConfig {
   prompt: string[]
   ignoreBlanks: boolean
 }
+interface ListenerSettingsConfig {
+  superusers: number[]
+}
 interface ListenerConfig {
+  settings: ListenerSettingsConfig
   command: CommandListenerConfig
 }
 

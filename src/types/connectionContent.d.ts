@@ -5,7 +5,7 @@ export namespace ConnectionContent {
   namespace Connection {
     interface Response<T> {
       status: ConnectionEnum.ResponseStatus
-      retcode: number
+      retcode: ConnectionEnum.ResponseCode
       msg: string
       wording: string
       data: T

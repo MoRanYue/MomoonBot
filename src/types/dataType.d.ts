@@ -12,6 +12,7 @@ export namespace DataType {
     notice: Map<ListenedMessage, Listener[]>
   }
   type State = Record<string, any>
+  type Checker = (ev: MessageEvent) => boolean
   type ListenedMessage = string | RegExp
   type ListenedMessageFunc = (ev: MessageEvent, state: DataType.State) => (void | Promise<void>)
   type ListenedCommandFunc = (ev: MessageEvent, state: DataType.State, args: string[]) => (void | Promise<void>)

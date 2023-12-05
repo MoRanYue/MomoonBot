@@ -27,6 +27,9 @@ export class ReverseWsConnection extends Connection {
 
     this.server.on("connection", (socket, req) => {
       this.clientAddresses.push(`${req.socket.remoteAddress}:${req.socket.remotePort}`)
+      console.log("=============================================")
+      console.log("Reverse WebSocket Received Connection Request")
+      console.log("Client:", `${req.socket.remoteAddress}:${req.socket.remotePort}`)
       
       this.ev.on("response", data => {
         console.log("===================================")
@@ -71,9 +74,14 @@ export class ReverseWsConnection extends Connection {
             this.clientAddresses.splice(i, 1)
           }
         })
+        console.log("===================================")
+        console.log("Reverse WebSocket Connection Closed")
+        console.log("Client:", `${req.socket.remoteAddress}:${req.socket.remotePort}`)
       })
       socket.on("error", err => {
-        throw err
+        if (err) {
+          throw err
+        }
       })
     })
 

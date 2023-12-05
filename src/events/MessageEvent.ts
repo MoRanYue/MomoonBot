@@ -23,7 +23,7 @@ export class MessageEvent extends Ev {
   public sender: Event.MessageSender
   public messageId: number
 
-  constructor(ev: Event.Message, conn: Connection) {
+  constructor(ev: Event.Message, conn?: Connection) {
     super();
 
     if (Object.hasOwn(ev, "post_type") && ev.post_type != EventEnum.EventType.message) {

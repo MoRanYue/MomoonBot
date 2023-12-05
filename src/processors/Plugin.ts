@@ -3,6 +3,7 @@ import type { DataType } from "../types/dataType"
 import config from "../config"
 import { CustomEventEmitter } from "src/types/CustomEventEmitter"
 import { CustomEventEmitter as EventEmitter } from "../tools/CustomEventEmitter"
+import { ListenerEnum } from "../types/enums"
 
 export abstract class Plugin {
   readonly name: string = "Plugin name"
@@ -54,8 +55,10 @@ export abstract class Plugin {
     })
   }
 
-  public onMessage(message: DataType.ListenedMessage, cb: DataType.ListenedMessageFunc, priority: number = 0, block: boolean = false, ignoreCase: boolean = true, usage?: string): Listener {
-    const listener = new MessageListener(cb, priority, block, ignoreCase, usage)
+  public onMessage(message: DataType.ListenedMessage, cb: DataType.ListenedMessageFunc, priority: number = 0, 
+  permission: ListenerEnum.Permission = ListenerEnum.Permission.user, checkers: DataType.Checker | DataType.Checker[] = [], 
+  block: boolean = false, ignoreCase: boolean = true, usage?: string): Listener {
+    const listener = new MessageListener(cb, priority, permission, checkers, block, ignoreCase, usage)
 
     const messageListeners = this.listeners.message
 
@@ -80,8 +83,10 @@ export abstract class Plugin {
 
     return listener
   }
-  public onCommand(command: DataType.ListenedMessage, cb: DataType.ListenedCommandFunc, priority: number = 0, block: boolean = false, ignoreCase: boolean = true, usage?: string): Listener {
-    const listener = new CommandListener(cb, priority, block, ignoreCase, usage)
+  public onCommand(command: DataType.ListenedMessage, cb: DataType.ListenedCommandFunc, priority: number = 0, 
+  permission: ListenerEnum.Permission = ListenerEnum.Permission.user, checkers: DataType.Checker | DataType.Checker[] = [], 
+  block: boolean = false, ignoreCase: boolean = true, usage?: string): Listener {
+    const listener = new CommandListener(cb, priority, permission, checkers, block, ignoreCase, usage)
 
     const commandListeners = this.listeners.command
 

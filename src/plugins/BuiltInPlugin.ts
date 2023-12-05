@@ -14,13 +14,13 @@ export default class BuiltInPlugin extends Plugin {
 
     this.onMessage("", (ev, state) => {
       console.log(`接收到信息：${ev.raw} 发送者：${ev.userId}`)
-    }, 100, false)
+    }, 100)
     this.onCommand("", (ev, state, args) => {
       console.log(`接收到命令：${ev.raw} 发送者：${ev.userId}`)
     }, 100)
 
     this.onCommand("echo", (ev, state, args) => {
-      ev.quickReply(new MessageSegment.Text(`回显字符串：${args[0] ?? ""}`).toObject())
+      ev.quickReply(args.join(" "))
     }, -1)
   }
 }

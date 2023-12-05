@@ -185,4 +185,16 @@ export namespace ConnectionEnum {
     ok = "ok",
     failed = "failed"
   }
+  export enum ResponseCode {
+    ok = 0
+  }
+}
+
+export namespace ListenerEnum {
+  export enum Permission {
+    superuser = "superuser",
+    owner = "owner",
+    admin = "admin",
+    user = "user"
+  }
 }

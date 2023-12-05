@@ -19,6 +19,9 @@
     }
   ],
   "listener": {
+    "settings": {
+      "superusers": []
+    },
     "command": {
       "separator": [" "],
       "prompt": ["!", "！", ".", "。"],
