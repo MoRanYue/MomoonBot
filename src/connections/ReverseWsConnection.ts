@@ -6,10 +6,12 @@ import ws from "ws"
 import { Utils } from "../tools/Utils";
 import { type ConnectionEnum, EventEnum } from "../types/enums";
 import { ConnectionContent } from "src/types/connectionContent";
+import type { DataType } from "src/types/dataType";
 
 export class ReverseWsConnection extends Connection {
   protected server!: ws.Server;
   public clientAddresses: string[] = []
+  protected messageCbs: Record<string, DataType.ResponseFunction> = {}
 
   readonly ev: CustomEventEmitter.ReverseWsEventEmitter = new EventEmitter()
 
@@ -26,6 +28,8 @@ export class ReverseWsConnection extends Connection {
     }
 
     this.server.on("connection", (socket, req) => {
+      this.ev.emit("connect")
+
       this.clientAddresses.push(`${req.socket.remoteAddress}:${req.socket.remotePort}`)
       console.log("=============================================")
       console.log("Reverse WebSocket Received Connection Request")
@@ -34,7 +38,19 @@ export class ReverseWsConnection extends Connection {
       this.ev.on("response", data => {
         console.log("===================================")
         console.log("Reverse WebSocket Received Response")
-        console.log(data)
+
+        let messageInfo: ConnectionContent.Connection.WsRequestDetector
+        try {
+          messageInfo = <ConnectionContent.Connection.WsRequestDetector>Utils.jsonToData(data.echo)
+          console.log(messageInfo)
+        } catch (err) {
+          console.warn("收到的返回非本服务器发送的请求所应返回的")
+          return
+        }
+
+        if (Object.hasOwn(this.messageCbs, messageInfo.id)) {
+          this.messageCbs[messageInfo.id](data)
+        }
       })
 
       socket.on("message", buf => this.receivePacket(buf, dataStr => {
@@ -87,11 +103,20 @@ export class ReverseWsConnection extends Connection {
 
     return this
   }
+
   public connect(address: string): boolean {
     throw new Error("Method not implemented.");
   }
+  public address(): string | undefined {
+    return <string>this.server.address()
+  }
 
-  public async send(action: ConnectionEnum.Action, data: Record<string, any>, clientIndex: number = 0): Promise<void> {
+  public send(action: ConnectionEnum.Action, data: Record<string, any> = {}, cb?: DataType.ResponseFunction, clientIndex: number = 0): void {
+    const id: string = Utils.randomChar()
+    if (cb) {
+      this.messageCbs[id] = cb
+    }
+
     let i: number = -1
     this.server.clients.forEach(socket => {
       i++
@@ -99,7 +124,10 @@ export class ReverseWsConnection extends Connection {
         socket.send(Utils.dataToJson(<ConnectionContent.Connection.WsRequest<typeof data>>{
           action,
           params: data,
-          echo: "Momoon Bot"
+          echo: Utils.dataToJson(<ConnectionContent.Connection.WsRequestDetector>{
+            platform: "Momoon Bot",
+            id
+          })
         }), err => {
           if (err) {
             console.log("There Is A Error In Sending WS Request")

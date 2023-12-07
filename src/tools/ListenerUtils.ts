@@ -15,4 +15,19 @@ export class ListenerUtils {
   public static isSuperuser(id: number): boolean {
     return config.listener.settings.superusers.includes(id)
   }
+  public static groupRoleToPermission(role: "owner" | "admin" | "member"): ListenerEnum.Permission {
+    switch (role) {
+      case "owner":
+        return ListenerEnum.Permission.owner
+
+      case "admin":
+        return ListenerEnum.Permission.admin
+    
+      default:
+        return ListenerEnum.Permission.user
+    }
+  }
+  public static userToPermission(id: number, role: "owner" | "admin" | "member"): ListenerEnum.Permission {
+    return ListenerUtils.isSuperuser(id) ? ListenerEnum.Permission.superuser : ListenerUtils.groupRoleToPermission(role)
+  }
 }

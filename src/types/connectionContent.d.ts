@@ -11,10 +11,14 @@ export namespace ConnectionContent {
       data: T
       echo: string
     }
+    interface WsRequestDetector {
+      platform: "Momoon Bot",
+      id: string
+    }
     interface WsRequest<T> {
       action: ConnectionEnum.Action
       params: T
-      echo: string
+      echo: WsRequestDetector & string
     }
   }
 
@@ -309,11 +313,13 @@ export namespace ConnectionContent {
     interface GetOnlineClients {
       clients: Device[]
     }
+    type Sex = "unknown" | "male" | "female"
+    type Gender = 0 | 1 | 2
     interface GetStrangerInfo {
       user_id: number
       nickname: string
       age: number
-      sex: string
+      sex: Sex
       ext: object
     }
     interface FriendListItem {
@@ -322,7 +328,7 @@ export namespace ConnectionContent {
       user_displayname: string
       user_remark: string
       age: number
-      gender: number
+      gender: Gender
       group_id: number
       platform: string
       term_type: string
@@ -352,7 +358,7 @@ export namespace ConnectionContent {
       user_id: number
       group_id: number
       user_name: string
-      sex: string
+      sex: Sex
       title: string
       title_expire_time: number
       nickname: string
@@ -364,7 +370,7 @@ export namespace ConnectionContent {
       unique_name: string
       area: string
       level: number
-      role: string
+      role: "member" | "admin" | "owner"
       unfriendly: boolean
       card_changeable: boolean
     }
@@ -441,7 +447,7 @@ export namespace ConnectionContent {
     interface Sender {
       user_id: number
       nickname: string
-      sex: string
+      sex: sex
       age: number
       uid: string
     }

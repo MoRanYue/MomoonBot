@@ -1,9 +1,12 @@
 import type { Listener, MessageListener } from "src/processors/Listener"
 import type { Event } from "../events/Event"
 import type { MessageEvent } from "../events/MessageEvent"
+import type { ConnectionContent } from "./connectionContent"
 
 export namespace DataType {
   type AnyFunction = (...args: any[]) => any
+
+  type ResponseFunction = (data: ConnectionContent.Connection.Response<number | object | object[]>) => void | Promise<void>
 
   interface ListenerList {
     message: Map<ListenedMessage, MessageListener[]>

@@ -35,7 +35,13 @@ interface ListenerConfig {
   command: CommandListenerConfig
 }
 
+interface BotConfig {
+  friendListRefreshInterval: number
+  groupListRefreshInterval: number
+}
+
 export interface Config {
   connections: ConnectionMiddlewareConfig[]
   listener: ListenerConfig
+  bot: BotConfig
 }

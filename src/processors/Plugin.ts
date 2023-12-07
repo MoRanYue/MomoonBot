@@ -30,7 +30,6 @@ export abstract class Plugin {
             const listeners = messageListeners.get(message)!
             
             listeners.forEach(listener => {
-              // const state: DataType.State = {}
               listener.trigger(ev, {})
             })
           }
@@ -46,7 +45,6 @@ export abstract class Plugin {
             const listeners = commandListeners.get(command)!
             
             listeners.forEach(listener => {
-              // const state: DataType.State = {}
               listener.trigger(ev, {}, maybeArgs)
             })
           }
@@ -78,9 +76,6 @@ export abstract class Plugin {
       return 0
     })
 
-    console.log("onMessage Registered A New Listener:\n", messageListeners)
-    console.log("All Listeners:\n", this.listeners)
-
     return listener
   }
   public onCommand(command: DataType.ListenedMessage, cb: DataType.ListenedCommandFunc, priority: number = 0, 
@@ -97,9 +92,6 @@ export abstract class Plugin {
       commandListeners.set(command, [listener])
     }
     commandListeners.get(command)!.sort(this.sortListeners)
-
-    console.log("onCommand Registered A New Listener:\n", commandListeners)
-    console.log("All Listeners:\n", this.listeners)
 
     return listener
   }

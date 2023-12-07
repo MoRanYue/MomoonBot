@@ -2,14 +2,21 @@ import { HttpConnection } from "../connections/HttpConnection"
 import { ReverseWsConnection } from "../connections/ReverseWsConnection"
 import type { Connection } from "../connections/Connection"
 import type { HttpMiddleware, ReverseWsMiddleware, WsMiddleware } from "../types/config.d.ts"
-import { ConfigEnum } from "../types/enums"
+import { ConfigEnum, ConnectionEnum } from "../types/enums"
 import config from "../config"
 import { MessageEvent } from "../events/MessageEvent"
 import { PluginLoader } from "./PluginLoader"
+import { User } from "./sets/User"
+import { Group } from "./sets/Group"
+import type { ConnectionContent } from "src/types/connectionContent"
+import { Utils } from "../tools/Utils"
 
 export class Launcher {
   protected connections: Connection[] = []
   protected loader!: PluginLoader
+
+  protected friends: Record<string, Record<number, User>> = {}
+  protected groups: Record<string, Record<number, Group>> = {}
 
   public launch() {
     console.log("正在尝试启动")
@@ -38,18 +45,64 @@ export class Launcher {
   public getConnections() {
     return this.connections
   }
+  public getFriends(first: boolean = true): Record<number, User> | undefined {
+    return first ? this.friends[Object.keys(this.friends)[0]] : undefined
+  }
+  public getGroups(first: boolean = true): Record<number, Group> | undefined {
+    return first ? this.groups[Object.keys(this.groups)[0]] : undefined
+  }
   
   private launchConnection(type: ConfigEnum.ConnectionType, port?: number, host?: string) {
     switch (type) {
       case ConfigEnum.ConnectionType.http:
         const http = new HttpConnection()
         http.createServer(port ?? 3006, host)
+
+        const httpId = Utils.generateConnectionId(http)
+        const refreshHttpFriend = () => {
+          this.friends[httpId] = []
+        }
+        const refreshHttpGroup = () => {
+          this.groups[httpId] = []
+        }
+        console.log(`正在准备尝试为“${httpId}”获取好友与群聊信息`)
+        http.ev.once("connect", () => {
+          refreshHttpFriend()
+          refreshHttpGroup()
+          const httpFriendTimer = setInterval(refreshHttpFriend, config.bot.friendListRefreshInterval * 1000)
+          const httpGroupTimer = setInterval(refreshHttpGroup, config.bot.groupListRefreshInterval * 1000)
+        })
         
         return http
 
       case ConfigEnum.ConnectionType.reverseWs:
         const reverseWs = new ReverseWsConnection()
         reverseWs.createServer(port ?? 3007, host)
+
+        const reverseWsId = Utils.generateConnectionId(reverseWs)
+        const refreshReverseWsFriend = () => {
+          this.friends[reverseWsId] = []
+          reverseWs.send(ConnectionEnum.Action.getFriendList, {}, data => {
+            (<ConnectionContent.ActionResponse.GetFriendList>data.data).forEach(friend => {
+              this.friends[reverseWsId][friend.user_id] = new User(friend, reverseWs)
+            })
+          })
+        }
+        const refreshReverseWsGroup = () => {
+          this.groups[reverseWsId] = []
+          reverseWs.send(ConnectionEnum.Action.getGroupList, {}, data => {
+            (<ConnectionContent.ActionResponse.GetGroupList>data.data).forEach(group => {
+              this.groups[reverseWsId][group.group_id] = new Group(group, reverseWs)
+            })
+          })
+        }
+        console.log(`正在准备尝试为“${reverseWsId}”获取好友与群聊信息`)
+        reverseWs.ev.once("connect", () => {
+          refreshReverseWsFriend()
+          refreshReverseWsGroup()
+          const reverseWsFriendTimer = setInterval(refreshReverseWsFriend, config.bot.friendListRefreshInterval * 1000)
+          const reverseWsGroupTimer = setInterval(refreshReverseWsGroup, config.bot.groupListRefreshInterval * 1000)
+        })
 
         return reverseWs
       

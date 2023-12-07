@@ -27,5 +27,9 @@
       "prompt": ["!", "！", ".", "。"],
       "ignoreBlanks": true
     }
+  },
+  "bot": {
+    "friendListRefreshInterval": 600,
+    "groupListRefreshInterval": 600
   }
 }

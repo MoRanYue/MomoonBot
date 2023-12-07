@@ -1,6 +1,7 @@
 import type { ConnectionEnum } from "src/types/enums"
 import type { CustomEventEmitter } from "../tools/CustomEventEmitter"
 import type { ConnectionContent } from "src/types/connectionContent"
+import type { DataType } from "src/types/dataType"
 
 export abstract class Connection {
   protected abstract server: unknown
@@ -12,6 +13,7 @@ export abstract class Connection {
   public abstract createServer(port: number, host?: string, cb?: VoidFunction): this
 
   public abstract connect(address: string): boolean
+  public abstract address(): string | undefined
 
-  public abstract send(action: ConnectionEnum.Action, data: Record<string, any>): Promise<void>
+  public abstract send(action: ConnectionEnum.Action, data: Record<string, any>, cb?: DataType.ResponseFunction): void
 }

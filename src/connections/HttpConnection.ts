@@ -9,6 +9,7 @@ import { Event } from "../types/event";
 import { type ConnectionEnum, EventEnum } from "../types/enums";
 import { CustomEventEmitter as EventEmitter } from "../tools/CustomEventEmitter";
 import type { ConnectionContent } from "src/types/connectionContent";
+import type { DataType } from "src/types/dataType";
 
 export class HttpConnection extends Connection {
   protected server!: http.Server
@@ -23,10 +24,11 @@ export class HttpConnection extends Connection {
     this.ev.on("response", data => {
       console.log("======================")
       console.log("Http Received Response")
-      console.log(data)
     })
     
     this.server.on("request", (req: http.IncomingMessage, res: http.ServerResponse) => {
+      this.ev.emit("connect")
+
       this.receiveRequest(req, res, async (req, res) => {
         const data = <object>Utils.jsonToData(req.body)
         if (Object.hasOwn(data, "echo")) {
@@ -69,7 +71,11 @@ export class HttpConnection extends Connection {
     throw new Error("Method not implemented.");
   }
 
-  public async send(action: ConnectionEnum.Action, data: Record<string, any>, clientIndex: number = 0): Promise<void> {
+  public address(): string | undefined {
+    return <string>this.server.address()
+  }
+
+  public send(action: ConnectionEnum.Action, data: Record<string, any> = {}, cb?: DataType.ResponseFunction, clientIndex: number = 0): void {
     let resData: string
     const req = http.request({
       method: "post",
@@ -109,7 +115,7 @@ export class HttpConnection extends Connection {
     }
   }
 
-  private async receivePacket(res: http.IncomingMessage): Promise<void> {
+  private async receivePacket(res: http.IncomingMessage, cb?: DataType.ResponseFunction): Promise<void> {
     res.setEncoding('utf-8')
 
     let data: string = ""
@@ -118,6 +124,13 @@ export class HttpConnection extends Connection {
     res.on('error', err => {
       throw err
     })
-    res.on('end', () => this.ev.emit('response', Utils.jsonToData(data)))
+    res.on('end', () => {
+      const result = Utils.jsonToData(data)
+
+      if (cb) {
+        cb(result)
+      }
+      this.ev.emit("response", result)
+    })
   }
 }
