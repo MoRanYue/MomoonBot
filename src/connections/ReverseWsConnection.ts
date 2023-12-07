@@ -50,6 +50,7 @@ export class ReverseWsConnection extends Connection {
 
         if (Object.hasOwn(this.messageCbs, messageInfo.id)) {
           this.messageCbs[messageInfo.id](data)
+          delete this.messageCbs[messageInfo.id]
         }
       })
 
