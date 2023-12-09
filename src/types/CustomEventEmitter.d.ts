@@ -9,7 +9,7 @@ import type { ConnectionContent } from "./connectionContent";
 export namespace CustomEventEmitter {
   interface CustomEventEmitter extends EventEmitter {}
 
-  interface HttpEventEmitter extends CustomEventEmitter {
+  interface ConnectionEventEmitter {
     on(eventName: "message", listener: (ev: Event.Message) => void): this
     on(eventName: "notice", listener: (ev: Event.Notice) => void): this
     on(eventName: "request", listener: (ev: Event.Request) => void): this
@@ -34,7 +34,9 @@ export namespace CustomEventEmitter {
     emit(eventName: "connect"): boolean
     emit(eventName: string | symbol, ...args: any[]): boolean;
   }
-  interface ReverseWsEventEmitter extends CustomEventEmitter {
+
+  interface HttpEventEmitter extends ConnectionEventEmitter {}
+  interface ReverseWsEventEmitter extends ConnectionContent {
     on(eventName: "message", listener: (ev: Event.Message) => void): this
     on(eventName: "notice", listener: (ev: Event.Notice) => void): this
     on(eventName: "request", listener: (ev: Event.Request) => void): this

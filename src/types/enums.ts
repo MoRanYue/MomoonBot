@@ -197,4 +197,9 @@ export namespace ListenerEnum {
     admin = "admin",
     user = "user"
   }
+  export enum ReceiverReturn {
+    finish,
+    continue,
+    keep
+  }
 }

@@ -2,6 +2,7 @@ import type { Listener, MessageListener } from "src/processors/Listener"
 import type { Event } from "../events/Event"
 import type { MessageEvent } from "../events/MessageEvent"
 import type { ConnectionContent } from "./connectionContent"
+import type { EventEnum, ListenerEnum } from "./enums"
 
 export namespace DataType {
   type AnyFunction = (...args: any[]) => any
@@ -14,9 +15,16 @@ export namespace DataType {
     request: Map<ListenedMessage, Listener[]>
     notice: Map<ListenedMessage, Listener[]>
   }
+  interface ListenerReceiverData<T extends Function> {
+    storedKey: string
+    cb: T
+  }
   type State = Record<string, any>
   type Checker = (ev: MessageEvent) => boolean
+  type MessageTypeChecker = EventEnum.MessageType | "all"
   type ListenedMessage = string | RegExp
-  type ListenedMessageFunc = (ev: MessageEvent, state: DataType.State) => (void | Promise<void>)
-  type ListenedCommandFunc = (ev: MessageEvent, state: DataType.State, args: string[]) => (void | Promise<void>)
+  type ListenedMessageFuncReturn = void | boolean | Promise<void | boolean>
+  type ListenedMessageFunc = (ev: MessageEvent, state: DataType.State) => ListenedMessageFuncReturn
+  type ListenedMessageReceiverFunc = (ev: MessageEvent, state: DataType.State, eventQueue: MessageEvent[]) => void | ListenerEnum.ReceiverReturn
+  type ListenedCommandFunc = (ev: MessageEvent, state: DataType.State, args: string[]) => ListenedMessageFuncReturn
 }

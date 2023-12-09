@@ -4,6 +4,7 @@ import config from "../config"
 import { CustomEventEmitter } from "src/types/CustomEventEmitter"
 import { CustomEventEmitter as EventEmitter } from "../tools/CustomEventEmitter"
 import { ListenerEnum } from "../types/enums"
+import { MessageUtils } from "../tools/MessageUtils"
 
 export abstract class Plugin {
   readonly name: string = "Plugin name"
@@ -21,42 +22,61 @@ export abstract class Plugin {
 
   constructor() {
     this.ev.on("message", ev => {
+      if (ev.isSelfSent && !config.listener.settings.triggerBySelf) {
+        return
+      }
+
       const plainText = ev.getPlainText()
       
       const messageListeners = this.listeners.message
       for (const message of messageListeners.keys()) {
-        if (this.matchMessage(plainText, message)) {
-          if (messageListeners.has(message)) {
-            const listeners = messageListeners.get(message)!
-            
-            listeners.forEach(listener => {
-              listener.trigger(ev, {})
-            })
-          }
+        if (messageListeners.has(message)) {
+          const listeners = messageListeners.get(message)!
+          
+          listeners.forEach((listener, i) => {
+            try {
+              listener.trigger(ev)
+            }
+            catch (err) {
+              console.error(`在触发消息监听器“${message}”（优先级：${listener.priority}，执行顺序：${i + 1}）时捕获到错误`)
+              console.error(err)
+              return
+            }
+          })
         }
       }
 
       const commandListeners = this.listeners.command
       for (const command of commandListeners.keys()) {
-        const maybeArgs = this.matchCommand(plainText, command)
-
-        if (maybeArgs) {
-          if (commandListeners.has(command)) {
-            const listeners = commandListeners.get(command)!
-            
-            listeners.forEach(listener => {
-              listener.trigger(ev, {}, maybeArgs)
-            })
-          }
+        if (commandListeners.has(command)) {
+          const listeners = commandListeners.get(command)!
+          
+          listeners.forEach((listener, i) => {
+            try {
+              listener.trigger(ev)
+            }
+            catch (err) {
+              console.error(`在触发命令监听器“${command}”（优先级：${listener.priority}，执行顺序：${i + 1}）时捕获到错误`)
+              console.error(err)
+              return
+            }
+          })
         }
       }
     })
   }
 
-  public onMessage(message: DataType.ListenedMessage, cb: DataType.ListenedMessageFunc, priority: number = 0, 
+  public onMessage(message: DataType.ListenedMessage, cb: DataType.ListenedMessageFunc, aliases: DataType.ListenedMessage[] | DataType.ListenedMessage = [], priority: number = 0, messageType: DataType.MessageTypeChecker = "all", 
   permission: ListenerEnum.Permission = ListenerEnum.Permission.user, checkers: DataType.Checker | DataType.Checker[] = [], 
-  block: boolean = false, ignoreCase: boolean = true, usage?: string): Listener {
-    const listener = new MessageListener(cb, priority, permission, checkers, block, ignoreCase, usage)
+  block: boolean = false, ignoreCase: boolean = true, usage?: string): MessageListener {
+    let patterns: DataType.ListenedMessage[] = [message]
+    if (Array.isArray(aliases)) {
+      patterns.push(...aliases)
+    }
+    else {
+      patterns.push(aliases)
+    }
+    const listener = new MessageListener(patterns, cb, priority, permission, messageType, checkers, block, ignoreCase, usage)
 
     const messageListeners = this.listeners.message
 
@@ -78,10 +98,17 @@ export abstract class Plugin {
 
     return listener
   }
-  public onCommand(command: DataType.ListenedMessage, cb: DataType.ListenedCommandFunc, priority: number = 0, 
+  public onCommand(command: DataType.ListenedMessage, cb: DataType.ListenedCommandFunc, aliases: DataType.ListenedMessage[] | DataType.ListenedMessage = [], priority: number = 0, messageType: DataType.MessageTypeChecker = "all", 
   permission: ListenerEnum.Permission = ListenerEnum.Permission.user, checkers: DataType.Checker | DataType.Checker[] = [], 
-  block: boolean = false, ignoreCase: boolean = true, usage?: string): Listener {
-    const listener = new CommandListener(cb, priority, permission, checkers, block, ignoreCase, usage)
+  block: boolean = false, ignoreCase: boolean = true, usage?: string): CommandListener {
+    let patterns: DataType.ListenedMessage[] = [command]
+    if (Array.isArray(aliases)) {
+      patterns.push(...aliases)
+    }
+    else {
+      patterns.push(aliases)
+    }
+    const listener = new CommandListener(patterns, cb, priority, permission, messageType, checkers, block, ignoreCase, usage)
 
     const commandListeners = this.listeners.command
 
@@ -104,65 +131,6 @@ export abstract class Plugin {
       return -1
     }
     return 0
-  }
-
-  private matchMessage(str: string, pattern: DataType.ListenedMessage, ignoreCase: boolean = true): boolean {
-    return (typeof pattern == "string" && (ignoreCase ? str.toLowerCase().includes(<string>pattern.toLowerCase()) : str.includes(<string>pattern))) || 
-    (pattern instanceof RegExp && pattern.test(str))
-  }
-  private matchCommand(str: string, command: DataType.ListenedMessage, ignoreCase: boolean = true): string[] | undefined {
-    let i: number = -1
-    let char: string | undefined
-    function advance() {
-      i++
-      char = str[i]
-    }
-    function skipBlanks() {
-      while (char && [" ", "\t", "\n", "\r"].includes(char)) {
-        advance()
-      }
-    }
-    function isSeparator() {
-      return commandConfig.separator.includes(char!)
-    }
-    advance()
-
-    const commandConfig = config.listener.command
-    if (commandConfig.ignoreBlanks) {
-      skipBlanks()
-    }
-
-    if (commandConfig.prompt.includes(char!)) {
-      const segments: string[] = []
-
-      advance()
-      while (char) {
-        if (isSeparator()) {
-          advance()
-        }
-        else {
-          let segment: string = ""
-          while (char && !isSeparator()) {
-            segment += char
-            advance()
-          }
-          advance()
-
-          if (commandConfig.ignoreBlanks) {
-            segment = segment.trim()
-          }
-
-          segments.push(segment)
-        }
-      }
-
-      const cmd = segments.shift()
-      if (cmd && this.matchMessage(cmd, command, ignoreCase)) {
-        return segments
-      }
-    }
-
-    return undefined
   }
 }
 

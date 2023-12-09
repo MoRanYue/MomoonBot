@@ -22,12 +22,20 @@ export class MessageEvent extends Ev {
   public raw: string
   public sender: Event.MessageSender
   public messageId: number
+  public isSelfSent: boolean
 
   constructor(ev: Event.Message, conn?: Connection) {
     super();
 
-    if (Object.hasOwn(ev, "post_type") && ev.post_type != EventEnum.EventType.message) {
-      throw new WrongEventTypeError(`错误的事件类型，应为“${EventEnum.EventType.message}”而不是“${ev.post_type}”`)
+    if (Object.hasOwn(ev, "post_type") && ![EventEnum.EventType.message, EventEnum.EventType.messageSent].includes(ev.post_type)) {
+      throw new WrongEventTypeError(`错误的事件类型，应为“${EventEnum.EventType.message}”或“${EventEnum.EventType.messageSent}”而不是“${ev.post_type}”`)
+    }
+
+    if (ev.post_type == EventEnum.EventType.messageSent) {
+      this.isSelfSent = true
+    }
+    else {
+      this.isSelfSent = false
     }
 
     this.type = EventEnum.EventType.message

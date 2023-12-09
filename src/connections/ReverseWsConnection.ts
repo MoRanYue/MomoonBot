@@ -64,15 +64,32 @@ export class ReverseWsConnection extends Connection {
             case EventEnum.EventType.message:
               console.log("=======================================")
               console.log("Reverse WebSocket Received Event Report")
+              console.log("Type: Message")
 
+              this.ev.emit("message", <Event.Message>data)
+              break;
+
+            case EventEnum.EventType.messageSent:
+              console.log("=======================================")
+              console.log("Reverse WebSocket Received Event Report")
+              console.log("Type: MessageSent")
+            
               this.ev.emit("message", <Event.Message>data)
               break;
           
             case EventEnum.EventType.notice:
+              console.log("=======================================")
+              console.log("Reverse WebSocket Received Event Report")
+              console.log("Type: Notice")
+
               this.ev.emit("notice", <Event.Notice>data)
               break;
 
             case EventEnum.EventType.request:
+              console.log("=======================================")
+              console.log("Reverse WebSocket Received Event Report")
+              console.log("Type: Request")
+
               this.ev.emit("request", <Event.Request>data)
               break;
             

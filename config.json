@@ -20,6 +20,7 @@
   ],
   "listener": {
     "settings": {
+      "triggerBySelf": false,
       "superusers": []
     },
     "command": {

@@ -28,6 +28,7 @@ interface CommandListenerConfig {
   ignoreBlanks: boolean
 }
 interface ListenerSettingsConfig {
+  triggerBySelf: boolean
   superusers: number[]
 }
 interface ListenerConfig {

@@ -24,8 +24,6 @@ export default class TodayNumber extends Plugin {
       ev.quickReply([new MessageSegment.At(ev.userId), new MessageSegment.Text(` 今天的数字是：${numbers[id]}`)])
     }
 
-    this.onCommand("今日数字", handle)
-    this.onCommand("jrsz", handle)
-    this.onCommand("todaynumber", handle)
+    this.onCommand("今日数字", handle, ["jrsz", "todaynumber"])
   }
 }
