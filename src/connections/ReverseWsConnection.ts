@@ -81,6 +81,7 @@ export class ReverseWsConnection extends Connection {
               console.log("=======================================")
               console.log("Reverse WebSocket Received Event Report")
               console.log("Type: Notice")
+              console.log(data)
 
               this.ev.emit("notice", <Event.Notice>data)
               break;

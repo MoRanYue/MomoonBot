@@ -7,10 +7,10 @@ import { ListenerEnum } from "../types/enums"
 import { MessageUtils } from "../tools/MessageUtils"
 
 export abstract class Plugin {
-  readonly name: string = "Plugin name"
-  readonly description: string = "Plugin description"
-  readonly instruction: string = "Plugin instruction"
-  readonly version: string = "1.0.0"
+  readonly abstract name: string
+  readonly abstract description: string
+  readonly abstract instruction: string
+  readonly abstract version: string
 
   protected listeners: DataType.ListenerList = {
     message: new Map(),
@@ -134,4 +134,9 @@ export abstract class Plugin {
   }
 }
 
-export class Plugin_ extends Plugin {}
+export class Plugin_ extends Plugin {
+  readonly name: string = "Plugin_"
+  readonly description: string = "Plugin_"
+  readonly instruction: string = "Plugin_"
+  readonly version: string = "Plugin_"
+}

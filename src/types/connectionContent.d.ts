@@ -127,21 +127,29 @@ export namespace ConnectionContent {
     interface ReferenceForwardMessageDataItem {
       id: string
     }
-    interface CustomForwardMessageItem {
+    interface CustomForwardMessageDataItem {
       name: string
       content: MessageSegment.Segment[]
     }
-    interface ForwardMessageNode {
+    interface CustomForwardMessageNode {
       type: "node"
-      data: (ReferenceForwardMessageItem | CustomForwardMessageItem)[]
+      data: CustomForwardMessageDataItem
+    }
+    interface ReferenceForwardMessageNode {
+      type: "node"
+      data: ReferenceForwardMessageDataItem
+    }
+    interface MixedForwardMessageNode {
+      type: "node"
+      data: ReferenceForwardMessageItem | CustomForwardMessageDataItem
     }
     interface SendGroupForwardMsg {
       group_id: number
-      messages: ForwardMessageNode[]
+      messages: MixedForwardMessageNode[]
     }
-    interface SendGroupForwardMsg {
+    interface SendPrivateForwardMsg {
       user_id: number
-      messages: ForwardMessageNode[]
+      messages: MixedForwardMessageNode[]
     }
     interface GetImage {
       file: string

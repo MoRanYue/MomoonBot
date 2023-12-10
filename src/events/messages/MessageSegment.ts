@@ -41,7 +41,7 @@ class Text extends Segment {
 }
 
 class Image extends Segment {
-  public file: string
+  public file!: string
   public url?: string
 
   constructor(file: string | Buffer, url?: string) {
@@ -50,8 +50,8 @@ class Image extends Segment {
     if (typeof file == "string") {
       this.file = file
     }
-    else {
-      this.file = file.toString()
+    else if (file instanceof Buffer) {
+      this.file = "base64://" + file.toString("base64")
     }
     this.url = url
   }

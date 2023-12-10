@@ -89,9 +89,15 @@ export namespace MessageSegmentEnum {
     share = "share",
     gift = "gift",
     json = "json",
+    basketball = "basketball",
+    newRps = "new_rps",
+    newDice = "new_dice",
+    deprecatedRps = "rps",
+    deprecatedDice = "dice",
+    marketFace = "mface",
 
-    mergedForward = "",
-    mergedForwardNode = "",
+    forward = "foward",
+    forwardNode = "foward_node",
     xml = "",
     textToSpeech = ""
   }

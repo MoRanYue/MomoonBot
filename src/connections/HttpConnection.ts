@@ -35,22 +35,33 @@ export class HttpConnection extends Connection {
           this.ev.emit("response", <ConnectionContent.Connection.Response<number | object | object[]>>data)
         }
         else {
+          console.log("===========================")
+          console.log("Http Received Event Report")
+
           switch ((<Event.Reported>data).post_type) {
             case EventEnum.EventType.message:
-              console.log("==========================")
-              console.log("Http Received Event Report")
+              console.log("Type: Message")
 
+              this.ev.emit("message", <Event.Message>data)
+              break;
+
+            case EventEnum.EventType.messageSent:
+              console.log("Type: MessageSent")
+            
               this.ev.emit("message", <Event.Message>data)
               break;
           
             case EventEnum.EventType.notice:
+              console.log("Type: Notice")
+
               this.ev.emit("notice", <Event.Notice>data)
               break;
 
             case EventEnum.EventType.request:
+              console.log("Type: Request")
+
               this.ev.emit("request", <Event.Request>data)
               break;
-          
           
             default:
               this.ev.emit("unknown", <Event.Unknown>data)

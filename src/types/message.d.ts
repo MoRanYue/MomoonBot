@@ -67,7 +67,7 @@ export namespace MessageSegment {
     data: {
       type: number
       id: number
-      strength: number
+      strength: 1 | 2 | 3 | 4 | 5
     }
   }
   interface TouchSegment implements Segment {
@@ -131,6 +131,50 @@ export namespace MessageSegment {
     type: MessageSegmentEnum.SegmentType.json
     data: {
       data: string
+    }
+  }
+  interface BasketballSegment implements Segment {
+    type: MessageSegmentEnum.SegmentType.basketball
+    data: {
+      id: 5 | 4 | 3 | 2 | 1
+    }
+  }
+  interface NewRpsSegment implements Segment {
+    type: MessageSegmentEnum.SegmentType.newRps
+    data: {
+      id: 3 | 2 | 1
+    }
+  }
+  interface NewDiceSegment implements Segment {
+    type: MessageSegmentEnum.SegmentType.newDice
+    data: {
+      id: 6 | 5 | 4 | 3 | 2 | 1
+    }
+  }
+  interface DeprecatedRpsSegment implements Segment {
+    type: MessageSegmentEnum.SegmentType.deprecatedRps
+    data: {}
+  }
+  interface DeprecatedDiceSegment implements Segment {
+    type: MessageSegmentEnum.SegmentType.deprecatedDice
+    data: {}
+  }
+  interface ForwardSegment {
+    type: MessageSegmentEnum.SegmentType.forward
+    data: {
+      id: string
+    }
+  }
+  interface ForwardNodeSegment {
+    type: MessageSegmentEnum.SegmentType.forwardNode
+    data: {
+      id: number
+    }
+  }
+  interface MarketFaceSegment {
+    type: MessageSegmentEnum.SegmentType.marketFace
+    data: {
+      id: string
     }
   }
 }

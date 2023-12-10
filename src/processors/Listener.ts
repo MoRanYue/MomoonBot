@@ -80,7 +80,7 @@ class MessageListener extends Listener {
       if (status == ListenerEnum.ReceiverReturn.keep) {
         conversation.step--
       }
-      else if (status == ListenerEnum.ReceiverReturn.finish || conversation.step >= this.receivers.length) {
+      else if (status == ListenerEnum.ReceiverReturn.finish || conversation.step >= this.receivers.length - 1) {
         delete this.conversations[conversation.initiatorId]
       }
 
@@ -123,9 +123,9 @@ class MessageListener extends Listener {
     }
     
     const receiver = this.receivers[receiverIndex]
-    conversation.step++
     if (!Object.hasOwn(conversation.state, receiver.storedKey)) {
       if (ev) {
+        conversation.step++
         return receiver.cb(ev, conversation.state, conversation.messageQueue)
       }
     }
@@ -208,7 +208,7 @@ class CommandListener extends Listener {
       if (status == ListenerEnum.ReceiverReturn.keep) {
         conversation.step--
       }
-      else if (status == ListenerEnum.ReceiverReturn.finish || conversation.step >= this.receivers.length) {
+      else if (status == ListenerEnum.ReceiverReturn.finish || conversation.step >= this.receivers.length - 1) {
         delete this.conversations[conversation.initiatorId]
       }
 
@@ -248,9 +248,9 @@ class CommandListener extends Listener {
     }
     
     const receiver = this.receivers[receiverIndex]
-    conversation.step++
     if (!Object.hasOwn(conversation.state, receiver.storedKey)) {
       if (ev) {
+        conversation.step++
         return receiver.cb(ev, conversation.state, conversation.messageQueue)
       }
     }

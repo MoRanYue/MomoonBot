@@ -27,9 +27,7 @@ export class MessageEvent extends Ev {
   constructor(ev: Event.Message, conn?: Connection) {
     super();
 
-    if (Object.hasOwn(ev, "post_type") && ![EventEnum.EventType.message, EventEnum.EventType.messageSent].includes(ev.post_type)) {
-      throw new WrongEventTypeError(`错误的事件类型，应为“${EventEnum.EventType.message}”或“${EventEnum.EventType.messageSent}”而不是“${ev.post_type}”`)
-    }
+    this.checkEventType(ev, [EventEnum.EventType.message, EventEnum.EventType.messageSent])
 
     if (ev.post_type == EventEnum.EventType.messageSent) {
       this.isSelfSent = true

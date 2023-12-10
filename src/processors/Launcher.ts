@@ -10,6 +10,7 @@ import { User } from "./sets/User"
 import { Group } from "./sets/Group"
 import type { ConnectionContent } from "src/types/connectionContent"
 import { Utils } from "../tools/Utils"
+import { NoticeEvent } from "../events/NoticeEvent"
 
 export class Launcher {
   protected connections: Connection[] = []
@@ -34,7 +35,11 @@ export class Launcher {
       console.log(`尝试启动“${conn.type}”（协议：“${conn.protocol}”）服务器`)
 
       const inst = this.launchConnection(<ConfigEnum.ConnectionType>conn.type, (<HttpMiddleware | ReverseWsMiddleware>conn.server).port, (<HttpMiddleware | ReverseWsMiddleware>conn.server).host ?? (<WsMiddleware>conn.server).universe)
+      if (conn.type == ConfigEnum.ConnectionType.http) {
+        (<HttpConnection>inst).addClient((<HttpMiddleware>conn.server).api)
+      }
       inst.ev.on("message", ev => this.loader.ev.emit("message", new MessageEvent(ev, inst)))
+      inst.ev.on("notice", ev => this.loader.ev.emit("notice", NoticeEvent.fromObject(ev, inst)))
       
       this.connections.push(inst)
     })

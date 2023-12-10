@@ -47,27 +47,37 @@ export namespace Event {
     ban: boolean
     ban_duration: number
   }
-  interface PrivateRecall extends Reported {
+  interface ReportedNotice extends Reported {
+    notice_type: EventEnum.NoticeType
+  }
+  interface ReportedSystemNotice extends ReportedNotice {
+    notice_type: EventEnum.NoticeType.notify
+    sub_type: EventEnum.NotifySubType
+  }
+  interface PrivateRecall extends ReportedNotice {
     user_id: number
     operator_id: number
     message_id: number
   }
-  interface GroupRecall extends PrivateRecall {
+  interface GroupRecall extends ReportedNotice {
+    user_id: number
+    operator_id: number
+    message_id: number
     group_id: number
   }
-  interface GroupMemberIncrease extends Reported {
+  interface GroupMemberIncrease extends ReportedNotice {
     group_id: number
     user_id: number
     operator_id: number
     sub_type: "approve" | "invite"
   }
-  interface GroupMemberDecrease extends Reported {
+  interface GroupMemberDecrease extends ReportedNotice {
     group_id: number
     user_id: number
     operator_id: number
     sub_type: "leave" | "kick" | "kick_me"
   }
-  interface GroupAdminChange extends Reported {
+  interface GroupAdminChange extends ReportedNotice {
     group_id: number
     user_id: number
     sub_type: "set" | "unset"
@@ -80,7 +90,7 @@ export namespace Event {
     sub_id: string
     exppire: number
   }
-  interface PrivateFileUpload extends Reported {
+  interface PrivateFileUpload extends ReportedNotice {
     user_id: number
     sender: number
     private_file: PrivateFileMessage
@@ -92,25 +102,25 @@ export namespace Event {
     busid: number
     url: string
   }
-  interface GroupFileUpload extends Reported {
+  interface GroupFileUpload extends ReportedNotice {
     group_id: number
     user_id: number
     file: GroupFileMessage
   }
-  interface GroupBan extends Reported {
+  interface GroupBan extends ReportedNotice {
     group_id: number
     user_id: number
     operator_id: number
     duration: number
     sub_type: "ban" | "lift_ban"
   }
-  interface GroupCardChange extends Reported {
+  interface GroupCardChange extends ReportedNotice {
     group_id: number
     user_id: number
     card_new: string
     card_old: string
   }
-  interface Essence extends Reported {
+  interface Essence extends ReportedNotice {
     group_id: number
     sender_id: number
     operator_id: number
@@ -118,32 +128,38 @@ export namespace Event {
     sub_type: "add" | "delete"
   }
   interface ClientStatusMessage {}
-  interface ClientStatus extends Reported {
+  interface ClientStatus extends ReportedNotice {
     client: ClientStatusMessage
     online: boolean
   }
-  interface Poke extends Reported {
+  interface PokeDetail {
+    action: string
+    suffix: string
+    action_img_url: string
+  }
+  interface Poke extends ReportedSystemNotice {
     group_id: number
     sender_id: number
     user_id: number
     target_id: number
+    poke_detail: PokeDetail
   }
-  interface LuckyKing extends Reported {
+  interface LuckyKing extends ReportedSystemNotice {
     group_id: number
     user_id: number
     target_id: number
   }
-  interface Honor extends Reported {
+  interface Honor extends ReportedSystemNotice {
     group_id: number
     user_id: number
     honor_type: string
   }
-  interface Title extends Reported {
+  interface Title extends ReportedSystemNotice {
     group_id: number
     user_id: number
     title: string
   }
-  interface FriendAdd extends Reported {
+  interface FriendAdd extends ReportedNotice {
     user_id: number
   }
   interface OffileFileMessage {
@@ -151,7 +167,7 @@ export namespace Event {
     size: number
     url: string
   }
-  interface OfflineFile extends Reported {
+  interface OfflineFile extends ReportedNotice {
     user_id: number
     file: OffileFileMessage
   }
@@ -193,7 +209,7 @@ export namespace Event {
 
   type Notice = PrivateRecall | GroupRecall | GroupMemberIncrease | GroupMemberDecrease | GroupAdminChange | 
   GroupFileUpload | PrivateFileUpload | GroupBan | GroupCardChange | FriendAdd | OfflineFile | Title | 
-  Essence | ClientStatus | Poke | LuckyKing | Honor
+  Essence | ClientStatus | Poke | LuckyKing | Honor | ReportedNotice | ReportedSystemNotice
   type Request = FriendRequest | GroupRequest
   type Operation = MessageQuickOperation | MessageQuickReply | GroupRequestQuickOperation | FriendRequestQuickOperation
   type Unknown = Reported
