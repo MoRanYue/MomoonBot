@@ -11,6 +11,7 @@ import { MessageUtils } from "../tools/MessageUtils";
 import type { Connection } from "src/connections/Connection";
 import url from "node:url";
 import fs from "node:fs"
+import type { IncomingMessage } from "node:http";
 
 export default class RandomAnimePicture extends Plugin {
   readonly name: string = "随机动漫图片";
@@ -19,52 +20,82 @@ export default class RandomAnimePicture extends Plugin {
   readonly version: string = "1.0.0";
 
   readonly dataFolder: string = "./data/anime/"
-  readonly apiServers = [
+  readonly apiServers: ((conn: Connection, msgType: EventEnum.MessageType, userId: number, groupId?: number, num?: number) => void)[] = [
     (conn: Connection, msgType: EventEnum.MessageType, userId: number, groupId?: number, num: number = 1): void => {
-      this.httpGet(`https://api.lolicon.app/setu/v2?num=${num}&r18=0&tag=萝莉|少女|原神|GenshinImpact&size=regular&size=original`, data => {
-        const result = Utils.jsonToData(data.toString("utf-8"))
-        const messages: ConnectionContent.Params.CustomForwardMessageNode[] = []
-        if (!result.error) {
-          let i: number = 0
-          for (let i = 0; i < result.data.length; i++) {
-            const item: { urls: { original: string, regular: string }, title: string, ext: string, pid: number, author: string } = result.data[i];
-            
-            http.https.get(item.urls.regular, async res => {
-              const location = path.join(this.dataFolder, item.pid.toString() + "." + item.ext)
-              const stream = FileUtils.writeFileWithStream(location, "w+")
+      const apis = [
+        "https://t.mwm.moe/moe",
+        "https://t.mwm.moe/ys",
+        "https://t.mwm.moe/ysmp",
+        "https://t.mwm.moe/pc",
+        "https://t.mwm.moe/mp",
+        "https://t.mwm.moe/moemp",
 
-              res.pipe(stream)
-              res.on("error", err => {
-                if (err) {
-                  console.error(`请求图片${item.urls.regular}时遇到错误`)
-                  console.error(err)
+        "https://api.yimian.xyz/img?type=moe",
 
-                  i++
-                  if (i == result.data.length) {
-                    this.ev.emit("finishCollecting", conn, msgType, userId, groupId, messages)
-                  }
-                }
-              })
-              res.on("end", () => {
-                fs.readFile(location, (err, data) => {
-                  if (err) {
-                    throw err
-                  }
+        "https://api.vvhan.com/api/acgimg",
 
-                  console.log(`正在准备图片“${item.urls.regular}”`)
-                  const node = this.buildForwardNode([new MessageSegment.Text(`标题：${item.title}\nPixiv ID：${item.pid}\n作者：${item.author}\n原图链接：${item.urls.original}`), new MessageSegment.Image(data)])
-                  messages.push(node)
+        "https://api.dujin.org/pic",
+        "https://api.dujin.org/pic/yuanshen",
 
-                  i++
-                  if (i == result.data.length) {
-                    this.ev.emit("finishCollecting", conn, msgType, userId, groupId, messages)
-                  }
-                })
-              })
-            })
+        "https://api.r10086.com/%E6%A8%B1%E9%81%93%E9%9A%8F%E6%9C%BA%E5%9B%BE%E7%89%87api%E6%8E%A5%E5%8F%A3.php?%E5%9B%BE%E7%89%87%E7%B3%BB%E5%88%97=%E8%B5%9B%E9%A9%AC%E5%A8%98%E6%A8%AA%E5%B1%8F%E7%B3%BB%E5%88%971",
+        "https://api.r10086.com/%E6%A8%B1%E9%81%93%E9%9A%8F%E6%9C%BA%E5%9B%BE%E7%89%87api%E6%8E%A5%E5%8F%A3.php?%E5%9B%BE%E7%89%87%E7%B3%BB%E5%88%97=%E4%B8%BA%E7%BE%8E%E5%A5%BD%E4%B8%96%E7%95%8C%E7%8C%AE%E4%B8%8A%E7%A5%9D%E7%A6%8F%E6%A8%AA%E5%B1%8F%E7%B3%BB%E5%88%971",
+        "https://api.r10086.com/%E6%A8%B1%E9%81%93%E9%9A%8F%E6%9C%BA%E5%9B%BE%E7%89%87api%E6%8E%A5%E5%8F%A3.php?%E5%9B%BE%E7%89%87%E7%B3%BB%E5%88%97=%E5%8E%9F%E7%A5%9E%E6%A8%AA%E5%B1%8F%E7%B3%BB%E5%88%971",
+        "https://api.r10086.com/%E6%A8%B1%E9%81%93%E9%9A%8F%E6%9C%BA%E5%9B%BE%E7%89%87api%E6%8E%A5%E5%8F%A3.php?%E5%9B%BE%E7%89%87%E7%B3%BB%E5%88%97=%E6%98%8E%E6%97%A5%E6%96%B9%E8%88%9F1",
+        "https://api.r10086.com/%E6%A8%B1%E9%81%93%E9%9A%8F%E6%9C%BA%E5%9B%BE%E7%89%87api%E6%8E%A5%E5%8F%A3.php?%E5%9B%BE%E7%89%87%E7%B3%BB%E5%88%97=%E5%B0%91%E5%A5%B3%E5%89%8D%E7%BA%BF1",
+        "https://api.r10086.com/%E6%A8%B1%E9%81%93%E9%9A%8F%E6%9C%BA%E5%9B%BE%E7%89%87api%E6%8E%A5%E5%8F%A3.php?%E5%9B%BE%E7%89%87%E7%B3%BB%E5%88%97=P%E7%AB%99%E7%B3%BB%E5%88%973",
+        "https://api.r10086.com/%E6%A8%B1%E9%81%93%E9%9A%8F%E6%9C%BA%E5%9B%BE%E7%89%87api%E6%8E%A5%E5%8F%A3.php?%E5%9B%BE%E7%89%87%E7%B3%BB%E5%88%97=P%E7%AB%99%E7%B3%BB%E5%88%974",
+        "https://api.r10086.com/%E6%A8%B1%E9%81%93%E9%9A%8F%E6%9C%BA%E5%9B%BE%E7%89%87api%E6%8E%A5%E5%8F%A3.php?%E5%9B%BE%E7%89%87%E7%B3%BB%E5%88%97=CG%E7%B3%BB%E5%88%971",
+
+        "https://image.anosu.top/pixiv/direct?r18=0&proxy=i.pixiv.re&size=original",
+
+        "https://api.oick.cn/api/random?type=pc",
+        "https://api.oick.cn/api/random?type=pe",
+
+        "https://www.loliapi.com/acg/pc",
+        "https://www.loliapi.com/acg/pe",
+        "https://www.loliapi.com/bg",
+
+        "https://tuapi.eees.cc/api.php?type=302&px=m&category=dongman",
+        "https://tuapi.eees.cc/api.php?type=302&px=pc&category=dongman",
+
+        "https://api.likepoems.com/img/pc",
+        "https://api.likepoems.com/img/pe",
+
+        "https://api.suyanw.cn/api/ys",
+        "https://api.suyanw.cn/api/comic",
+        "https://api.suyanw.cn/api/comic2",
+        "https://api.suyanw.cn/api/mao",
+      ]
+      const messages: ConnectionContent.Params.CustomForwardMessageNode[] = []
+      let index: number = 0
+      const get = () => {
+        const url = Utils.randomChoice(apis)
+        this.httpGet(url, (data, res) => {
+          const imgUrl = res.responseUrl
+          console.log(`正在处理第${index + 1}张图片：“${imgUrl}”（“${url}”）`)
+          let format = imgUrl.split(".").pop()?.toLowerCase()
+          if (!format || !["jpg", "jpeg", "png", "webp", "webm"].includes(format)) {
+            format = "png"
           }
-        }
-      })
+
+          messages.push(this.buildForwardNode([new MessageSegment.Image(data)]))
+          index++
+          if (index == num) {
+            this.ev.emit("finishCollecting", conn, msgType, userId, groupId, messages)
+          }
+
+          const stream = FileUtils.writeFileWithStream(path.join(this.dataFolder, Utils.randomChar(7) + "." + format))
+          stream.write(data)
+        }, (err, res) => {
+          console.error(`请求“${res.responseUrl}”（“${url}”）时出错，正在重试`)
+          console.error(err)
+          get()
+        })
+      }
+
+      for (let i = 0; i < num; i++) {
+        get()
+      }
     }
   ]
 
@@ -143,8 +174,9 @@ export default class RandomAnimePicture extends Plugin {
     }
   }
 
-  public httpGet(target: string, cb?: (data: Buffer) => (void | Promise<void>), catchCb?: (err: Error) => (void | Promise<void>)): void {
+  public httpGet(target: string, cb?: (data: Buffer, res: IncomingMessage & http.FollowResponse) => (void | Promise<void>), catchCb?: (err: Error, res: IncomingMessage & http.FollowResponse) => (void | Promise<void>)): void {
     http.https.get(target, {
+      timeout: 20000,
       headers: {
         "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36 Edg/120.0.0.0"
       }
@@ -152,14 +184,14 @@ export default class RandomAnimePicture extends Plugin {
       if (catchCb) {
         res.on("error", err => {
           if (err) {
-            catchCb(err)
+            catchCb(err, res)
           }
         })
       }
       if (cb) {
-        let data: string = ""
-        res.on("data", chunk => data += chunk)
-        res.on("end", () => cb(Buffer.from(data)))
+        let data: any[] = []
+        res.on("data", chunk => data.push(Buffer.from(chunk, "binary")))
+        res.on("end", () => cb(Buffer.concat(data), res))
       }
     })
   }
