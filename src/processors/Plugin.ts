@@ -64,6 +64,26 @@ export abstract class Plugin {
         }
       }
     })
+    
+    this.ev.on("notice", ev => {
+      const noticeListeners = this.listeners.notice
+      for (const notice of noticeListeners.keys()) {
+        if (noticeListeners.has(notice)) {
+          const listeners = noticeListeners.get(notice)!
+          
+          listeners.forEach((listener, i) => {
+            try {
+              listener.trigger(ev)
+            }
+            catch (err) {
+              console.error(`在触发通知监听器“${notice}”（优先级：${listener.priority}，执行顺序：${i + 1}）时捕获到错误`)
+              console.error(err)
+              return
+            }
+          })
+        }
+      }
+    })
   }
 
   public onMessage(message: DataType.ListenedMessage, cb: DataType.ListenedMessageFunc, aliases: DataType.ListenedMessage[] | DataType.ListenedMessage = [], priority: number = 0, messageType: DataType.MessageTypeChecker = "all", 
@@ -121,6 +141,9 @@ export abstract class Plugin {
     commandListeners.get(command)!.sort(this.sortListeners)
 
     return listener
+  }
+  public onNotice(notice: DataType.ListenedNotice, cb: DataType.ListenedNoticeFunc, priority: number = 0, checkers: DataType.NoticeChecker | DataType.NoticeChecker[] = [], block: boolean = false) {
+    
   }
 
   private sortListeners(a: Listener, b: Listener) {
