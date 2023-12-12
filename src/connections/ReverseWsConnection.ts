@@ -152,16 +152,28 @@ export class ReverseWsConnection extends Connection {
     return <string>this.server.address()
   }
 
-  public getGroups(clientIndex: number = 0): Record<number, Group> {
+  public getGroups(clientIndex: number = 0): Record<number, Group> | undefined {
+    if (!this.clientAddresses[clientIndex]) {
+      return undefined
+    }
     return this.groups[this.clientAddresses[clientIndex]]
   }
-  public getGroup(id: number, clientIndex: number = 0): Group {
+  public getGroup(id: number, clientIndex: number = 0): Group | undefined {
+    if (!(this.clientAddresses[clientIndex] && Object.hasOwn(this.groups, this.clientAddresses[clientIndex]) && Object.hasOwn(this.groups[this.clientAddresses[clientIndex]], id))) {
+      return undefined
+    }
     return this.groups[this.clientAddresses[clientIndex]][id]
   }
-  public getFriends(clientIndex: number = 0): Record<number, User> {
+  public getFriends(clientIndex: number = 0): Record<number, User> | undefined {
+    if (!this.clientAddresses[clientIndex]) {
+      return undefined
+    }
     return this.friends[this.clientAddresses[clientIndex]]
   }
-  public getFriend(id: number, clientIndex: number = 0): User {
+  public getFriend(id: number, clientIndex: number = 0): User | undefined {
+    if (!(this.clientAddresses[clientIndex] && Object.hasOwn(this.friends, this.clientAddresses[clientIndex]) && Object.hasOwn(this.friends[this.clientAddresses[clientIndex]], id))) {
+      return undefined
+    }
     return this.friends[this.clientAddresses[clientIndex]][id]
   }
 

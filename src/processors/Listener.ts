@@ -53,18 +53,27 @@ class MessageListener extends Listener {
     if (ev.messageType != this.messageType && this.messageType != "all") {
       return
     }
+    
+    let permission: ListenerEnum.Permission = ListenerEnum.Permission.user
     if (ev.messageType == EventEnum.MessageType.group) {
-      const userPermission = ev.conn!.getGroup(ev.groupId!)!.members[ev.userId].permission
-      if (!ListenerUtils.comparePermission(userPermission, this.permission)) {
-        return
+      const group = ev.conn!.getGroup(ev.groupId!)
+      if (group) {
+        const user = group.members[ev.userId]
+        if (user) {
+          permission = user.permission
+        }
       }
     }
     else {
-      const userPermission = ev.conn!.getFriend(ev.userId)!.permission
-      if (!ListenerUtils.comparePermission(userPermission, this.permission)) {
-        return
+      const user = ev.conn!.getFriend(ev.userId)
+      if (user) {
+        permission = user.permission
       }
     }
+    if (!ListenerUtils.comparePermission(permission, this.permission)) {
+      return
+    }
+    
     for (let i = 0; i < this.checkers.length; i++) {
       if (!this.checkers[i](ev)) {
         return
@@ -181,18 +190,27 @@ class CommandListener extends Listener {
     if (ev.messageType != this.messageType && this.messageType != "all") {
       return
     }
+    
+    let permission: ListenerEnum.Permission = ListenerEnum.Permission.user
     if (ev.messageType == EventEnum.MessageType.group) {
-      const userPermission = ev.conn!.getGroup(ev.groupId!)!.members[ev.userId].permission
-      if (!ListenerUtils.comparePermission(userPermission, this.permission)) {
-        return
+      const group = ev.conn!.getGroup(ev.groupId!)
+      if (group) {
+        const user = group.members[ev.userId]
+        if (user) {
+          permission = user.permission
+        }
       }
     }
     else {
-      const userPermission = ev.conn!.getFriend(ev.userId)!.permission
-      if (!ListenerUtils.comparePermission(userPermission, this.permission)) {
-        return
+      const user = ev.conn!.getFriend(ev.userId)
+      if (user) {
+        permission = user.permission
       }
     }
+    if (!ListenerUtils.comparePermission(permission, this.permission)) {
+      return
+    }
+    
     for (let i = 0; i < this.checkers.length; i++) {
       if (!this.checkers[i](ev)) {
         return

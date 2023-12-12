@@ -111,16 +111,28 @@ export class HttpConnection extends Connection {
     return <string>this.server.address()
   }
 
-  public getGroups(first?: any): Record<number, Group> {
+  public getGroups(first?: any): Record<number, Group> | undefined {
+    if (this.clientAddresses.length == 0) {
+      return undefined
+    }
     return this.groups[this.clientAddresses[0]]
   }
-  public getGroup(id: number, first?: any): Group {
+  public getGroup(id: number, first?: any): Group | undefined {
+    if (!(this.clientAddresses.length != 0 && Object.hasOwn(this.groups, this.clientAddresses[0]) && Object.hasOwn(this.groups[this.clientAddresses[0]], id))) {
+      return undefined
+    }
     return this.groups[this.clientAddresses[0]][id]
   }
-  public getFriends(first?: any): Record<number, User> {
+  public getFriends(first?: any): Record<number, User> | undefined {
+    if (this.clientAddresses.length == 0) {
+      return undefined
+    }
     return this.friends[this.clientAddresses[0]]
   }
-  public getFriend(id: number, first?: any): User {
+  public getFriend(id: number, first?: any): User | undefined {
+    if (!(this.clientAddresses.length != 0 && Object.hasOwn(this.friends, this.clientAddresses[0]) && Object.hasOwn(this.friends[this.clientAddresses[0]], id))) {
+      return undefined
+    }
     return this.friends[this.clientAddresses[0]][id]
   }
 
