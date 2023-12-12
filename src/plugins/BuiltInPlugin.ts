@@ -18,11 +18,19 @@ export default class BuiltInPlugin extends Plugin {
     function reportEvent(type: string, ev: MessageEvent) {
       if (ev.messageType == EventEnum.MessageType.group) {
         const group = ev.conn!.getGroup(ev.groupId!)
+        if (!group) {
+          console.log(`接收到${type}：${ev.raw} 来自群聊：${ev.groupId} 发送者：${ev.userId}`)
+          return
+        }
         const member = group.members[ev.userId]
         console.log(`接收到${type}：${ev.raw} 来自群聊：${group.name}（${ev.groupId}） 发送者：${member.viewedName}（${ev.userId}）`)
       }
       else if (ev.messageType == EventEnum.MessageType.private) {
         const friend = ev.conn!.getFriend(ev.userId)
+        if (!friend) {
+          console.log(`接收到${type}：${ev.raw} 来自私聊 发送者：${ev.userId}`)
+          return 
+        }
         console.log(`接收到${type}：${ev.raw} 来自私聊 发送者：${friend.viewedName}（${ev.userId}）`)
       }
     }

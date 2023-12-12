@@ -196,4 +196,30 @@ export class ReverseWsConnection extends Connection {
   private receivePacket(data: ws.RawData, cb: (data: string) => void) {
     cb(data.toString("utf-8"))
   }
+
+  // 以下函数仅被内置类调用
+  public _addGroup(group: Event.Reported): void {
+    throw new Error("Method not implemented.");
+  }
+  public _removeGroup(id: number): void {
+    throw new Error("Method not implemented.");
+  }
+  public _addGroupMember(member: Event.GroupMemberIncrease): void {
+    throw new Error("Method not implemented.");
+  }
+  public _removeGroupMember(id: number): void {
+    throw new Error("Method not implemented.");
+  }
+  public _processGroupAdminChange(admin: Event.GroupAdminChange): void {
+    throw new Error("Method not implemented.");
+  }
+  public _processGroupMemberCardChange(card: Event.GroupCardChange): void {
+    throw new Error("Method not implemented.");
+  }
+  public _addFriend(friend: Event.FriendAdd): void {
+    throw new Error("Method not implemented.");
+  }
+  public _removeFriend(id: number): void {
+    throw new Error("Method not implemented.");
+  }
 }

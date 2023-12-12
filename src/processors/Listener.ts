@@ -54,13 +54,13 @@ class MessageListener extends Listener {
       return
     }
     if (ev.messageType == EventEnum.MessageType.group) {
-      const userPermission = ev.conn!.getGroup(ev.groupId!).members[ev.userId].permission
+      const userPermission = ev.conn!.getGroup(ev.groupId!)!.members[ev.userId].permission
       if (!ListenerUtils.comparePermission(userPermission, this.permission)) {
         return
       }
     }
     else {
-      const userPermission = ev.conn!.getFriend(ev.userId).permission
+      const userPermission = ev.conn!.getFriend(ev.userId)!.permission
       if (!ListenerUtils.comparePermission(userPermission, this.permission)) {
         return
       }
@@ -182,13 +182,13 @@ class CommandListener extends Listener {
       return
     }
     if (ev.messageType == EventEnum.MessageType.group) {
-      const userPermission = ev.conn!.getGroup(ev.groupId!).members[ev.userId].permission
+      const userPermission = ev.conn!.getGroup(ev.groupId!)!.members[ev.userId].permission
       if (!ListenerUtils.comparePermission(userPermission, this.permission)) {
         return
       }
     }
     else {
-      const userPermission = ev.conn!.getFriend(ev.userId).permission
+      const userPermission = ev.conn!.getFriend(ev.userId)!.permission
       if (!ListenerUtils.comparePermission(userPermission, this.permission)) {
         return
       }
