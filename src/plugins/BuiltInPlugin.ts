@@ -23,6 +23,10 @@ export default class BuiltInPlugin extends Plugin {
           return
         }
         const member = group.members[ev.userId]
+        if (!member) {
+          console.log(`接收到${type}：${ev.raw} 来自群聊：${group.name}（${ev.groupId}） 发送者：${ev.userId}`)
+          return
+        }
         console.log(`接收到${type}：${ev.raw} 来自群聊：${group.name}（${ev.groupId}） 发送者：${member.viewedName}（${ev.userId}）`)
       }
       else if (ev.messageType == EventEnum.MessageType.private) {

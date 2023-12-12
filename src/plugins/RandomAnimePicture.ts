@@ -87,7 +87,12 @@ export default class RandomAnimePicture extends Plugin {
           const stream = FileUtils.writeFileWithStream(path.join(this.dataFolder, Utils.randomChar(7) + "." + format))
           stream.write(data)
         }, (err, res) => {
-          console.error(`请求“${res.responseUrl}”（“${url}”）时出错，正在重试`)
+          if (res) {
+            console.error(`请求“${res.responseUrl}”（“${url}”）时出错，正在重试`)
+          }
+          else {
+            console.error(`请求（“${url}”）时出错，正在重试`)
+          }
           console.error(err)
           get()
         })
@@ -174,26 +179,33 @@ export default class RandomAnimePicture extends Plugin {
     }
   }
 
-  public httpGet(target: string, cb?: (data: Buffer, res: IncomingMessage & http.FollowResponse) => (void | Promise<void>), catchCb?: (err: Error, res: IncomingMessage & http.FollowResponse) => (void | Promise<void>)): void {
-    http.https.get(target, {
-      timeout: 20000,
-      headers: {
-        "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36 Edg/120.0.0.0"
-      }
-    }, res => {
+  public httpGet(target: string, cb?: (data: Buffer, res: IncomingMessage & http.FollowResponse) => (void | Promise<void>), catchCb?: (err: Error, res?: IncomingMessage & http.FollowResponse) => (void | Promise<void>)): void {
+    try {
+      http.https.get(target, {
+        timeout: 20000,
+        headers: {
+          "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36 Edg/120.0.0.0"
+        }
+      }, res => {
+        if (catchCb) {
+          res.on("error", err => {
+            if (err) {
+              catchCb(err, res)
+            }
+          })
+        }
+        if (cb) {
+          let data: any[] = []
+          res.on("data", chunk => data.push(Buffer.from(chunk, "binary")))
+          res.on("end", () => cb(Buffer.concat(data), res))
+        }
+      })
+    }
+    catch (err) {
       if (catchCb) {
-        res.on("error", err => {
-          if (err) {
-            catchCb(err, res)
-          }
-        })
+        catchCb(<Error>err)
       }
-      if (cb) {
-        let data: any[] = []
-        res.on("data", chunk => data.push(Buffer.from(chunk, "binary")))
-        res.on("end", () => cb(Buffer.concat(data), res))
-      }
-    })
+    }
   }
 
   public buildForwardNode(messages: Segment[]): ConnectionContent.Params.CustomForwardMessageNode {
