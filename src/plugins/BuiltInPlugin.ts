@@ -1,6 +1,5 @@
 import { EventEnum, ListenerEnum } from "../types/enums";
 import { Plugin } from "../processors/Plugin";
-import { launcher } from "../app";
 import type { ConnectionContent } from "src/types/connectionContent";
 import MessageSegment from "../events/messages/MessageSegment";
 import type { Event } from "src/events/Event";
@@ -18,12 +17,12 @@ export default class BuiltInPlugin extends Plugin {
 
     function reportEvent(type: string, ev: MessageEvent) {
       if (ev.messageType == EventEnum.MessageType.group) {
-        const group = launcher.getGroups()![ev.groupId!]
+        const group = ev.conn!.getGroup(ev.groupId!)
         const member = group.members[ev.userId]
         console.log(`接收到${type}：${ev.raw} 来自群聊：${group.name}（${ev.groupId}） 发送者：${member.viewedName}（${ev.userId}）`)
       }
       else if (ev.messageType == EventEnum.MessageType.private) {
-        const friend = launcher.getFriends()![ev.userId]
+        const friend = ev.conn!.getFriend(ev.userId)
         console.log(`接收到${type}：${ev.raw} 来自私聊 发送者：${friend.viewedName}（${ev.userId}）`)
       }
     }

@@ -4,11 +4,15 @@ import { CustomEventEmitter as EventEmitter } from "../tools/CustomEventEmitter"
 import type { Event } from "src/types/event";
 import ws from "ws"
 import { Utils } from "../tools/Utils";
-import { type ConnectionEnum, EventEnum } from "../types/enums";
+import { ConnectionEnum, EventEnum } from "../types/enums";
 import { ConnectionContent } from "src/types/connectionContent";
 import type { DataType } from "src/types/dataType";
+import { Group } from "../processors/sets/Group";
+import { User } from "../processors/sets/User";
 
 export class ReverseWsConnection extends Connection {
+  public groups: Record<string, Record<number, Group>> = {};
+  public friends: Record<string, Record<number, User>> = {};
   protected server!: ws.Server;
   public clientAddresses: string[] = []
   protected messageCbs: Record<string, DataType.ResponseFunction> = {}
@@ -104,11 +108,15 @@ export class ReverseWsConnection extends Connection {
         }
       }))
       socket.on("close", () => {
+        const clientAddress = `${req.socket.remoteAddress}:${req.socket.remotePort}`
         this.clientAddresses.forEach((address, i) => {
-          if (address.includes(req.socket.remoteAddress!)) {
+          if (address.includes(clientAddress)) {
             this.clientAddresses.splice(i, 1)
           }
         })
+        delete this.groups[clientAddress]
+        delete this.friends[clientAddress]
+
         console.log("===================================")
         console.log("Reverse WebSocket Connection Closed")
         console.log("Client:", `${req.socket.remoteAddress}:${req.socket.remotePort}`)
@@ -117,6 +125,20 @@ export class ReverseWsConnection extends Connection {
         if (err) {
           throw err
         }
+      })
+
+      console.log("正在尝试获取群聊与好友信息")
+      this.send(ConnectionEnum.Action.getGroupList, {}, data => {
+        const result = <ConnectionContent.Connection.Response<ConnectionContent.ActionResponse.GetGroupList>>data
+        const groups: Record<number, Group> = {}
+        result.data.forEach(group => groups[group.group_id] = new Group(group, this))
+        this.groups[this.clientAddresses[0]] = groups
+      })
+      this.send(ConnectionEnum.Action.getFriendList, {}, data => {
+        const result = <ConnectionContent.Connection.Response<ConnectionContent.ActionResponse.GetFriendList>>data
+        const friends: Record<number, User> = {}
+        result.data.forEach(friend => friends[friend.user_id] = new User(friend, this))
+        this.friends[this.clientAddresses[0]] = friends
       })
     })
 
@@ -128,6 +150,19 @@ export class ReverseWsConnection extends Connection {
   }
   public address(): string | undefined {
     return <string>this.server.address()
+  }
+
+  public getGroups(clientIndex: number = 0): Record<number, Group> {
+    return this.groups[this.clientAddresses[clientIndex]]
+  }
+  public getGroup(id: number, clientIndex: number = 0): Group {
+    return this.groups[this.clientAddresses[clientIndex]][id]
+  }
+  public getFriends(clientIndex: number = 0): Record<number, User> {
+    return this.friends[this.clientAddresses[clientIndex]]
+  }
+  public getFriend(id: number, clientIndex: number = 0): User {
+    return this.friends[this.clientAddresses[clientIndex]][id]
   }
 
   public send(action: ConnectionEnum.Action, data: Record<string, any> = {}, cb?: DataType.ResponseFunction, clientIndex: number = 0): void {

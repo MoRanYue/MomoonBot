@@ -1,4 +1,4 @@
-import type { Listener, MessageListener } from "src/processors/Listener"
+import type { CommandListener, Listener, MessageListener, NoticeListener } from "src/processors/Listener"
 import type { Event } from "../events/Event"
 import type { MessageEvent } from "../events/MessageEvent"
 import type { NoticeEvent } from "../events/NoticeEvent";
@@ -12,9 +12,9 @@ export namespace DataType {
 
   interface ListenerList {
     message: Map<ListenedMessage, MessageListener[]>
-    command: Map<ListenedMessage, Listener[]>
+    command: Map<ListenedMessage, CommandListener[]>
     request: Map<ListenedMessage, Listener[]>
-    notice: Map<ListenedMessage, Listener[]>
+    notice: Map<ListenedMessage, NoticeListener[]>
   }
   interface ListenerReceiverData<T extends Function> {
     storedKey: string

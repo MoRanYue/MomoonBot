@@ -1,4 +1,4 @@
-import { CommandListener, Listener, MessageListener } from "./Listener"
+import { CommandListener, Listener, MessageListener, NoticeListener } from "./Listener"
 import type { DataType } from "../types/dataType"
 import config from "../config"
 import { CustomEventEmitter } from "src/types/CustomEventEmitter"
@@ -33,16 +33,21 @@ export abstract class Plugin {
         if (messageListeners.has(message)) {
           const listeners = messageListeners.get(message)!
           
-          listeners.forEach((listener, i) => {
+          for (let i = 0; i < listeners.length; i++) {
+            const listener = listeners[i];
+            
             try {
               listener.trigger(ev)
             }
             catch (err) {
               console.error(`在触发消息监听器“${message}”（优先级：${listener.priority}，执行顺序：${i + 1}）时捕获到错误`)
               console.error(err)
-              return
             }
-          })
+
+            if (listener.block) {
+              break
+            }
+          }
         }
       }
 
@@ -51,16 +56,21 @@ export abstract class Plugin {
         if (commandListeners.has(command)) {
           const listeners = commandListeners.get(command)!
           
-          listeners.forEach((listener, i) => {
+          for (let i = 0; i < listeners.length; i++) {
+            const listener = listeners[i];
+            
             try {
               listener.trigger(ev)
             }
             catch (err) {
               console.error(`在触发命令监听器“${command}”（优先级：${listener.priority}，执行顺序：${i + 1}）时捕获到错误`)
               console.error(err)
-              return
             }
-          })
+
+            if (listener.block) {
+              break
+            }
+          }
         }
       }
     })
@@ -71,16 +81,21 @@ export abstract class Plugin {
         if (noticeListeners.has(notice)) {
           const listeners = noticeListeners.get(notice)!
           
-          listeners.forEach((listener, i) => {
+          for (let i = 0; i < listeners.length; i++) {
+            const listener = listeners[i];
+            
             try {
               listener.trigger(ev)
             }
             catch (err) {
               console.error(`在触发通知监听器“${notice}”（优先级：${listener.priority}，执行顺序：${i + 1}）时捕获到错误`)
               console.error(err)
-              return
             }
-          })
+
+            if (listener.block) {
+              break
+            }
+          }
         }
       }
     })
@@ -142,8 +157,22 @@ export abstract class Plugin {
 
     return listener
   }
-  public onNotice(notice: DataType.ListenedNotice, cb: DataType.ListenedNoticeFunc, priority: number = 0, checkers: DataType.NoticeChecker | DataType.NoticeChecker[] = [], block: boolean = false) {
-    
+  public onNotice(notices: DataType.ListenedNotice | DataType.ListenedNotice[], cb: DataType.ListenedNoticeFunc, priority: number = 0, 
+  checkers: DataType.NoticeChecker | DataType.NoticeChecker[] = [], block: boolean = false): NoticeListener {
+    const listener = new NoticeListener(notices, cb, priority, checkers, block)
+
+    const noticeListeners = this.listeners.notice
+
+    const noticeStr = Array.isArray(notices) ? notices.join("、") : notices
+    if (noticeListeners.has(noticeStr)) {
+      noticeListeners.get(noticeStr)!.push(listener)
+    }
+    else {
+      noticeListeners.set(noticeStr, [listener])
+    }
+    noticeListeners.get(noticeStr)!.sort(this.sortListeners)
+
+    return listener
   }
 
   private sortListeners(a: Listener, b: Listener) {

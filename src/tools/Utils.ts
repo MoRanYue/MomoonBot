@@ -41,20 +41,6 @@ export class Utils {
     return chars
   }
 
-  public static generateConnectionId(conn: Connection): string {
-    let type: ConfigEnum.ConnectionType | string
-    if (conn instanceof HttpConnection) {
-      type = ConfigEnum.ConnectionType.http
-    }
-    else if (conn instanceof ReverseWsConnection) {
-      type = ConfigEnum.ConnectionType.reverseWs
-    }
-    else {
-      type = "unknown"
-    }
-    return `${type}_${conn.address()}`
-  }
-
   public static sexToId(sex: ConnectionContent.ActionResponse.Sex): ConnectionContent.ActionResponse.Gender {
     switch (sex) {
       case "male":

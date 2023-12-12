@@ -6,12 +6,16 @@ import { CustomIncomingMessage } from "../types/http";
 import { CustomEventEmitter } from "../types/CustomEventEmitter";
 import { Utils } from "../tools/Utils";
 import { Event } from "../types/event";
-import { type ConnectionEnum, EventEnum } from "../types/enums";
+import { ConnectionEnum, EventEnum } from "../types/enums";
 import { CustomEventEmitter as EventEmitter } from "../tools/CustomEventEmitter";
 import type { ConnectionContent } from "src/types/connectionContent";
 import type { DataType } from "src/types/dataType";
+import { Group } from "../processors/sets/Group";
+import { User } from "../processors/sets/User";
 
 export class HttpConnection extends Connection {
+  public groups: Record<string, Record<number, Group>> = {};
+  public friends: Record<string, Record<number, User>> = {};
   protected server!: http.Server
   readonly ev: CustomEventEmitter.HttpEventEmitter = new EventEmitter()
   public clientAddresses: string[] = []
@@ -25,6 +29,27 @@ export class HttpConnection extends Connection {
       console.log("======================")
       console.log("Http Received Response")
     })
+
+    this.ev.once("connect", () => {
+      console.log("正在尝试获取群聊与好友信息")
+      if (this.clientAddresses.length == 0) {
+        console.error("“Http”无法获取群聊与好友信息，因为未指定客户端地址")
+        return
+      }
+      
+      this.send(ConnectionEnum.Action.getGroupList, {}, data => {
+        const result = <ConnectionContent.Connection.Response<ConnectionContent.ActionResponse.GetGroupList>>data
+        const groups: Record<number, Group> = {}
+        result.data.forEach(group => groups[group.group_id] = new Group(group, this))
+        this.groups[this.clientAddresses[0]] = groups
+      })
+      this.send(ConnectionEnum.Action.getFriendList, {}, data => {
+        const result = <ConnectionContent.Connection.Response<ConnectionContent.ActionResponse.GetFriendList>>data
+        const friends: Record<number, User> = {}
+        result.data.forEach(friend => friends[friend.user_id] = new User(friend, this))
+        this.friends[this.clientAddresses[0]] = friends
+      })
+    })
     
     this.server.on("request", (req: http.IncomingMessage, res: http.ServerResponse) => {
       this.ev.emit("connect")
@@ -35,7 +60,7 @@ export class HttpConnection extends Connection {
           this.ev.emit("response", <ConnectionContent.Connection.Response<number | object | object[]>>data)
         }
         else {
-          console.log("===========================")
+          console.log("==========================")
           console.log("Http Received Event Report")
 
           switch ((<Event.Reported>data).post_type) {
@@ -86,8 +111,20 @@ export class HttpConnection extends Connection {
     return <string>this.server.address()
   }
 
+  public getGroups(first?: any): Record<number, Group> {
+    return this.groups[this.clientAddresses[0]]
+  }
+  public getGroup(id: number, first?: any): Group {
+    return this.groups[this.clientAddresses[0]][id]
+  }
+  public getFriends(first?: any): Record<number, User> {
+    return this.friends[this.clientAddresses[0]]
+  }
+  public getFriend(id: number, first?: any): User {
+    return this.friends[this.clientAddresses[0]][id]
+  }
+
   public send(action: ConnectionEnum.Action, data: Record<string, any> = {}, cb?: DataType.ResponseFunction, clientIndex: number = 0): void {
-    let resData: string
     const req = http.request({
       method: "post",
       protocol: "http:",
@@ -136,7 +173,15 @@ export class HttpConnection extends Connection {
       throw err
     })
     res.on('end', () => {
-      const result = Utils.jsonToData(data)
+      let result
+      try {
+        result = Utils.jsonToData(data)
+      }
+      catch (err) {
+        console.error("===========================")
+        console.error("Http Received Error Request")
+        return 
+      }
 
       if (cb) {
         cb(result)
