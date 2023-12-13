@@ -3,6 +3,7 @@ import { Connection } from "./Connection";
 import { CustomEventEmitter as EventEmitter } from "../tools/CustomEventEmitter";
 import type { Event } from "src/types/event";
 import ws from "ws"
+import config from "../config"
 import { Utils } from "../tools/Utils";
 import { ConnectionEnum, EventEnum } from "../types/enums";
 import { ConnectionContent } from "src/types/connectionContent";
@@ -11,6 +12,7 @@ import { Group } from "../processors/sets/Group";
 import { User } from "../processors/sets/User";
 
 export class ReverseWsConnection extends Connection {
+  protected token: string | null | undefined;
   public groups: Record<string, Record<number, Group>> = {};
   public friends: Record<string, Record<number, User>> = {};
   protected server!: ws.Server;
@@ -21,11 +23,17 @@ export class ReverseWsConnection extends Connection {
 
   public createServer(port: number): this;
   public createServer(port: number, host?: string | undefined): this;
-  public createServer(port: number, host?: string | undefined, cb?: VoidFunction | undefined): this {
+  public createServer(port: number, host?: string | undefined, token?: string | null): this;
+  public createServer(port: number, host?: string | undefined, token?: string | null, cb?: VoidFunction | undefined): this {
+    if (this.server) {
+      this.server.close()
+    }
+
     this.server = new ws.Server({
       port,
       host,
     })
+    this.token = token
 
     if (cb) {
       this.server.on("listening", cb)
@@ -38,6 +46,14 @@ export class ReverseWsConnection extends Connection {
       console.log("=============================================")
       console.log("Reverse WebSocket Received Connection Request")
       console.log("Client:", `${req.socket.remoteAddress}:${req.socket.remotePort}`)
+
+      const auth = req.headers.authorization
+      if (this.token) {
+        if (!auth || auth.split(" ", 2).pop() != this.token) {
+          console.log("客户端鉴权失败")
+          return
+        }
+      }
       
       this.ev.on("response", data => {
         console.log("===================================")

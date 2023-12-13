@@ -7,6 +7,7 @@ import { Event } from "src/types/event"
 
 export abstract class Connection {
   protected abstract server: unknown
+  protected abstract token: string | null | undefined
   
   readonly abstract ev: CustomEventEmitter.ConnectionEventEmitter
 

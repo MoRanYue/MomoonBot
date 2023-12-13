@@ -14,6 +14,7 @@ import { Group } from "../processors/sets/Group";
 import { User } from "../processors/sets/User";
 
 export class HttpConnection extends Connection {
+  protected token: string | null | undefined;
   public groups: Record<string, Record<number, Group>> = {};
   public friends: Record<string, Record<number, User>> = {};
   protected server!: http.Server
@@ -22,8 +23,14 @@ export class HttpConnection extends Connection {
 
   public createServer(port: number): this
   public createServer(port: number, host?: string): this
-  public createServer(port: number, host?: string, cb?: () => void): this {
+  public createServer(port: number, host?: string, token?: string | null): this
+  public createServer(port: number, host?: string, token?: string | null, cb?: () => void): this {
+    if (this.server) {
+      this.server.close()
+    }
+
     this.server = http.createServer()
+    this.token = token
 
     this.ev.on("response", data => {
       console.log("======================")
@@ -52,6 +59,14 @@ export class HttpConnection extends Connection {
     })
     
     this.server.on("request", (req: http.IncomingMessage, res: http.ServerResponse) => {
+      const auth = req.headers.authorization
+      if (token) {
+        if (!auth || auth.split(" ", 2).pop() != token) {
+          console.log("客户端鉴权失败")
+          return
+        }
+      }
+
       this.ev.emit("connect")
 
       this.receiveRequest(req, res, async (req, res) => {

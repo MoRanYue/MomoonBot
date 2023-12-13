@@ -4,14 +4,17 @@ export interface HttpMiddleware {
   api: string
   host: string
   port: number
+  token: string | null
 }
 export interface WsMiddleware {
   api?: string
   universe: string
+  token: string | null
 }
 export interface ReverseWsMiddleware {
   host: string
   port: number
+  token: string | null
 }
 
 interface ConnectionMiddlewareConfig {

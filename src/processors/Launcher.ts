@@ -31,7 +31,8 @@ export class Launcher {
     config.connections.forEach(conn => {
       console.log(`尝试启动“${conn.type}”（协议：“${conn.protocol}”）服务器`)
 
-      const inst = this.launchConnection(<ConfigEnum.ConnectionType>conn.type, (<HttpMiddleware | ReverseWsMiddleware>conn.server).port, (<HttpMiddleware | ReverseWsMiddleware>conn.server).host ?? (<WsMiddleware>conn.server).universe)
+      const inst = this.launchConnection(<ConfigEnum.ConnectionType>conn.type, (<HttpMiddleware | ReverseWsMiddleware>conn.server).port, 
+      (<HttpMiddleware | ReverseWsMiddleware>conn.server).host ?? (<WsMiddleware>conn.server).universe, conn.server.token)
       if (conn.type == ConfigEnum.ConnectionType.http) {
         (<HttpConnection>inst).addClient((<HttpMiddleware>conn.server).api)
       }
@@ -48,7 +49,7 @@ export class Launcher {
     return this.connections
   }
   
-  private launchConnection(type: ConfigEnum.ConnectionType, port?: number, host?: string) {
+  private launchConnection(type: ConfigEnum.ConnectionType, port?: number, host?: string, token?: string | null) {
     switch (type) {
       case ConfigEnum.ConnectionType.http:
         const http = new HttpConnection()
@@ -58,7 +59,7 @@ export class Launcher {
 
       case ConfigEnum.ConnectionType.reverseWs:
         const reverseWs = new ReverseWsConnection()
-        reverseWs.createServer(port ?? 3007, host)
+        reverseWs.createServer(port ?? 3007, host, token)
 
         return reverseWs
       
