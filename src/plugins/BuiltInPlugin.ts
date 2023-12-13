@@ -5,6 +5,7 @@ import MessageSegment from "../events/messages/MessageSegment";
 import type { Event } from "src/events/Event";
 import type { MessageEvent } from "src/events/MessageEvent";
 import { MessageUtils } from "../tools/MessageUtils";
+import type { FriendAdd, GroupAdminChange, GroupCardChange, GroupMemberDecrease, GroupMemberIncrease } from "src/events/NoticeEvent";
 
 export default class BuiltInPlugin extends Plugin {
   name: string = "内置插件"
@@ -41,6 +42,64 @@ export default class BuiltInPlugin extends Plugin {
 
     this.onMessage("", ev => reportEvent("消息", ev), [], 999)
     this.onCommand("", ev => reportEvent("命令", ev), [], 999)
+    this.onNotice(EventEnum.NoticeType.groupIncrease, event => {
+      const ev = <GroupMemberIncrease>event
+      const group = ev.conn!.getGroup(ev.groupId)!
+      const operator = group.members[ev.operatorId]
+      let method: string = ev.entry
+      if (ev.entry == "approve") {
+        method = ` ${operator.viewedName}（${ev.operatorId}） 允许加入`
+      }
+      else if (ev.entry == "invite") {
+        method = `被邀请，由 ${operator.viewedName}（${ev.operatorId}） 允许加入`
+      }
+      console.log(`接收到群聊成员加入通知：群聊：${group.name}（${ev.groupId}） 加入者：${ev.userId} 方式：${method}`)
+    }, 999)
+    this.onNotice(EventEnum.NoticeType.groupDecrease, event => {
+      const ev = <GroupMemberDecrease>event
+      const group = ev.conn!.getGroup(ev.groupId)!
+      let reason: string = ev.reason
+      if (ev.reason == "leave") {
+        reason = "退出群聊"
+      }
+      else if (ev.reason == "kick") {
+        const operator = group.members[ev.operatorId]
+        if (operator) {
+          reason = `被 ${operator.viewedName}（${ev.operatorId}） 踢出`
+        }
+        else {
+          reason = `被踢出`
+        }
+      }
+      else if (ev.reason == "kick_me") {
+        reason = `自身被 ${ev.operatorId} 踢出`
+      }
+      console.log(`接收到群聊成员退出通知：群聊：${group.name}（${ev.groupId}） 退出者：${ev.userId} 原因：${reason}`)
+    }, 999)
+    this.onNotice(EventEnum.NoticeType.groupAdmin, event => {
+      const ev = <GroupAdminChange>event
+      const group = ev.conn!.getGroup(ev.groupId)!
+      const member = group.members[ev.userId]
+      let status: string = ev.status
+      if (ev.status == "set") {
+        status = "设置"
+      }
+      else if (ev.status == "unset") {
+        status = "取消"
+      }
+      console.log(`接受到群聊${status}管理员通知：群聊：${group.name}（${ev.groupId}） 管理员：${member.viewedName}（${ev.userId}）`)
+    }, 999)
+    this.onNotice(EventEnum.NoticeType.groupCard, event => {
+      const ev = <GroupCardChange>event
+      const group = ev.conn!.getGroup(ev.groupId)!
+      const member = group.members[ev.userId]
+      console.log(`接受到群聊成员名片修改通知：成员：${member.name}（${ev.userId}） 旧名片：${ev.old} 新名片：${ev.new}`)
+    }, 999)
+    this.onNotice(EventEnum.NoticeType.friendAdd, event => {
+      const ev = <FriendAdd>event
+      const friend = ev.conn!.getFriend(ev.userId)!
+      console.log(`接受到好友添加通知：好友：${friend.viewedName}（${ev.userId}）`)
+    }, 999)
 
     this.onCommand("echo", (ev, state, args) => {
       ev.quickReply(args.join(" "))

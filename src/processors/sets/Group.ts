@@ -2,6 +2,7 @@ import type { ConnectionContent } from "src/types/connectionContent"
 import type { Connection } from "../../connections/Connection"
 import { ConnectionEnum } from "../../types/enums"
 import { User } from "./User"
+import type { Event } from "src/types/event"
 
 export class Group {
   public id: number
@@ -65,4 +66,56 @@ export class Group {
   }
 
   public sendMessage() {}
+
+  public _addMember(member: Event.GroupMemberIncrease): boolean {
+    if (member.group_id != this.id) {
+      return false
+    }
+
+    this.members[member.user_id] = new User({
+      id: member.user_id,
+      groupId: this.id
+    }, this.conn)
+
+    return true
+  }
+  public _removeMember(member: Event.GroupMemberDecrease): boolean {
+    if (member.group_id != this.id) {
+      return false
+    }
+
+    delete this.members[member.user_id]
+    return true
+  }
+  public _processAdminChange(admin: Event.GroupAdminChange): boolean {
+    if (admin.group_id != this.id) {
+      return false
+    }
+
+    if (admin.sub_type == "set") {
+      if (Object.hasOwn(this.admins, admin.user_id)) {
+        return false
+      }
+
+      this.admins[admin.user_id] = this.members[admin.user_id]
+    }
+    else if (admin.sub_type == "unset") {
+      if (!Object.hasOwn(this.admins, admin.user_id)) {
+        return false
+      }
+
+      delete this.admins[admin.user_id]
+    }
+
+    return true
+  }
+  public _processMemberCardChange(card: Event.GroupCardChange): boolean {
+    if (card.group_id != this.id || !Object.hasOwn(this.members, card.user_id)) {
+      return false
+    }
+
+    const member = this.members[card.user_id]
+    member.remark = card.card_new
+    return true
+  }
 }

@@ -221,25 +221,39 @@ export class HttpConnection extends Connection {
   public _addGroup(group: Event.Reported): void {
     throw new Error("Method not implemented.");
   }
-  public _removeGroup(id: number): void {
-    throw new Error("Method not implemented.");
+  public _removeGroup(id: number, first?: any): void {
+    if (this.getGroup(id)) {
+      delete this.groups[this.clientAddresses[0]][id]
+    }
   }
-  public _addGroupMember(member: Event.GroupMemberIncrease): void {
-    throw new Error("Method not implemented.");
+  public _addGroupMember(member: Event.GroupMemberIncrease, first?: any): void {
+    if (this.getGroup(member.group_id)) {
+      this.groups[this.clientAddresses[0]][member.group_id]._addMember(member)
+    }
   }
-  public _removeGroupMember(id: number): void {
-    throw new Error("Method not implemented.");
+  public _removeGroupMember(member: Event.GroupMemberDecrease, first?: any): void {
+    if (this.getGroup(member.group_id)) {
+      this.groups[this.clientAddresses[0]][member.group_id]._removeMember(member)
+    }
   }
-  public _processGroupAdminChange(admin: Event.GroupAdminChange): void {
-    throw new Error("Method not implemented.");
+  public _processGroupAdminChange(admin: Event.GroupAdminChange, first?: any): void {
+    if (this.getGroup(admin.group_id)) {
+      this.groups[this.clientAddresses[0]][admin.group_id]._processAdminChange(admin)
+    }
   }
-  public _processGroupMemberCardChange(card: Event.GroupCardChange): void {
-    throw new Error("Method not implemented.");
+  public _processGroupMemberCardChange(card: Event.GroupCardChange, first?: any): void {
+    if (this.getGroup(card.group_id)) {
+      this.groups[this.clientAddresses[0]][card.group_id]._processMemberCardChange(card)
+    }
   }
-  public _addFriend(friend: Event.FriendAdd): void {
-    throw new Error("Method not implemented.");
+  public _addFriend(friend: Event.FriendAdd, first?: any): void {
+    if (!this.getFriend(friend.user_id)) {
+      this.friends[this.clientAddresses[0]][friend.user_id] = new User(friend, this)
+    }
   }
-  public _removeFriend(id: number): void {
-    throw new Error("Method not implemented.");
+  public _removeFriend(id: number, first?: any): void {
+    if (this.getGroup(id)) {
+      delete this.friends[this.clientAddresses[0]][id]
+    }
   }
 }

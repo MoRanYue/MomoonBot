@@ -32,7 +32,7 @@ export abstract class Connection {
   public abstract _addGroup(group: Event.Unknown): void
   public abstract _removeGroup(id: number): void
   public abstract _addGroupMember(member: Event.GroupMemberIncrease): void
-  public abstract _removeGroupMember(id: number): void
+  public abstract _removeGroupMember(member: Event.GroupMemberDecrease): void
   public abstract _processGroupAdminChange(admin: Event.GroupAdminChange): void
   public abstract _processGroupMemberCardChange(card: Event.GroupCardChange): void
   public abstract _addFriend(friend: Event.FriendAdd): void

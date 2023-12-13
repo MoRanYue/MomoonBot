@@ -2,15 +2,12 @@ import { HttpConnection } from "../connections/HttpConnection"
 import { ReverseWsConnection } from "../connections/ReverseWsConnection"
 import type { Connection } from "../connections/Connection"
 import type { HttpMiddleware, ReverseWsMiddleware, WsMiddleware } from "../types/config.d.ts"
-import { ConfigEnum, ConnectionEnum } from "../types/enums"
+import { ConfigEnum, EventEnum } from "../types/enums"
 import config from "../config"
 import { MessageEvent } from "../events/MessageEvent"
 import { PluginLoader } from "./PluginLoader"
-import { User } from "./sets/User"
-import { Group } from "./sets/Group"
-import type { ConnectionContent } from "src/types/connectionContent"
-import { Utils } from "../tools/Utils"
 import { NoticeEvent } from "../events/NoticeEvent"
+import type { Event } from "src/types/event"
 
 export class Launcher {
   protected connections: Connection[] = []
@@ -37,7 +34,35 @@ export class Launcher {
         (<HttpConnection>inst).addClient((<HttpMiddleware>conn.server).api)
       }
       inst.ev.on("message", ev => this.loader.ev.emit("message", new MessageEvent(ev, inst)))
-      inst.ev.on("notice", ev => this.loader.ev.emit("notice", NoticeEvent.fromObject(ev, inst)))
+      inst.ev.on("notice", ev => {
+        switch (ev.notice_type) {
+          case EventEnum.NoticeType.groupIncrease:
+            inst._addGroupMember(<Event.GroupMemberIncrease>ev)
+            break;
+          
+          case EventEnum.NoticeType.groupDecrease:
+            const event = <Event.GroupMemberDecrease>ev
+            if (event.sub_type == "kick_me") {
+              inst._removeGroup(event.group_id)
+              break;
+            }
+            inst._removeGroupMember(event)
+            break;
+
+          case EventEnum.NoticeType.groupAdmin:
+            inst._processGroupAdminChange(<Event.GroupAdminChange>ev)
+            break;
+
+          case EventEnum.NoticeType.groupCard:
+            inst._processGroupMemberCardChange(<Event.GroupCardChange>ev)
+            break;
+
+          case EventEnum.NoticeType.friendAdd:
+            inst._addFriend(<Event.FriendAdd>ev)
+        }
+
+        this.loader.ev.emit("notice", NoticeEvent.fromObject(ev, inst))
+      })
       
       this.connections.push(inst)
     })

@@ -226,28 +226,42 @@ export class ReverseWsConnection extends Connection {
   }
 
   // 以下函数仅被内置类调用
-  public _addGroup(group: Event.Reported): void {
+  public _addGroup(group: Event.Reported, clientIndex: number = 0): void {
     throw new Error("Method not implemented.");
   }
-  public _removeGroup(id: number): void {
-    throw new Error("Method not implemented.");
+  public _removeGroup(id: number, clientIndex: number = 0): void {
+    if (this.getGroup(id, clientIndex)) {
+      delete this.groups[this.clientAddresses[clientIndex]][id]
+    }
   }
-  public _addGroupMember(member: Event.GroupMemberIncrease): void {
-    throw new Error("Method not implemented.");
+  public _addGroupMember(member: Event.GroupMemberIncrease, clientIndex: number = 0): void {
+    if (this.getGroup(member.group_id, clientIndex)) {
+      this.groups[this.clientAddresses[clientIndex]][member.group_id]._addMember(member)
+    }
   }
-  public _removeGroupMember(id: number): void {
-    throw new Error("Method not implemented.");
+  public _removeGroupMember(member: Event.GroupMemberDecrease, clientIndex: number = 0): void {
+    if (this.getGroup(member.group_id, clientIndex)) {
+      this.groups[this.clientAddresses[clientIndex]][member.group_id]._removeMember(member)
+    }
   }
-  public _processGroupAdminChange(admin: Event.GroupAdminChange): void {
-    throw new Error("Method not implemented.");
+  public _processGroupAdminChange(admin: Event.GroupAdminChange, clientIndex: number = 0): void {
+    if (this.getGroup(admin.group_id, clientIndex)) {
+      this.groups[this.clientAddresses[clientIndex]][admin.group_id]._processAdminChange(admin)
+    }
   }
-  public _processGroupMemberCardChange(card: Event.GroupCardChange): void {
-    throw new Error("Method not implemented.");
+  public _processGroupMemberCardChange(card: Event.GroupCardChange, clientIndex: number = 0): void {
+    if (this.getGroup(card.group_id, clientIndex)) {
+      this.groups[this.clientAddresses[clientIndex]][card.group_id]._processMemberCardChange(card)
+    }
   }
-  public _addFriend(friend: Event.FriendAdd): void {
-    throw new Error("Method not implemented.");
+  public _addFriend(friend: Event.FriendAdd, clientIndex: number = 0): void {
+    if (!this.getFriend(friend.user_id, clientIndex)) {
+      this.friends[this.clientAddresses[clientIndex]][friend.user_id] = new User(friend, this)
+    }
   }
-  public _removeFriend(id: number): void {
-    throw new Error("Method not implemented.");
+  public _removeFriend(id: number, clientIndex: number = 0): void {
+    if (this.getGroup(id, clientIndex)) {
+      delete this.friends[this.clientAddresses[clientIndex]][id]
+    }
   }
 }
