@@ -20,6 +20,29 @@ export class ReverseWsConnection extends Connection {
   protected messageCbs: Record<string, DataType.ResponseFunction> = {}
 
   readonly ev: CustomEventEmitter.ReverseWsEventEmitter = new EventEmitter()
+  
+  constructor() {
+    super();
+  
+    this.ev.on("response", data => {
+      console.log("===================================")
+      console.log("Reverse WebSocket Received Response")
+      
+      let messageInfo: ConnectionContent.Connection.WsRequestDetector
+      try {
+        messageInfo = <ConnectionContent.Connection.WsRequestDetector>Utils.jsonToData(data.echo)
+        console.log(messageInfo)
+      } catch (err) {
+        console.warn("收到的返回非本服务器发送的请求所应返回的")
+        return
+      }
+
+      if (Object.hasOwn(this.messageCbs, messageInfo.id)) {
+        this.messageCbs[messageInfo.id](data)
+        delete this.messageCbs[messageInfo.id]
+      }
+    })
+  }
 
   public createServer(port: number): this;
   public createServer(port: number, host?: string | undefined): this;
@@ -54,25 +77,6 @@ export class ReverseWsConnection extends Connection {
           return
         }
       }
-      
-      this.ev.on("response", data => {
-        console.log("===================================")
-        console.log("Reverse WebSocket Received Response")
-
-        let messageInfo: ConnectionContent.Connection.WsRequestDetector
-        try {
-          messageInfo = <ConnectionContent.Connection.WsRequestDetector>Utils.jsonToData(data.echo)
-          console.log(messageInfo)
-        } catch (err) {
-          console.warn("收到的返回非本服务器发送的请求所应返回的")
-          return
-        }
-
-        if (Object.hasOwn(this.messageCbs, messageInfo.id)) {
-          this.messageCbs[messageInfo.id](data)
-          delete this.messageCbs[messageInfo.id]
-        }
-      })
 
       socket.on("message", buf => this.receivePacket(buf, dataStr => {
         const data = <object>Utils.jsonToData(dataStr)
