@@ -67,13 +67,28 @@ export class Group {
 
   public sendMessage() {}
 
-  public _addMember(member: Event.GroupMemberIncrease): boolean {
-    if (member.group_id != this.id) {
+  public _addMember(member: number): boolean
+  public _addMember(member: Event.GroupMemberIncrease): boolean
+  public _addMember(member: Event.GroupMemberIncrease | number): boolean {
+    let id: number
+    if (typeof member == "number") {
+      id = member
+    }
+    else {
+      id = member.user_id
+      if (member.group_id != this.id) {
+        return false
+      }
+    }
+
+    // 兼容OpenShamrock的Bug
+    // https://github.com/whitechi73/OpenShamrock/issues/150
+    if (!id) {
       return false
     }
 
-    this.members[member.user_id] = new User({
-      id: member.user_id,
+    this.members[id] = new User({
+      id,
       groupId: this.id
     }, this.conn)
 

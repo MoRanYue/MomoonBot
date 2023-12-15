@@ -157,7 +157,7 @@ export abstract class Plugin {
 
     return listener
   }
-  public onNotice(notices: DataType.ListenedNotice | DataType.ListenedNotice[], cb: DataType.ListenedNoticeFunc, priority: number = 0, 
+  public onNotice(notices: DataType.ListenedNotice | DataType.ListenedNotice[] | "", cb: DataType.ListenedNoticeFunc, priority: number = 0, 
   checkers: DataType.NoticeChecker | DataType.NoticeChecker[] = [], block: boolean = false): NoticeListener {
     const listener = new NoticeListener(notices, cb, priority, checkers, block)
 

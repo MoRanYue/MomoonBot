@@ -27,6 +27,63 @@ export class MessageUtils {
 
       case MessageSegmentEnum.SegmentType.face:
         return MsgSegment.Face.fromObject(<MessageSegment.FaceSegment>seg)
+
+      case MessageSegmentEnum.SegmentType.marketFace:
+        return MsgSegment.MarketFace.fromObject(<MessageSegment.MarketFaceSegment>seg)
+
+      case MessageSegmentEnum.SegmentType.file:
+        return MsgSegment.File.fromObject(<MessageSegment.FileSegment>seg)
+
+      case MessageSegmentEnum.SegmentType.video:
+        return MsgSegment.Video.fromObject(<MessageSegment.VideoSegment>seg)
+
+      case MessageSegmentEnum.SegmentType.record:
+        return MsgSegment.Record.fromObject(<MessageSegment.RecordSegment>seg)
+
+      case MessageSegmentEnum.SegmentType.share:
+        return MsgSegment.Share.fromObject(<MessageSegment.ShareSegment>seg)
+
+      case MessageSegmentEnum.SegmentType.json:
+        return MsgSegment.Json.fromObject(<MessageSegment.JsonSegment>seg)
+
+      case MessageSegmentEnum.SegmentType.basketball:
+        return MsgSegment.Basketball.fromObject(<MessageSegment.BasketballSegment>seg)
+
+      case MessageSegmentEnum.SegmentType.newDice:
+        return MsgSegment.NewDice.fromObject(<MessageSegment.NewDiceSegment>seg)
+
+      case MessageSegmentEnum.SegmentType.newRps:
+        return MsgSegment.NewRps.fromObject(<MessageSegment.NewRpsSegment>seg)
+
+      case MessageSegmentEnum.SegmentType.deprecatedDice:
+        return MsgSegment.DeprecatedDice.fromObject(<MessageSegment.DeprecatedDiceSegment>seg)
+
+      case MessageSegmentEnum.SegmentType.deprecatedRps:
+        return MsgSegment.DeprecatedRps.fromObject(<MessageSegment.DeprecatedRpsSegment>seg)
+
+      case MessageSegmentEnum.SegmentType.forward:
+        return MsgSegment.Forward.fromObject(<MessageSegment.ForwardSegment>seg)
+
+      case MessageSegmentEnum.SegmentType.forwardNode:
+        return MsgSegment.ForwardNode.fromObject(<MessageSegment.ForwardNodeSegment>seg)
+
+      case MessageSegmentEnum.SegmentType.gift:
+        return MsgSegment.Gift.fromObject(<MessageSegment.GiftSegment>seg)
+
+      case MessageSegmentEnum.SegmentType.location:
+        return MsgSegment.Location.fromObject(<MessageSegment.LocationSegment>seg)
+
+      case MessageSegmentEnum.SegmentType.music:
+        return MsgSegment.Music.fromObject(<MessageSegment.MusicSegment | MessageSegment.CustomMusicSegment>seg)
+
+      case MessageSegmentEnum.SegmentType.poke:
+        return MsgSegment.Poke.fromObject(<MessageSegment.PokeSegment>seg)
+
+      case MessageSegmentEnum.SegmentType.touch:
+        return MsgSegment.Touch.fromObject(<MessageSegment.TouchSegment>seg)
+
+      case MessageSegmentEnum.SegmentType.weather:
+        return MsgSegment.Weather.fromObject(<MessageSegment.WeatherSegment>seg)
     
       default:
         return MsgSegment.Unknown.fromObject(seg)

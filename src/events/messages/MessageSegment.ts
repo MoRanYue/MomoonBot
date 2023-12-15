@@ -1,6 +1,7 @@
 import { MessageSegmentEnum } from "../../types/enums"
 import { MessageSegment } from "../../types/message";
 import { WrongMessageTypeError } from "../../exceptions/exceptions"
+import { Utils } from "../../tools/Utils";
 
 export abstract class Segment {
   protected static verify(seg: MessageSegment.Segment, type: MessageSegmentEnum.SegmentType) {
@@ -11,7 +12,572 @@ export abstract class Segment {
 
   public abstract toPlainText(): string
   public abstract toObject(): MessageSegment.Segment
-  // public abstract fromObject(seg: MessageSegment.Segment): void
+}
+
+class File extends Segment {
+  public id: string
+  public name: string
+  public url: string
+  public expire: number
+  public sub: string
+  public biz: number
+  public size: number
+
+  constructor(id: string, name: string, url: string, expire: number, sub: string, biz: number, size: number) {
+    super();
+
+    this.id = id
+    this.name = name
+    this.url = url
+    this.expire = expire
+    this.sub = sub
+    this.size = size
+    this.biz = biz
+  }
+
+  public toPlainText(): string {
+    return ""
+  }
+  public toObject(): MessageSegment.FileSegment {
+    return {
+      type: MessageSegmentEnum.SegmentType.file,
+      data: {
+        sub: this.sub,
+        biz: this.biz,
+        expire: this.expire,
+        id: this.id,
+        name: this.name,
+        size: this.size,
+        url: this.url
+      }
+    }
+  }
+  public static fromObject(seg: MessageSegment.FileSegment): File {
+    this.verify(seg, MessageSegmentEnum.SegmentType.file)
+    return new File(seg.data.id, seg.data.name, seg.data.url, seg.data.expire, seg.data.sub, seg.data.biz, seg.data.size)
+  }
+}
+
+class Json extends Segment {
+  public data: any
+
+  constructor(data: string | any) {
+    super();
+
+    if (typeof data == "string") {
+      this.data = Utils.jsonToData(data)
+      return
+    }
+    this.data = data
+  }
+
+  public toPlainText(): string {
+    return ""
+  }
+  public toObject(): MessageSegment.JsonSegment {
+    return {
+      type: MessageSegmentEnum.SegmentType.json,
+      data: {
+        data: Utils.dataToJson(this.data)
+      }
+    }
+  }
+  public static fromObject(seg: MessageSegment.JsonSegment): Json {
+    this.verify(seg, MessageSegmentEnum.SegmentType.json)
+    return new Json(seg.data.data)
+  }
+}
+
+class ForwardNode extends Segment {
+  public id: number
+
+  constructor(id: number) {
+    super();
+
+    this.id = id
+  }
+
+  public toPlainText(): string {
+    return ""
+  }
+  public toObject(): MessageSegment.ForwardNodeSegment {
+    return {
+      type: MessageSegmentEnum.SegmentType.forwardNode,
+      data: {
+        id: this.id
+      }
+    }
+  }
+  public static fromObject(seg: MessageSegment.ForwardNodeSegment): ForwardNode {
+    this.verify(seg, MessageSegmentEnum.SegmentType.forwardNode)
+    return new ForwardNode(seg.data.id)
+  }
+}
+
+class Forward extends Segment {
+  public id: string
+
+  constructor(id: string) {
+    super();
+
+    this.id = id
+  }
+
+  public toPlainText(): string {
+    return ""
+  }
+  public toObject(): MessageSegment.ForwardSegment {
+    return {
+      type: MessageSegmentEnum.SegmentType.forward,
+      data: {
+        id: this.id
+      }
+    }
+  }
+  public static fromObject(seg: MessageSegment.ForwardSegment): Forward {
+    this.verify(seg, MessageSegmentEnum.SegmentType.forward)
+    return new Forward(seg.data.id)
+  }
+}
+
+class Gift extends Segment {
+  public target: number
+  public id: number
+
+  constructor(target: number, id: number) {
+    super();
+
+    this.target = target
+    this.id = id
+  }
+
+  public toPlainText(): string {
+    return ""
+  }
+  public toObject(): MessageSegment.GiftSegment {
+    return {
+      type: MessageSegmentEnum.SegmentType.gift,
+      data: {
+        qq: this.target,
+        id: this.id
+      }
+    }
+  }
+  public static fromObject(seg: MessageSegment.GiftSegment): Gift {
+    this.verify(seg, MessageSegmentEnum.SegmentType.gift)
+    return new Gift(seg.data.qq, seg.data.id)
+  }
+}
+
+class Share extends Segment {
+  public url: string
+  public title: string
+  public content?: string
+  public image?: string
+  public file?: string
+
+  constructor(url: string, title: string, content?: string, image?: string, file?: string) {
+    super();
+
+    this.url = url
+    this.title = title
+    this.content = content
+    this.image = image
+    this.file = file
+  }
+
+  public toPlainText(): string {
+    return ""
+  }
+  public toObject(): MessageSegment.ShareSegment {
+    return {
+      type: MessageSegmentEnum.SegmentType.share,
+      data: {
+        url: this.url,
+        title: this.title,
+        content: this.content,
+        image: this.image,
+        file: this.file
+      }
+    }
+  }
+  public static fromObject(seg: MessageSegment.ShareSegment): Share {
+    this.verify(seg, MessageSegmentEnum.SegmentType.share)
+    return new Share(seg.data.url, seg.data.title, seg.data.content, seg.data.image, seg.data.file)
+  }
+}
+
+class Location extends Segment {
+  public lat: number
+  public lon: number
+  public title?: string
+  public content?: string
+
+  constructor(lat: number, lon: number, title?: string, content?: string) {
+    super();
+
+    this.lat = lat
+    this.lon = lon
+    this.title = title
+    this.content = content
+  }
+
+  public toPlainText(): string {
+    return ""
+  }
+  public toObject(): MessageSegment.LocationSegment {
+    return {
+      type: MessageSegmentEnum.SegmentType.location,
+      data: {
+        lat: this.lat,
+        lon: this.lon,
+        title: this.title,
+        content: this.content
+      }
+    }
+  }
+  public static fromObject(seg: MessageSegment.LocationSegment): Location {
+    this.verify(seg, MessageSegmentEnum.SegmentType.location)
+    return new Location(seg.data.lat, seg.data.lon, seg.data.title, seg.data.content)
+  }
+}
+
+class Weather extends Segment {
+  public city?: string
+  public code?: string
+
+  constructor(city?: string, code?: string) {
+    super();
+
+    this.city = city
+    this.code = code
+  }
+
+  public toPlainText(): string {
+    return ""
+  }
+  public toObject(): MessageSegment.WeatherSegment {
+    return {
+      type: MessageSegmentEnum.SegmentType.weather,
+      data: {
+        city: this.city!,
+        code: this.code!
+      }
+    }
+  }
+  public static fromObject(seg: MessageSegment.WeatherSegment): Weather {
+    this.verify(seg, MessageSegmentEnum.SegmentType.weather)
+    return new Weather(seg.data.city, seg.data.code)
+  }
+}
+
+class Music extends Segment {
+  public type: Exclude<MessageSegmentEnum.MusicType, "custom">
+  public id: number
+
+  constructor(type: Exclude<MessageSegmentEnum.MusicType, "custom">, id: number) {
+    super();
+
+    this.type = type
+    this.id = id
+  }
+
+  public toPlainText(): string {
+    return ""
+  }
+  public toObject(): MessageSegment.MusicSegment {
+    return {
+      type: MessageSegmentEnum.SegmentType.music,
+      data: {
+        type: <Exclude<MessageSegmentEnum.MusicType, "custom">>this.type,
+        id: this.id
+      }
+    }
+  }
+  public static fromObject(seg: MessageSegment.MusicSegment | MessageSegment.CustomMusicSegment): Music | CustomMusic {
+    this.verify(seg, MessageSegmentEnum.SegmentType.music)
+    if (seg.data.type == MessageSegmentEnum.MusicType.custom) {
+      return new CustomMusic(seg.data.url, seg.data.audio, seg.data.title, seg.data.singer, seg.data.image)
+    }
+    return new Music(seg.data.type, seg.data.id)
+  }
+}
+
+class CustomMusic extends Segment {
+  public type: MessageSegmentEnum.MusicType.custom = MessageSegmentEnum.MusicType.custom
+  public url: string
+  public audio: string
+  public title: string
+  public singer: string
+  public image: string
+
+  constructor(url: string, audio: string, title: string, singer: string, image: string) {
+    super();
+
+    this.url = url
+    this.audio = audio
+    this.title = title
+    this.singer = singer
+    this.image = image
+  }
+
+  public toPlainText(): string {
+    return ""
+  }
+  public toObject(): MessageSegment.CustomMusicSegment {
+    return {
+      type: MessageSegmentEnum.SegmentType.music,
+      data: {
+        type: this.type,
+        url: this.url,
+        audio: this.audio,
+        title: this.title,
+        singer: this.singer,
+        image: this.image
+      }
+    }
+  }
+  public static fromObject(seg: MessageSegment.CustomMusicSegment | MessageSegment.MusicSegment): CustomMusic | Music {
+    this.verify(seg, MessageSegmentEnum.SegmentType.music)
+    if (seg.data.type == MessageSegmentEnum.MusicType.custom) {
+      return new CustomMusic(seg.data.url, seg.data.audio, seg.data.title, seg.data.singer, seg.data.image)
+    }
+    return Music.fromObject(<MessageSegment.MusicSegment>seg)
+  }
+}
+
+class Touch extends Segment {
+  public id: number
+
+  constructor(id: number) {
+    super();
+
+    this.id = id
+  }
+
+  public toPlainText(): string {
+    return ""
+  }
+  public toObject(): MessageSegment.TouchSegment {
+    return {
+      type: MessageSegmentEnum.SegmentType.touch,
+      data: {
+        id: this.id
+      }
+    }
+  }
+  public static fromObject(seg: MessageSegment.TouchSegment): Touch {
+    this.verify(seg, MessageSegmentEnum.SegmentType.touch)
+    return new Touch(seg.data.id)
+  }
+}
+
+class Poke extends Segment {
+  public type: number
+  public id: number
+  public strength: 1 | 2 | 3 | 4 | 5
+
+  constructor(type: number, id: number, strength: 1 | 2 | 3 | 4 | 5) {
+    super();
+
+    this.type = type
+    this.id = id
+    this.strength = strength
+  }
+
+  public toPlainText(): string {
+    return ""
+  }
+  public toObject(): MessageSegment.PokeSegment {
+    return {
+      type: MessageSegmentEnum.SegmentType.poke,
+      data: {
+        type: this.type,
+        id: this.id,
+        strength: this.strength
+      }
+    }
+  }
+  public static fromObject(seg: MessageSegment.PokeSegment): Poke {
+    this.verify(seg, MessageSegmentEnum.SegmentType.poke)
+    return new Poke(seg.data.type, seg.data.id, seg.data.strength)
+  }
+}
+
+class DeprecatedRps extends Segment {
+  constructor() {
+    super();
+  }
+
+  public toPlainText(): string {
+    return ""
+  }
+  public toObject(): MessageSegment.DeprecatedRpsSegment {
+    return {
+      type: MessageSegmentEnum.SegmentType.deprecatedRps,
+      data: {}
+    }
+  }
+  public static fromObject(seg: MessageSegment.DeprecatedRpsSegment): DeprecatedRps {
+    this.verify(seg, MessageSegmentEnum.SegmentType.deprecatedRps)
+    return new DeprecatedRps()
+  }
+}
+
+class DeprecatedDice extends Segment {
+  constructor() {
+    super();
+  }
+
+  public toPlainText(): string {
+    return ""
+  }
+  public toObject(): MessageSegment.DeprecatedDiceSegment {
+    return {
+      type: MessageSegmentEnum.SegmentType.deprecatedDice,
+      data: {}
+    }
+  }
+  public static fromObject(seg: MessageSegment.DeprecatedDiceSegment): DeprecatedDice {
+    this.verify(seg, MessageSegmentEnum.SegmentType.deprecatedDice)
+    return new DeprecatedDice()
+  }
+}
+
+class NewDice extends Segment {
+  public id: 6 | 5 | 4 | 3 | 2 | 1
+
+  constructor(id: 6 | 5 | 4 | 3 | 2 | 1) {
+    super();
+
+    this.id = id
+  }
+
+  public toPlainText(): string {
+    return ""
+  }
+  public toObject(): MessageSegment.NewDiceSegment {
+    return {
+      type: MessageSegmentEnum.SegmentType.newDice,
+      data: {
+        id: this.id
+      }
+    }
+  }
+  public static fromObject(seg: MessageSegment.NewDiceSegment): NewDice {
+    this.verify(seg, MessageSegmentEnum.SegmentType.newDice)
+    return new NewDice(seg.data.id)
+  }
+}
+
+class NewRps extends Segment {
+  public id: MessageSegmentEnum.RpsId
+
+  constructor(id: MessageSegmentEnum.RpsId) {
+    super();
+
+    this.id = id
+  }
+
+  public toPlainText(): string {
+    return ""
+  }
+  public toObject(): MessageSegment.NewRpsSegment {
+    return {
+      type: MessageSegmentEnum.SegmentType.newRps,
+      data: {
+        id: this.id
+      }
+    }
+  }
+  public static fromObject(seg: MessageSegment.NewRpsSegment): NewRps {
+    this.verify(seg, MessageSegmentEnum.SegmentType.newRps)
+    return new NewRps(seg.data.id)
+  }
+}
+
+class Basketball extends Segment {
+  public id: MessageSegmentEnum.BasketballId
+
+  constructor(id: MessageSegmentEnum.BasketballId) {
+    super();
+
+    this.id = id
+  }
+
+  public toPlainText(): string {
+    return ""
+  }
+  public toObject(): MessageSegment.BasketballSegment {
+    return {
+      type: MessageSegmentEnum.SegmentType.basketball,
+      data: {
+        id: this.id
+      }
+    }
+  }
+  public static fromObject(seg: MessageSegment.BasketballSegment): Basketball {
+    this.verify(seg, MessageSegmentEnum.SegmentType.basketball)
+    return new Basketball(seg.data.id)
+  }
+}
+
+class Record extends Segment {
+  public file: string
+  public url?: string
+  public magic?: boolean
+
+  constructor(file: string, url?: string, magic?: boolean) {
+    super();
+
+    this.file = file
+    this.url = url
+    this.magic = magic
+  }
+
+  public toPlainText(): string {
+    return ""
+  }
+  public toObject(): MessageSegment.RecordSegment {
+    return {
+      type: MessageSegmentEnum.SegmentType.record,
+      data: {
+        file: this.file,
+        url: this.url,
+        magic: this.magic
+      }
+    }
+  }
+  public static fromObject(seg: MessageSegment.RecordSegment): Record {
+    this.verify(seg, MessageSegmentEnum.SegmentType.record)
+    return new Record(seg.data.file, seg.data.url, seg.data.magic)
+  }
+}
+
+class Video extends Segment {
+  public file?: string
+
+  constructor(file?: string) {
+    super();
+
+    this.file = file
+  }
+
+  public toPlainText(): string {
+    return ""
+  }
+  public toObject(): MessageSegment.VideoSegment {
+    return {
+      type: MessageSegmentEnum.SegmentType.video,
+      data: {
+        file: this.file
+      }
+    }
+  }
+  public static fromObject(seg: MessageSegment.VideoSegment): Video {
+    this.verify(seg, MessageSegmentEnum.SegmentType.video)
+    return new Video(seg.data.file)
+  }
 }
 
 class Text extends Segment {
@@ -75,12 +641,12 @@ class Image extends Segment {
 }
 
 class At extends Segment {
-  public qq: number
+  public qq: string
 
-  constructor(id: number) {
+  constructor(id: number | string) {
     super();
 
-    this.qq = id
+    this.qq = String(id)
   }
 
   public toPlainText(): string {
@@ -152,6 +718,32 @@ class Face extends Segment {
   }
 }
 
+class MarketFace extends Segment {
+  public id: string
+
+  constructor(id: string) {
+    super();
+
+    this.id = id
+  }
+
+  public toPlainText(): string {
+    return ""
+  }
+  public toObject(): MessageSegment.MarketFaceSegment {
+    return {
+      type: MessageSegmentEnum.SegmentType.marketFace,
+      data: {
+        id: this.id
+      }
+    }
+  }
+  public static fromObject(seg: MessageSegment.MarketFaceSegment): MarketFace {
+    this.verify(seg, MessageSegmentEnum.SegmentType.marketFace)
+    return new MarketFace(seg.data.id)
+  }
+}
+
 class Unknown extends Segment {
   public data: object
 
@@ -178,5 +770,8 @@ class Unknown extends Segment {
 }
 
 export default {
-  Segment, Text, Image, At, Reply, Face, Unknown
+  Segment, Text, Image, At, Reply, Face, MarketFace, Unknown, 
+  Json, Video, Record, Weather, Music, CustomMusic, Poke, Touch,
+  Share, Basketball, DeprecatedDice, DeprecatedRps, NewDice, NewRps, 
+  Forward, ForwardNode, Location, Gift, File
 }

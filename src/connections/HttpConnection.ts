@@ -226,9 +226,23 @@ export class HttpConnection extends Connection {
       delete this.groups[this.clientAddresses[0]][id]
     }
   }
-  public _addGroupMember(member: Event.GroupMemberIncrease, first?: any): void {
-    if (this.getGroup(member.group_id)) {
-      this.groups[this.clientAddresses[0]][member.group_id]._addMember(member)
+  public _addGroupMember(member: Event.GroupMemberIncrease, first?: any): void
+  public _addGroupMember(member: DataType.GroupMemberParams, first?: any): void
+  public _addGroupMember(member: Event.GroupMemberIncrease | DataType.GroupMemberParams, first?: any): void {
+    let userId: number
+    let groupId: number
+    if (Object.hasOwn(member, "groupId")) {
+      member = <DataType.GroupMemberParams>member
+      userId = member.id
+      groupId = member.groupId
+    }
+    else {
+      member = <Event.GroupMemberIncrease>member
+      userId = member.user_id
+      groupId = member.group_id
+    }
+    if (this.getGroup(groupId)) {
+      this.groups[this.clientAddresses[0]][groupId]._addMember(userId)
     }
   }
   public _removeGroupMember(member: Event.GroupMemberDecrease, first?: any): void {

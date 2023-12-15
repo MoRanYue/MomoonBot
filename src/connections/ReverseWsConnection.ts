@@ -234,9 +234,23 @@ export class ReverseWsConnection extends Connection {
       delete this.groups[this.clientAddresses[clientIndex]][id]
     }
   }
-  public _addGroupMember(member: Event.GroupMemberIncrease, clientIndex: number = 0): void {
-    if (this.getGroup(member.group_id, clientIndex)) {
-      this.groups[this.clientAddresses[clientIndex]][member.group_id]._addMember(member)
+  public _addGroupMember(member: Event.GroupMemberIncrease, clientIndex?: number): void
+  public _addGroupMember(member: DataType.GroupMemberParams, clientIndex?: number): void
+  public _addGroupMember(member: Event.GroupMemberIncrease | DataType.GroupMemberParams, clientIndex: number = 0): void {
+    let userId: number
+    let groupId: number
+    if (Object.hasOwn(member, "groupId")) {
+      member = <DataType.GroupMemberParams>member
+      userId = member.id
+      groupId = member.groupId
+    }
+    else {
+      member = <Event.GroupMemberIncrease>member
+      userId = member.user_id
+      groupId = member.group_id
+    }
+    if (this.getGroup(groupId)) {
+      this.groups[this.clientAddresses[clientIndex]][groupId]._addMember(userId)
     }
   }
   public _removeGroupMember(member: Event.GroupMemberDecrease, clientIndex: number = 0): void {

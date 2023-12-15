@@ -14,7 +14,7 @@ export namespace MessageSegment {
   interface AtSegment implements Segment {
     type: MessageSegmentEnum.SegmentType.at
     data: {
-      qq: number
+      qq: string
     }
   }
   interface FaceSegment implements Segment {
@@ -51,8 +51,8 @@ export namespace MessageSegment {
   interface RecordSegment implements Segment {
     type: MessageSegmentEnum.SegmentType.record
     data: {
-      file?: string
-      url: string
+      file: string
+      url?: string
       magic?: boolean
     }
   }
@@ -79,14 +79,14 @@ export namespace MessageSegment {
   interface MusicSegment implements Segment {
     type: MessageSegmentEnum.SegmentType.music
     data: {
-      type: "qq" | "163"
+      type: Exclude<MessageSegmentEnum.MusicType, "custom">
       id: number
     }
   }
   interface CustomMusicSegment extends MusicSegment {
     type: MessageSegmentEnum.SegmentType.music
     data: {
-      type: "custom"
+      type: MessageSegmentEnum.MusicType.custom
       url: string
       audio: string
       title: string
@@ -114,7 +114,7 @@ export namespace MessageSegment {
     type: MessageSegmentEnum.SegmentType.share
     data: {
       url: string
-      title?: string
+      title: string
       content?: string
       image?: string
       file?: string
@@ -136,13 +136,13 @@ export namespace MessageSegment {
   interface BasketballSegment implements Segment {
     type: MessageSegmentEnum.SegmentType.basketball
     data: {
-      id: 5 | 4 | 3 | 2 | 1
+      id: MessageSegmentEnum.BasketballId
     }
   }
   interface NewRpsSegment implements Segment {
     type: MessageSegmentEnum.SegmentType.newRps
     data: {
-      id: 3 | 2 | 1
+      id: MessageSegmentEnum.RpsId
     }
   }
   interface NewDiceSegment implements Segment {

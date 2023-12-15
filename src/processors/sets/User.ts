@@ -4,11 +4,9 @@ import type { Event } from "src/types/event"
 import { ConnectionEnum, EventEnum, ListenerEnum } from "../../types/enums"
 import { Utils } from "../../tools/Utils"
 import { ListenerUtils } from "../../tools/ListenerUtils"
+import type { DataType } from "src/types/dataType"
 
-interface UserInfo {
-  id: number
-  groupId?: number
-}
+type UserInfo = Omit<DataType.GroupMemberParams, "group">
 
 export class User {
   public id: number

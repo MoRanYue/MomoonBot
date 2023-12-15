@@ -101,6 +101,23 @@ export namespace MessageSegmentEnum {
     xml = "",
     textToSpeech = ""
   }
+  export enum BasketballId {
+    missed = 5,
+    closeMissed = 4,
+    stuck = 3,
+    closeHit = 2,
+    hit = 1
+  }
+  export enum RpsId {
+    rock = 3,
+    scissor = 2,
+    paper = 1
+  }
+  export enum MusicType {
+    qq = "qq",
+    music163 = "163",
+    custom = "custom"
+  }
 }
 
 export namespace ConnectionEnum {

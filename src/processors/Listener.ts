@@ -294,12 +294,15 @@ class NoticeListener extends Listener {
   protected patterns: DataType.ListenedNotice[]
   protected checkers: DataType.NoticeChecker[]
 
-  constructor(notices: DataType.ListenedNotice | DataType.ListenedNotice[], cb: DataType.ListenedNoticeFunc, priority: number = 0, 
+  constructor(notices: DataType.ListenedNotice | DataType.ListenedNotice[] | "", cb: DataType.ListenedNoticeFunc, priority: number = 0, 
   checkers: DataType.NoticeChecker | DataType.NoticeChecker[] = [], block: boolean = false) {
     super();
 
     if (Array.isArray(notices)) {
       this.patterns = notices
+    }
+    else if (notices === "") {
+      this.patterns = []
     }
     else {
       this.patterns = [notices]
@@ -316,7 +319,7 @@ class NoticeListener extends Listener {
   }
 
   public trigger(ev: NoticeEvent): void | Promise<void> {
-    if (!(this.patterns.includes(ev.noticeType) || (ev.notifyType && this.patterns.includes(ev.notifyType)))) {
+    if (!(this.patterns.includes(ev.noticeType) || (ev.notifyType && this.patterns.includes(ev.notifyType))) && this.patterns.length != 0) {
       return
     }
     for (let i = 0; i < this.checkers.length; i++) {

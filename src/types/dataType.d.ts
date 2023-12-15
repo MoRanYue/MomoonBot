@@ -10,6 +10,11 @@ export namespace DataType {
 
   type ResponseFunction = (data: ConnectionContent.Connection.Response<number | object | object[]>) => void | Promise<void>
 
+  interface GroupMemberParams {
+    groupId: number
+    id: number
+  }
+
   interface ListenerList {
     message: Map<ListenedMessage, MessageListener[]>
     command: Map<ListenedMessage, CommandListener[]>
