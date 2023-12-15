@@ -32,11 +32,6 @@ export class HttpConnection extends Connection {
     this.server = http.createServer()
     this.token = token
 
-    this.ev.on("response", data => {
-      console.log("======================")
-      console.log("Http Received Response")
-    })
-
     this.ev.once("connect", () => {
       console.log("正在尝试获取群聊与好友信息")
       if (this.clientAddresses.length == 0) {
