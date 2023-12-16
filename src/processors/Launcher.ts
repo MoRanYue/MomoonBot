@@ -23,7 +23,10 @@ export class Launcher {
     })
 
     this.loader = new PluginLoader()
-    this.loader.loadFromDefaultFolder()
+    // 默认插件文件夹
+    this.loader.loadFromFolder("./src/plugins/")
+    config.plugins.files?.forEach(file => this.loader.loadFromFile(file))
+    config.plugins.folders.forEach(folder => this.loader.loadFromFolder(folder))
     
     config.connections.forEach(conn => {
       console.log(`尝试启动“${conn.type}”（协议：“${conn.protocol}”）服务器`)

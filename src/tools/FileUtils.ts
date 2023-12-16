@@ -29,4 +29,11 @@ export class FileUtils {
       mode
     })
   }
+
+  public static getFileName(path: string): string {
+    return path.substring(0, path.lastIndexOf("."))
+  }
+  public static toSlash(path: string): string {
+    return path.replaceAll("\\", "/")
+  }
 }

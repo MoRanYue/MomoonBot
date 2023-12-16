@@ -27,12 +27,14 @@
     },
     "command": {
       "separator": [" "],
-      "prompt": ["!", "！", ".", "。"],
+      "prompt": ["!", "！", ".", "。", "#"],
       "ignoreBlanks": true
     }
   },
-  "bot": {
-    "friendListRefreshInterval": 600,
-    "groupListRefreshInterval": 600
-  }
+  "plugins": {
+    "files": [],
+    "folders": [],
+    "data": {}
+  },
+  "bot": {}
 }

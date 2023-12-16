@@ -39,13 +39,17 @@ interface ListenerConfig {
   command: CommandListenerConfig
 }
 
-interface BotConfig {
-  friendListRefreshInterval: number
-  groupListRefreshInterval: number
+interface BotConfig {}
+
+interface PluginConfig {
+  files?: string[]
+  folders: string[]
+  data: Record<string, object | string[]>
 }
 
 export interface Config {
   connections: ConnectionMiddlewareConfig[]
   listener: ListenerConfig
+  plugins: PluginConfig
   bot: BotConfig
 }
