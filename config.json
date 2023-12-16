@@ -36,5 +36,10 @@
     "folders": [],
     "data": {}
   },
+  "log": {
+    "level": "info",
+    "debug": false,
+    "path": "./logs/"
+  },
   "bot": {}
 }

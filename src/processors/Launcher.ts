@@ -8,19 +8,41 @@ import { MessageEvent } from "../events/MessageEvent"
 import { PluginLoader } from "./PluginLoader"
 import { NoticeEvent } from "../events/NoticeEvent"
 import type { Event } from "src/types/event"
+import path from "node:path"
+import { Logger } from "../tools/Logger"
+import { Exit } from "./Exit"
 
 export class Launcher {
   protected connections: Connection[] = []
   protected loader!: PluginLoader
+  protected logger: Logger = new Logger()
 
   public launch() {
-    console.log("正在尝试启动")
-
-    process.on("uncaughtException", err => {
-      if (err) {
-        console.error(`错误：${err.name}\n调用堆栈：\n${err.stack}`)
+    process.on("unhandledRejection", (reason, promise) => {
+      if (reason) {
+        this.logger.error(`Promise错误：\n${reason}`)
       }
     })
+    process.on("uncaughtException", err => {
+      if (err) {
+        this.logger.error(err)
+      }
+    })
+
+    const exit = new Exit()
+    exit.register()
+    exit.addTask(complete => {
+      this.logger.info("正在卸载所有插件")
+      this.loader.unloadAll(complete)
+    })
+    exit.addTask(complete => {
+      const savedLogFile = path.resolve(path.dirname(this.logger.file), this.logger.formatCurrentTime().replaceAll(" ", "_").replaceAll(":", "_") + ".log")
+      this.logger._save(savedLogFile, complete)
+      this.logger.info(`正在保存日志“${savedLogFile}”`)
+    })
+    
+    this.logger.info("Momoon Bot")
+    this.logger.info("正在尝试启动")
 
     this.loader = new PluginLoader()
     // 默认插件文件夹
@@ -29,7 +51,7 @@ export class Launcher {
     config.plugins.folders.forEach(folder => this.loader.loadFromFolder(folder))
     
     config.connections.forEach(conn => {
-      console.log(`尝试启动“${conn.type}”（协议：“${conn.protocol}”）服务器`)
+      this.logger.info(`尝试启动“${conn.type}”（协议：${conn.protocol}）服务器`)
 
       const inst = this.launchConnection(<ConfigEnum.ConnectionType>conn.type, (<HttpMiddleware | ReverseWsMiddleware>conn.server).port, 
       (<HttpMiddleware | ReverseWsMiddleware>conn.server).host ?? (<WsMiddleware>conn.server).universe, conn.server.token)
@@ -70,7 +92,7 @@ export class Launcher {
       this.connections.push(inst)
     })
     
-    console.log("启动完毕")
+    this.logger.info("启动完毕")
   }
 
   public getConnections() {

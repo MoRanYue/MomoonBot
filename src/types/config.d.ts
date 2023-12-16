@@ -1,4 +1,4 @@
-import type { ConfigEnum } from "./enums"
+import type { ConfigEnum, LoggerEnum } from "./enums"
 
 export interface HttpMiddleware {
   api: string
@@ -47,9 +47,16 @@ interface PluginConfig {
   data: Record<string, object | string[]>
 }
 
+interface LoggerConfig {
+  level: LoggerEnum.LogLevel
+  debug: boolean
+  path: string
+}
+
 export interface Config {
   connections: ConnectionMiddlewareConfig[]
   listener: ListenerConfig
   plugins: PluginConfig
+  log: LoggerConfig
   bot: BotConfig
 }

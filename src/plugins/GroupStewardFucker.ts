@@ -4,21 +4,25 @@ import type { ConnectionContent } from "../types/connectionContent"
 import type { GroupRecall } from "../events/NoticeEvent"
 import { MessageUtils } from "../tools/MessageUtils"
 import MessageSegment from "../events/messages/MessageSegment"
+import { Logger } from "../tools/Logger"
 
 export default class GroupStewardFucker extends Plugin {
   name: string = "Q群管家滚蛋"
   description: string = "尝试对Q群管家的行为进行反抗。\n重新发出被Q群管家撤回的消息"
   instruction: string = "无"
   version: string = "1.0.0"
+  logPrefix: string = "Q群管家滚蛋"
+  protected logger: Logger;
 
   constructor() {
     super();
+    this.logger = new Logger(this.logPrefix)
 
     this.onNotice(EventEnum.NoticeType.groupRecall, event => {
       const ev = <GroupRecall>event
     
       if (ev.operatorId == 2854196310) {
-        console.log("检测到消息被Q群管家撤回")
+        this.logger.info("检测到消息被Q群管家撤回")
       
         ev.conn!.send(ConnectionEnum.Action.sendGroupForwardMsg, <ConnectionContent.Params.SendGroupForwardMsg>{
           group_id: ev.groupId,

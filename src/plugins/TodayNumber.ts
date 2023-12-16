@@ -3,15 +3,18 @@ import { Plugin } from "../processors/Plugin";
 import type { ConnectionContent } from "src/types/connectionContent";
 import MessageSegment from "../events/messages/MessageSegment";
 import { Utils } from "../tools/Utils";
+import { Logger } from "../tools/Logger";
 
 export default class TodayNumber extends Plugin {
   name: string = "今日数字"
   description: string = "今日数字"
   instruction: string = "命令：今日数字、jrsz、todaynumber"
   version: string = "1.0.0"
+  logPrefix: string = "今日数字"
 
   constructor() {
     super();
+    this.logger = new Logger(this.logPrefix)
 
     let numbers: Record<number, number> = {}
     setInterval(() => numbers = {}, 863990000)

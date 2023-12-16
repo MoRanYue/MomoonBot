@@ -4,10 +4,11 @@ import { Plugin, Plugin_ } from "./Plugin";
 import path from "node:path"
 import fs from "node:fs"
 import { FileUtils } from "../tools/FileUtils";
+import { Logger } from "../tools/Logger";
 
 export class PluginLoader {
   public ev: CustomEventEmitter.PluginLoaderEventEmitter = new EventEmitter()
-
+  private logger: Logger = new Logger("插件加载器")
   private plugins: Plugin[] = []
 
   constructor() {
@@ -24,14 +25,14 @@ export class PluginLoader {
       const plugin = this.plugins[i];
 
       if (plugin instanceof pluginClass) {
-        console.error(`插件“${plugin.name}”（类：${pluginClass.name}）可能重复加载或类名重复`)
+        this.logger.error(`插件“${plugin.name}”（类：${pluginClass.name}）可能重复加载或类名重复`)
         return
       }
     }
 
     const plugin = new pluginClass()
     plugin.ev.emit("load")
-    console.log(`成功加载插件“${plugin.name}”（类：${pluginClass.name}）`)
+    this.logger.success(`成功加载插件“${plugin.name}”（类：${pluginClass.name}）`)
     this.plugins.push(plugin)
 
     return plugin
@@ -43,10 +44,18 @@ export class PluginLoader {
       
       if (plugin.name == name) {
         plugin.ev.emit("unload")
-        console.log(`成功卸载插件“${plugin.name}”`)
+        this.logger.success(`成功卸载插件“${plugin.name}”`)
         this.plugins.splice(i, 1)
         return plugin
       }
+    }
+  }
+  public unloadAll(cb?: VoidFunction): void {
+    this.plugins.forEach(plugin => {
+      plugin.ev.emit("unload")
+    })
+    if (cb) {
+      cb()
     }
   }
 
@@ -57,7 +66,7 @@ export class PluginLoader {
       if (plugin.name == name) {
         plugin.ev.emit("unload")
         plugin.ev.emit("load")
-        console.log(`成功重载插件“${plugin.name}”`)
+        this.logger.success(`成功重载插件“${plugin.name}”`)
         return plugin
       }
     }
@@ -69,8 +78,8 @@ export class PluginLoader {
       const filePath = path.join(folder, plugin)
       fs.lstat(filePath, async (err, stats) => {
         if (err) {
-          console.log(`插件“${filePath}”加载错误：`)
-          console.error(err)
+          this.logger.failure(`插件“${filePath}”加载错误：`)
+          this.logger.error(err)
         }
 
         if (stats.isFile() && plugin.endsWith(".js")) {
@@ -88,8 +97,8 @@ export class PluginLoader {
   public loadFromFile(file: string): void {
     fs.lstat(file, async (err, stats) => {
       if (err) {
-        console.log(`插件“${file}”加载错误：`)
-        console.error(err)
+        this.logger.failure(`插件“${file}”加载错误：`)
+        this.logger.error(err)
       }
 
       if (stats.isFile() && file.endsWith(".js")) {

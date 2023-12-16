@@ -9,8 +9,8 @@ export class Utils {
     return data.split(/, */)
   }
 
-  public static dataToJson(data: any) {
-    return JSON.stringify(data)
+  public static dataToJson(data: any, spaces?: number) {
+    return JSON.stringify(data, undefined, spaces)
   }
 
   public static jsonToData(json: string) {

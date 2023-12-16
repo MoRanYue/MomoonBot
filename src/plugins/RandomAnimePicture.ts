@@ -12,12 +12,15 @@ import type { Connection } from "src/connections/Connection";
 import url from "node:url";
 import fs from "node:fs"
 import type { IncomingMessage } from "node:http";
+import { Logger } from "../tools/Logger";
 
 export default class RandomAnimePicture extends Plugin {
   readonly name: string = "随机动漫图片";
   readonly description: string = "调用多个API来获取动漫图片";
   readonly instruction: string = "randomPic、rdpic、anime";
   readonly version: string = "1.0.0";
+  readonly logPrefix: string = "随机动漫图片"
+  protected logger: Logger;
 
   readonly dataFolder: string = "./data/anime/"
   readonly apiServers: ((conn: Connection, msgType: EventEnum.MessageType, userId: number, groupId?: number, num?: number) => void)[] = [
@@ -72,7 +75,7 @@ export default class RandomAnimePicture extends Plugin {
         const url = Utils.randomChoice(apis)
         this.httpGet(url, (data, res) => {
           const imgUrl = res.responseUrl
-          console.log(`正在处理第${index + 1}张图片：“${imgUrl}”（“${url}”）`)
+          this.logger.info(`正在处理第${index + 1}张图片：“${imgUrl}”（“${url}”）`)
           let format = imgUrl.split(".").pop()?.toLowerCase()
           if (!format || !["jpg", "jpeg", "png", "webp", "webm"].includes(format)) {
             format = "png"
@@ -88,12 +91,12 @@ export default class RandomAnimePicture extends Plugin {
           stream.write(data)
         }, (err, res) => {
           if (res) {
-            console.error(`请求“${res.responseUrl}”（“${url}”）时出错，正在重试`)
+            this.logger.error(`请求“${res.responseUrl}”（“${url}”）时出错，正在重试`)
           }
           else {
-            console.error(`请求（“${url}”）时出错，正在重试`)
+            this.logger.error(`请求“${url}”时出错，正在重试`)
           }
-          console.error(err)
+          this.logger.error(err)
           get()
         })
       }
@@ -106,6 +109,7 @@ export default class RandomAnimePicture extends Plugin {
 
   constructor() {
     super();
+    this.logger = new Logger(this.logPrefix)
 
     FileUtils.createFolderIfNotExists(this.dataFolder)
 

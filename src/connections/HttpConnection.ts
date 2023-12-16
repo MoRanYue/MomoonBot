@@ -33,9 +33,9 @@ export class HttpConnection extends Connection {
     this.token = token
 
     this.ev.once("connect", () => {
-      console.log("正在尝试获取群聊与好友信息")
+      this.logger.info("正在尝试获取群聊与好友信息")
       if (this.clientAddresses.length == 0) {
-        console.error("“Http”无法获取群聊与好友信息，因为未指定客户端地址")
+        this.logger.error("“Http”无法获取群聊与好友信息，因为未指定客户端地址")
         return
       }
       
@@ -57,7 +57,7 @@ export class HttpConnection extends Connection {
       const auth = req.headers.authorization
       if (token) {
         if (!auth || auth.split(" ", 2).pop() != token) {
-          console.log("客户端鉴权失败")
+          this.logger.info("客户端鉴权失败")
           return
         }
       }
@@ -70,30 +70,30 @@ export class HttpConnection extends Connection {
           this.ev.emit("response", <ConnectionContent.Connection.Response<number | object | object[]>>data)
         }
         else {
-          console.log("==========================")
-          console.log("Http Received Event Report")
+          this.logger.info("==========================")
+          this.logger.info("Http Received Event Report")
 
           switch ((<Event.Reported>data).post_type) {
             case EventEnum.EventType.message:
-              console.log("Type: Message")
+              this.logger.info("Type: Message")
 
               this.ev.emit("message", <Event.Message>data)
               break;
 
             case EventEnum.EventType.messageSent:
-              console.log("Type: MessageSent")
+              this.logger.info("Type: MessageSent")
             
               this.ev.emit("message", <Event.Message>data)
               break;
           
             case EventEnum.EventType.notice:
-              console.log("Type: Notice")
+              this.logger.info("Type: Notice")
 
               this.ev.emit("notice", <Event.Notice>data)
               break;
 
             case EventEnum.EventType.request:
-              console.log("Type: Request")
+              this.logger.info("Type: Request")
 
               this.ev.emit("request", <Event.Request>data)
               break;
@@ -192,7 +192,9 @@ export class HttpConnection extends Connection {
 
     res.on('data', chunk => data += chunk)
     res.on('error', err => {
-      throw err
+      if (err) {
+        throw err
+      }
     })
     res.on('end', () => {
       let result
@@ -200,8 +202,9 @@ export class HttpConnection extends Connection {
         result = Utils.jsonToData(data)
       }
       catch (err) {
-        console.error("===========================")
-        console.error("Http Received Error Request")
+        this.logger.error("===========================")
+        this.logger.error("Http Received Error Request")
+        this.logger.error(err)
         return 
       }
 

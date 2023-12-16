@@ -5,12 +5,15 @@ import { CustomEventEmitter } from "src/types/CustomEventEmitter"
 import { CustomEventEmitter as EventEmitter } from "../tools/CustomEventEmitter"
 import { ListenerEnum } from "../types/enums"
 import { MessageUtils } from "../tools/MessageUtils"
+import { Logger } from "../tools/Logger"
 
 export abstract class Plugin {
-  readonly abstract name: string
-  readonly abstract description: string
-  readonly abstract instruction: string
-  readonly abstract version: string
+  public readonly abstract name: string
+  public readonly abstract description: string
+  public readonly abstract instruction: string
+  public readonly abstract version: string
+  public readonly logPrefix: string = "插件"
+  protected logger: Logger
 
   protected listeners: DataType.ListenerList = {
     message: new Map(),
@@ -21,6 +24,8 @@ export abstract class Plugin {
   readonly ev: CustomEventEmitter.PluginEventEmitter = new EventEmitter()
 
   constructor() {
+    this.logger = new Logger(this.logPrefix)
+
     this.ev.on("message", ev => {
       if (ev.isSelfSent && !config.listener.settings.triggerBySelf) {
         return
@@ -40,8 +45,8 @@ export abstract class Plugin {
               listener.trigger(ev)
             }
             catch (err) {
-              console.error(`在触发消息监听器“${message}”（优先级：${listener.priority}，执行顺序：${i + 1}）时捕获到错误`)
-              console.error(err)
+              this.logger.error(`在触发消息监听器“${message}”（优先级：${listener.priority}，执行顺序：${i + 1}）时捕获到错误`)
+              this.logger.error(err)
             }
 
             if (listener.block) {
@@ -63,8 +68,8 @@ export abstract class Plugin {
               listener.trigger(ev)
             }
             catch (err) {
-              console.error(`在触发命令监听器“${command}”（优先级：${listener.priority}，执行顺序：${i + 1}）时捕获到错误`)
-              console.error(err)
+              this.logger.error(`在触发命令监听器“${command}”（优先级：${listener.priority}，执行顺序：${i + 1}）时捕获到错误`)
+              this.logger.error(err)
             }
 
             if (listener.block) {
@@ -88,8 +93,8 @@ export abstract class Plugin {
               listener.trigger(ev)
             }
             catch (err) {
-              console.error(`在触发通知监听器“${notice}”（优先级：${listener.priority}，执行顺序：${i + 1}）时捕获到错误`)
-              console.error(err)
+              this.logger.error(`在触发通知监听器“${notice}”（优先级：${listener.priority}，执行顺序：${i + 1}）时捕获到错误`)
+              this.logger.error(err)
             }
 
             if (listener.block) {

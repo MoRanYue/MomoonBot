@@ -3,13 +3,15 @@ import type { CustomEventEmitter } from "../types/CustomEventEmitter"
 import type { DataType } from "src/types/dataType"
 import type { Group } from "../processors/sets/Group"
 import type { User } from "../processors/sets/User"
-import { Event } from "src/types/event"
+import type { Event } from "src/types/event"
+import { Logger } from "../tools/Logger"
 
 export abstract class Connection {
   protected abstract server: unknown
   protected abstract token: string | null | undefined
   
   readonly abstract ev: CustomEventEmitter.ConnectionEventEmitter
+  readonly logger: Logger = new Logger("连接")
 
   public abstract groups: Record<string, Record<number, Group>>
   public abstract friends: Record<string, Record<number, User>>

@@ -25,15 +25,15 @@ export class ReverseWsConnection extends Connection {
     super();
   
     this.ev.on("response", data => {
-      console.log("===================================")
-      console.log("Reverse WebSocket Received Response")
+      this.logger.debug("===================================")
+      this.logger.debug("Reverse WebSocket Received Response")
       
       let messageInfo: ConnectionContent.Connection.WsRequestDetector
       try {
         messageInfo = <ConnectionContent.Connection.WsRequestDetector>Utils.jsonToData(data.echo)
-        console.log(messageInfo)
+        this.logger.debug("\n", Utils.dataToJson(messageInfo, 2))
       } catch (err) {
-        console.warn("收到的返回非本服务器发送的请求所应返回的")
+        this.logger.warning("收到的返回非本服务器发送的请求所应返回的")
         return
       }
 
@@ -66,14 +66,14 @@ export class ReverseWsConnection extends Connection {
       this.ev.emit("connect")
 
       this.clientAddresses.push(`${req.socket.remoteAddress}:${req.socket.remotePort}`)
-      console.log("=============================================")
-      console.log("Reverse WebSocket Received Connection Request")
-      console.log("Client:", `${req.socket.remoteAddress}:${req.socket.remotePort}`)
+      this.logger.info("=============================================")
+      this.logger.info("Reverse WebSocket Received Connection Request")
+      this.logger.info("Client:", `${req.socket.remoteAddress}:${req.socket.remotePort}`)
 
       const auth = req.headers.authorization
       if (this.token) {
         if (!auth || auth.split(" ", 2).pop() != this.token) {
-          console.log("客户端鉴权失败")
+          this.logger.info("客户端鉴权失败")
           return
         }
       }
@@ -86,34 +86,34 @@ export class ReverseWsConnection extends Connection {
         else {
           switch ((<Event.Reported>data).post_type) {
             case EventEnum.EventType.message:
-              console.log("=======================================")
-              console.log("Reverse WebSocket Received Event Report")
-              console.log("Type: Message")
+              this.logger.info("=======================================")
+              this.logger.info("Reverse WebSocket Received Event Report")
+              this.logger.info("Type: Message")
 
               this.ev.emit("message", <Event.Message>data)
               break;
 
             case EventEnum.EventType.messageSent:
-              console.log("=======================================")
-              console.log("Reverse WebSocket Received Event Report")
-              console.log("Type: MessageSent")
+              this.logger.info("=======================================")
+              this.logger.info("Reverse WebSocket Received Event Report")
+              this.logger.info("Type: MessageSent")
             
               this.ev.emit("message", <Event.Message>data)
               break;
           
             case EventEnum.EventType.notice:
-              console.log("=======================================")
-              console.log("Reverse WebSocket Received Event Report")
-              console.log("Type: Notice")
-              console.log(data)
+              this.logger.info("=======================================")
+              this.logger.info("Reverse WebSocket Received Event Report")
+              this.logger.info("Type: Notice")
+              this.logger.info(data)
 
               this.ev.emit("notice", <Event.Notice>data)
               break;
 
             case EventEnum.EventType.request:
-              console.log("=======================================")
-              console.log("Reverse WebSocket Received Event Report")
-              console.log("Type: Request")
+              this.logger.info("=======================================")
+              this.logger.info("Reverse WebSocket Received Event Report")
+              this.logger.info("Type: Request")
 
               this.ev.emit("request", <Event.Request>data)
               break;
@@ -137,9 +137,9 @@ export class ReverseWsConnection extends Connection {
         delete this.groups[clientAddress]
         delete this.friends[clientAddress]
 
-        console.log("===================================")
-        console.log("Reverse WebSocket Connection Closed")
-        console.log("Client:", `${req.socket.remoteAddress}:${req.socket.remotePort}`)
+        this.logger.info("===================================")
+        this.logger.info("Reverse WebSocket Connection Closed")
+        this.logger.info("Client:", `${req.socket.remoteAddress}:${req.socket.remotePort}`)
       })
       socket.on("error", err => {
         if (err) {
@@ -147,7 +147,7 @@ export class ReverseWsConnection extends Connection {
         }
       })
 
-      console.log("正在尝试获取群聊与好友信息")
+      this.logger.info("正在尝试获取群聊与好友信息")
       this.send(ConnectionEnum.Action.getGroupList, {}, data => {
         const result = <ConnectionContent.Connection.Response<ConnectionContent.ActionResponse.GetGroupList>>data
         const groups: Record<number, Group> = {}
@@ -216,7 +216,7 @@ export class ReverseWsConnection extends Connection {
           })
         }), err => {
           if (err) {
-            console.log("There Is A Error In Sending WS Request")
+            this.logger.info("There Is A Error In Sending WS Request")
             throw err
           }
         })
