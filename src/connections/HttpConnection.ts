@@ -63,35 +63,40 @@ export class HttpConnection extends Connection {
       this.ev.emit("connect")
 
       this.receiveRequest(req, res, async (req, res) => {
-        const data = <object>Utils.jsonToData(req.body)
+        const dataStr: string = req.body
+        const data = <object>Utils.jsonToData(dataStr)
         if (Object.hasOwn(data, "echo")) {
           this.ev.emit("response", <ConnectionContent.Connection.Response<number | object | object[]>>data)
         }
         else {
-          this.logger.info("==========================")
-          this.logger.info("Http Received Event Report")
+          this.logger.debug("==========================")
+          this.logger.debug("Http Received Event Report")
 
           switch ((<Event.Reported>data).post_type) {
             case EventEnum.EventType.message:
-              this.logger.info("Type: Message")
+              this.logger.debug("Type: Message")
+              this.logger.debug(dataStr)
 
               this.ev.emit("message", <Event.Message>data)
               break;
 
             case EventEnum.EventType.messageSent:
-              this.logger.info("Type: MessageSent")
+              this.logger.debug("Type: MessageSent")
+              this.logger.debug(dataStr)
             
               this.ev.emit("message", <Event.Message>data)
               break;
           
             case EventEnum.EventType.notice:
-              this.logger.info("Type: Notice")
+              this.logger.debug("Type: Notice")
+              this.logger.debug(dataStr)
 
               this.ev.emit("notice", <Event.Notice>data)
               break;
 
             case EventEnum.EventType.request:
-              this.logger.info("Type: Request")
+              this.logger.debug("Type: Request")
+              this.logger.debug(dataStr)
 
               this.ev.emit("request", <Event.Request>data)
               break;
@@ -286,8 +291,10 @@ export class HttpConnection extends Connection {
   }
 
   // 以下函数仅被内置类调用
-  public _addGroup(group: Event.Reported): void {
-    throw new Error("Method not implemented.");
+  public _addGroup(group: number, first?: any): void {
+    if (!this.getGroup(group) && this.clientAddresses.length != 0) {
+      this.groups[this.clientAddresses[0]][group] = new Group(group, this)
+    }
   }
   public _removeGroup(id: number, first?: any): void {
     if (this.getGroup(id)) {
@@ -329,7 +336,7 @@ export class HttpConnection extends Connection {
     }
   }
   public _addFriend(friend: Event.FriendAdd, first?: any): void {
-    if (!this.getFriend(friend.user_id)) {
+    if (!this.getFriend(friend.user_id) && this.clientAddresses.length != 0) {
       this.friends[this.clientAddresses[0]][friend.user_id] = new User(friend, this)
     }
   }

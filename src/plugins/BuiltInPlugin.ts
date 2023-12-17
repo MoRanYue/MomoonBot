@@ -29,8 +29,12 @@ export default class BuiltInPlugin extends Plugin {
     const reportEvent = (type: string, ev: MessageEvent) => {
       if (ev.messageType == EventEnum.MessageType.group) {
         const group = ev.conn!.getGroup(ev.groupId!)
+        if (ev.isSelfSent) {
+          type = "自发送" + type
+        }
         if (!group) {
           this.logger.info(`接收到${type}：${ev.raw}（${ev.messageId}） 来自群聊：${ev.groupId} 发送者：${ev.userId}`)
+          ev.conn!._addGroup(ev.groupId!)
           return
         }
         const member = group.members[ev.userId]

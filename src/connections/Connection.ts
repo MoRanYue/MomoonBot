@@ -104,7 +104,7 @@ export abstract class Connection {
   public abstract getFriend(id: number): User | undefined
 
   // 以下函数仅被内置类调用
-  public abstract _addGroup(group: Event.Unknown): void
+  public abstract _addGroup(group: number): void
   public abstract _removeGroup(id: number): void
   public abstract _addGroupMember(member: Event.GroupMemberIncrease): void
   public abstract _addGroupMember(member: DataType.GroupMemberParams): void

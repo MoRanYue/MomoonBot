@@ -86,34 +86,37 @@ export class ReverseWsConnection extends Connection {
         else {
           switch ((<Event.Reported>data).post_type) {
             case EventEnum.EventType.message:
-              this.logger.info("=======================================")
-              this.logger.info("Reverse WebSocket Received Event Report")
-              this.logger.info("Type: Message")
+              this.logger.debug("=======================================")
+              this.logger.debug("Reverse WebSocket Received Event Report")
+              this.logger.debug("Type: Message")
+              this.logger.debug(dataStr)
 
               this.ev.emit("message", <Event.Message>data)
               break;
 
             case EventEnum.EventType.messageSent:
-              this.logger.info("=======================================")
-              this.logger.info("Reverse WebSocket Received Event Report")
-              this.logger.info("Type: MessageSent")
+              this.logger.debug("=======================================")
+              this.logger.debug("Reverse WebSocket Received Event Report")
+              this.logger.debug("Type: MessageSent")
+              this.logger.debug(dataStr)
             
               this.ev.emit("message", <Event.Message>data)
               break;
           
             case EventEnum.EventType.notice:
-              this.logger.info("=======================================")
-              this.logger.info("Reverse WebSocket Received Event Report")
-              this.logger.info("Type: Notice")
-              this.logger.info(data)
+              this.logger.debug("=======================================")
+              this.logger.debug("Reverse WebSocket Received Event Report")
+              this.logger.debug("Type: Notice")
+              this.logger.debug(dataStr)
 
               this.ev.emit("notice", <Event.Notice>data)
               break;
 
             case EventEnum.EventType.request:
-              this.logger.info("=======================================")
-              this.logger.info("Reverse WebSocket Received Event Report")
-              this.logger.info("Type: Request")
+              this.logger.debug("=======================================")
+              this.logger.debug("Reverse WebSocket Received Event Report")
+              this.logger.debug("Type: Request")
+              this.logger.debug(dataStr)
 
               this.ev.emit("request", <Event.Request>data)
               break;
@@ -286,8 +289,8 @@ export class ReverseWsConnection extends Connection {
           })
         }), err => {
           if (err) {
-            this.logger.info("There Is A Error In Sending WS Request")
-            throw err
+            this.logger.error("向客户端发送数据时出错：")
+            this.logger.error(err)
           }
         })
       }
@@ -300,8 +303,10 @@ export class ReverseWsConnection extends Connection {
   }
 
   // 以下函数仅被内置类调用
-  public _addGroup(group: Event.Reported, clientIndex: number = 0): void {
-    throw new Error("Method not implemented.");
+  public _addGroup(group: number, clientIndex: number = 0): void {
+    if (!this.getGroup(group, clientIndex) && this.clientAddresses[clientIndex]) {
+      this.groups[this.clientAddresses[clientIndex]][group] = new Group(group, this)
+    }
   }
   public _removeGroup(id: number, clientIndex: number = 0): void {
     if (this.getGroup(id, clientIndex)) {
@@ -343,7 +348,7 @@ export class ReverseWsConnection extends Connection {
     }
   }
   public _addFriend(friend: Event.FriendAdd, clientIndex: number = 0): void {
-    if (!this.getFriend(friend.user_id, clientIndex)) {
+    if (!this.getFriend(friend.user_id, clientIndex) && this.clientAddresses[clientIndex]) {
       this.friends[this.clientAddresses[clientIndex]][friend.user_id] = new User(friend, this)
     }
   }
