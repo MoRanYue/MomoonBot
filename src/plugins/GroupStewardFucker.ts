@@ -24,7 +24,7 @@ export default class GroupStewardFucker extends Plugin {
       if (ev.operatorId == 2854196310) {
         this.logger.info("检测到消息被Q群管家撤回")
       
-        ev.conn!.send(ConnectionEnum.Action.sendGroupForwardMsg, <ConnectionContent.Params.SendGroupForwardMsg>{
+        ev.conn!.send(ConnectionEnum.Action.sendGroupForwardMsg, {
           group_id: ev.groupId,
           messages: [
             {

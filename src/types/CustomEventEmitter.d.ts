@@ -15,7 +15,7 @@ export namespace CustomEventEmitter {
     on(eventName: "notice", listener: (ev: Event.Notice) => void): this
     on(eventName: "request", listener: (ev: Event.Request) => void): this
     on(eventName: "unknown", listener: (ev: Event.Unknown) => void): this
-    on(eventName: "response", listener: DataType.ResponseFunction): this
+    on(eventName: "response", listener: DataType.ResponseFunction<any> | DataType.RawResponseFunction<any>): this
     on(eventName: "connect", listener: VoidFunction): this
     on(eventName: string | symbol, listener: DataType.AnyFunction): this
 
@@ -23,7 +23,7 @@ export namespace CustomEventEmitter {
     once(eventName: "notice", listener: (ev: Event.Notice) => void): this
     once(eventName: "request", listener: (ev: Event.Request) => void): this
     once(eventName: "unknown", listener: (ev: Event.Unknown) => void): this
-    once(eventName: "response", listener: DataType.ResponseFunction): this
+    once(eventName: "response", listener: DataType.ResponseFunction<any> | DataType.RawResponseFunction<any>): this
     once(eventName: "connect", listener: VoidFunction): this
     once(eventName: string | symbol, listener: DataType.AnyFunction): this
     
@@ -31,7 +31,7 @@ export namespace CustomEventEmitter {
     emit(eventName: "notice", ev: Event.Notice): boolean
     emit(eventName: "request", ev: Event.Request): boolean
     emit(eventName: "unknown", ev: Event.Unknown): boolean
-    emit(eventName: "response", data: ConnectionContent.Connection.Response<object | object[] | number>): boolean
+    emit(eventName: "response", data: ConnectionContent.Connection.Response<any> | any): boolean
     emit(eventName: "connect"): boolean
     emit(eventName: string | symbol, ...args: any[]): boolean;
   }
@@ -43,7 +43,7 @@ export namespace CustomEventEmitter {
     on(eventName: "request", listener: (ev: Event.Request) => void): this
     on(eventName: "unknown", listener: (ev: Event.Unknown) => void): this
     on(eventName: "meta", listener: (ev: Event.MetaEvent) => void): this
-    on(eventName: "response", listener: DataType.ResponseFunction): this
+    on(eventName: "response", listener: DataType.ResponseFunction<any> | DataType.RawResponseFunction<any>): this
     on(eventName: "connect", listener: VoidFunction): this
     on(eventName: string | symbol, listener: DataType.AnyFunction): this
 
@@ -52,7 +52,7 @@ export namespace CustomEventEmitter {
     once(eventName: "request", listener: (ev: Event.Request) => void): this
     once(eventName: "unknown", listener: (ev: Event.Unknown) => void): this
     once(eventName: "meta", listener: (ev: Event.MetaEvent) => void): this
-    once(eventName: "response", listener: DataType.ResponseFunction): this
+    once(eventName: "response", listener: DataType.ResponseFunction<any> | DataType.RawResponseFunction<any>): this
     once(eventName: "connect", listener: VoidFunction): this
     once(eventName: string | symbol, listener: DataType.AnyFunction): this
     
@@ -61,7 +61,7 @@ export namespace CustomEventEmitter {
     emit(eventName: "request", ev: Event.Request): boolean
     emit(eventName: "unknown", ev: Event.Unknown): boolean
     emit(eventName: "meta", ev: Event.MetaEvent): boolean
-    emit(eventName: "response", data: ConnectionContent.Connection.Response<object | object[] | number>): boolean
+    emit(eventName: "response", data: ConnectionContent.Connection.Response<any> | any): boolean
     emit(eventName: "connect"): boolean
     emit(eventName: string | symbol, ...args: any[]): boolean
   }

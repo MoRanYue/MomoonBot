@@ -115,13 +115,13 @@ export default class RandomAnimePicture extends Plugin {
 
     this.ev.on("finishCollecting", (conn: Connection, msgType: EventEnum.MessageType, userId: number, groupId: number, messages: ConnectionContent.Params.CustomForwardMessageNode[]) => {
       if (msgType == EventEnum.MessageType.group) {
-        conn.send(ConnectionEnum.Action.sendGroupForwardMsg, <ConnectionContent.Params.SendGroupForwardMsg>{
+        conn.send(ConnectionEnum.Action.sendGroupForwardMsg, {
           group_id: groupId,
           messages
         })
       }
       else if (msgType == EventEnum.MessageType.private) {
-        conn.send(ConnectionEnum.Action.sendPrivateForwardMsg, <ConnectionContent.Params.SendPrivateForwardMsg>{
+        conn.send(ConnectionEnum.Action.sendPrivateForwardMsg, {
           user_id: userId,
           messages
         })

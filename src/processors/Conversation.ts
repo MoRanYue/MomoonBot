@@ -23,15 +23,14 @@ export class Conversation {
       this.origin = origin
 
       const client = launcher.getConnections()[connectionIndex]
-      client.send(ConnectionEnum.Action.getMsg, <ConnectionContent.Params.GetMsg>{
+      client.send(ConnectionEnum.Action.getMsg, {
         message_id: origin
       }, data => {
-        const result = <ConnectionContent.Connection.Response<ConnectionContent.ActionResponse.GetMsg>>data
         if (data.retcode != ConnectionEnum.ResponseCode.ok) {
           throw new Error(`消息“${origin}”无效`);
         }
 
-        const message = result.data
+        const message = data.data
         const isGroup = message.message_type == EventEnum.MessageType.group
         const inst = new MessageEvent({
           post_type: EventEnum.EventType.message,

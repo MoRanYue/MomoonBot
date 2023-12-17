@@ -23,20 +23,20 @@ export class Group {
 
     if (typeof group == "number") {
       this.id = group
-      this.conn.send(ConnectionEnum.Action.getGroupInfo, <ConnectionContent.Params.GetGroupInfo>{
+      this.conn.send(ConnectionEnum.Action.getGroupInfo, {
         group_id: this.id
       }, data => {
-        const result = <ConnectionContent.ActionResponse.GetGroupInfo>data.data
+        const result = data.data
         this.name = result.group_name
         this.remark = result.group_remark
         this.isFrozen = result.is_frozen
         this.maxMemberNumber = result.max_member
         this.memberNumber = result.member_num
 
-        this.conn.send(ConnectionEnum.Action.getGroupMemberList, <ConnectionContent.Params.GetGroupMemberList>{
+        this.conn.send(ConnectionEnum.Action.getGroupMemberList, {
           group_id: this.id
         }, data => {
-          (<ConnectionContent.ActionResponse.GetGroupMemberList>data.data).forEach(member => {
+          data.data.forEach(member => {
             const user = new User(member, this.conn)
             this.members[member.user_id] = user
             if (["admin", "owner"].includes(member.role)) {
@@ -51,10 +51,10 @@ export class Group {
       this.name = group.group_name
       this.remark = group.group_remark
       this.isFrozen = group.is_frozen
-      this.conn.send(ConnectionEnum.Action.getGroupMemberList, <ConnectionContent.Params.GetGroupMemberList>{
+      this.conn.send(ConnectionEnum.Action.getGroupMemberList, {
         group_id: this.id
       }, data => {
-        (<ConnectionContent.ActionResponse.GetGroupMemberList>data.data).forEach(member => {
+        data.data.forEach(member => {
           const user = new User(member, this.conn)
           this.members[member.user_id] = user
           if (["admin", "owner"].includes(member.role)) {

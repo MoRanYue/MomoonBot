@@ -287,6 +287,10 @@ export namespace ConnectionContent {
       start?: number
       recent?: boolean
     }
+    interface Shell {
+      cmd: string | string[]
+      dir: string
+    }
 
     interface GetWeatherCityCode {
       city: string
@@ -427,6 +431,21 @@ export namespace ConnectionContent {
       invited_requests: InvitedRequest[]
       join_requests: JoinRequest[]
     }
+    interface FriendSystemMessage {
+      request_id: number
+      requester_uin: number
+      requester_nick: string
+      source: string
+      message: string
+      source_group_name: string
+      source_group_id: number
+      sex: Sex
+      age: string
+      msg_detail: string
+      status: "已同意" | "已拒绝" | ""
+      flag: string
+    }
+    type GetFriendSystemMsg = FriendSystemMessage[]
     interface GetEssenceMsgList {
       sender_id: number
       sender_nick: string
@@ -493,7 +512,7 @@ export namespace ConnectionContent {
       coordinates: [number, number][]
     }
     interface OcrImage {
-      texts: TextDetection
+      texts: TextDetection[]
       language: string
     }
     interface GetRecord {

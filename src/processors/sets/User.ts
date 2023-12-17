@@ -47,10 +47,10 @@ export class User {
 
     if (typeof friend == "number") {
       this.id = friend
-      this.conn.send(ConnectionEnum.Action.getStrangerInfo, <ConnectionContent.Params.GetStrangerInfo>{
+      this.conn.send(ConnectionEnum.Action.getStrangerInfo, {
         user_id: this.id
       }, (data) => {
-        const result = <ConnectionContent.ActionResponse.GetStrangerInfo>data.data
+        const result = data.data
         this.name = result.nickname
         this.displayName = result.nickname
         this.gender = Utils.sexToId(result.sex)
@@ -101,11 +101,11 @@ export class User {
       this.group = friend.groupId
 
       if (this.group) {
-        this.conn.send(ConnectionEnum.Action.getGroupMemberInfo, <ConnectionContent.Params.GetGroupMemberInfo>{
+        this.conn.send(ConnectionEnum.Action.getGroupMemberInfo, {
           group_id: friend.groupId,
           user_id: this.id
         }, data => {
-          const result = <ConnectionContent.ActionResponse.GetGroupMemberInfo>data.data
+          const result = data.data
           this.gender = Utils.sexToId(result.sex)
           this.displayName = result.user_displayname
           this.name = result.user_name
@@ -118,10 +118,10 @@ export class User {
         return
       }
 
-      this.conn.send(ConnectionEnum.Action.getStrangerInfo, <ConnectionContent.Params.GetStrangerInfo>{
+      this.conn.send(ConnectionEnum.Action.getStrangerInfo, {
         user_id: this.id
       }, (data) => {
-        const result = <ConnectionContent.ActionResponse.GetStrangerInfo>data.data
+        const result = data.data
         this.name = result.nickname
         this.displayName = result.nickname
         this.gender = Utils.sexToId(result.sex)
@@ -138,10 +138,10 @@ export class User {
       }
 
       this.id = friend.user_id
-      this.conn.send(ConnectionEnum.Action.getStrangerInfo, <ConnectionContent.Params.GetStrangerInfo>{
+      this.conn.send(ConnectionEnum.Action.getStrangerInfo, {
         user_id: this.id
       }, (data) => {
-        const result = <ConnectionContent.ActionResponse.GetStrangerInfo>data.data
+        const result = data.data
         this.name = result.nickname
         this.displayName = result.nickname
         this.gender = Utils.sexToId(result.sex)

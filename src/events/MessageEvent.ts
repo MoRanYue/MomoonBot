@@ -76,7 +76,7 @@ export class MessageEvent extends Ev {
     else if (message instanceof Segment) {
       message = message.toObject()
     }
-    this.conn!.send(ConnectionEnum.Action.sendMsg, <ConnectionContent.Params.SendMsg>{
+    this.conn!.send(ConnectionEnum.Action.sendMsg, {
       message_type: this.messageType,
       group_id: this.groupId,
       user_id: this.userId,

@@ -137,6 +137,7 @@ export namespace ConnectionEnum {
     getGroupMemberList = "get_group_member_list",
     getGroupHonorInfo = "get_group_honor_info",
     getGroupSystemMsg = "get_group_system_msg",
+    getFriendSystemMsg = "get_friend_system_msg",
     getEssenceMsgList = "get_essence_msg_list",
     isBlacklistUin = "is_blacklist_uin",
 

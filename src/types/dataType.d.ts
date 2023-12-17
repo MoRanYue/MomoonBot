@@ -8,7 +8,8 @@ import type { EventEnum, ListenerEnum } from "./enums"
 export namespace DataType {
   type AnyFunction = (...args: any[]) => any
 
-  type ResponseFunction = (data: ConnectionContent.Connection.Response<number | object | object[]>) => void | Promise<void>
+  type RawResponseFunction<T> = (data: T) => void | Promise<void>
+  type ResponseFunction<T> = RawResponseFunction<ConnectionContent.Connection.Response<T>>
 
   interface GroupMemberParams {
     groupId: number
