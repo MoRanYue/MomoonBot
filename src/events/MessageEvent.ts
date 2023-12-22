@@ -29,13 +29,7 @@ export class MessageEvent extends Ev {
 
     this.checkEventType(ev, [EventEnum.EventType.message, EventEnum.EventType.messageSent])
 
-    if (ev.post_type == EventEnum.EventType.messageSent) {
-      this.isSelfSent = true
-    }
-    else {
-      this.isSelfSent = false
-    }
-
+    this.isSelfSent = ev.post_type == EventEnum.EventType.messageSent
     this.type = EventEnum.EventType.message
     this.conn = conn
     this.selfId = ev.self_id
@@ -79,10 +73,10 @@ export class MessageEvent extends Ev {
       msg = MessageUtils.segmentsToObject(<Segment[]>message)
     }
     else if (typeof message == "string") {
-      msg = MessageUtils.segmentsToObject([new MsgSegment.Text(message)])
+      msg = [new MsgSegment.Text(message).toObject()]
     }
     else if (message instanceof Segment) {
-      message = message.toObject()
+      msg = [message.toObject()]
     }
     else {
       throw new TypeError(`消息类型错误，应为“SendingMessageContent”而不是“${typeof message}”`)
@@ -99,7 +93,7 @@ export class MessageEvent extends Ev {
       message_type: this.messageType,
       group_id: this.groupId,
       user_id: this.userId,
-      message,
+      message: msg,
       auto_escape: false
     }, cb)
   }
