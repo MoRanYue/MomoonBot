@@ -78,6 +78,9 @@ export class ReverseWsConnection extends Connection {
         }
       }
 
+      this.groups[this.clientAddresses[0]] = {}
+      this.friends[this.clientAddresses[0]] = {}
+
       socket.on("message", buf => this.receivePacket(buf, dataStr => {
         const data = <object>Utils.jsonToData(dataStr)
         if (Object.hasOwn(data, "echo")) {
@@ -161,6 +164,18 @@ export class ReverseWsConnection extends Connection {
         data.data.forEach(friend => friends[friend.user_id] = new User(friend, this))
         this.friends[this.clientAddresses[0]] = friends
       })
+    })
+    this.server.on("error", err => {
+      if (err) {
+        this.logger.error("===============================")
+        this.logger.error("Reverse WebSocket Threw A Error")
+        this.logger.error(err)
+      }
+    })
+    this.server.on("close", () => {
+      this.groups = {}
+      this.friends = {}
+      this.clientAddresses = []
     })
 
     return this

@@ -114,10 +114,18 @@ export default class RandomAnimePicture extends Plugin {
     FileUtils.createFolderIfNotExists(this.dataFolder)
 
     this.ev.on("finishCollecting", (conn: Connection, msgType: EventEnum.MessageType, userId: number, groupId: number, messages: ConnectionContent.Params.CustomForwardMessageNode[]) => {
+      this.logger.info("正在发送图片中")
       if (msgType == EventEnum.MessageType.group) {
         conn.send(ConnectionEnum.Action.sendGroupForwardMsg, {
           group_id: groupId,
           messages
+        }, data => {
+          if (data.retcode != ConnectionEnum.ResponseCode.ok) {
+            conn.send(ConnectionEnum.Action.sendGroupMsg, {
+              group_id: groupId,
+              message: MessageUtils.segmentsToObject([new MessageSegment.At(userId), new MessageSegment.Text(" 消息发送失败")])
+            })
+          }
         })
       }
       else if (msgType == EventEnum.MessageType.private) {
@@ -132,19 +140,18 @@ export default class RandomAnimePicture extends Plugin {
       if (args.length == 1) {
         if (this.resolveCount(ev, args[0])) {
           state.count = parseInt(args[0])
-          this.getPictures(ev.conn!, ev.messageType, ev.userId, ev.groupId, state.count)
+          this.getPictures(ev, state.count)
           return true
         }
         return false
       }
-      this.getPictures(ev.conn!, ev.messageType, ev.userId, ev.groupId)
+      this.getPictures(ev)
       return true
     }, ["rdpic", "anime", "随机图片"], 1, undefined, undefined, undefined, undefined, undefined, "<COMMAND_PROMPT>randomPic <数量>").receive("count", (ev, state) => {
       const count = ev.getPlainText().trim()
       if (this.resolveCount(ev, count)) {
         state.count = parseInt(count)
-
-        this.getPictures(ev.conn!, ev.messageType, ev.userId, ev.groupId, state.count)
+        this.getPictures(ev, state.count)
         return ListenerEnum.ReceiverReturn.finish
       }
       if (!Object.hasOwn(state, "retryTimes")) {
@@ -152,40 +159,40 @@ export default class RandomAnimePicture extends Plugin {
       }
       state.retryTimes++
       if (state.retryTimes >= 3) {
-        ev.quickReply("停止接收参数")
         return ListenerEnum.ReceiverReturn.finish
       }
       return ListenerEnum.ReceiverReturn.keep
     })
   }
 
-  public getPictures(conn: Connection, msgType: EventEnum.MessageType, userId: number, groupId?: number, count: number = 1): void {
-    Utils.randomChoice(this.apiServers)(conn, msgType, userId, groupId, count)
+  public getPictures(ev: MessageEvent, count: number = 1): void {
+    ev.reply("正在获取中", undefined, true)
+    Utils.randomChoice(this.apiServers)(ev.conn!, ev.messageType, ev.userId, ev.groupId, count)
   }
 
   public resolveCount(ev: MessageEvent, num: string): boolean {
     try {
       const count = parseInt(num)
       if (count < 1) {
-        ev.quickReply([new MessageSegment.At(ev.userId), new MessageSegment.Text("1以下，是什么意思？")])
+        ev.reply([new MessageSegment.At(ev.userId), new MessageSegment.Text("1以下，是什么意思？")])
         return false
       }
       else if (count > 10) {
-        ev.quickReply([new MessageSegment.At(ev.userId), new MessageSegment.Text("太多啦")])
+        ev.reply([new MessageSegment.At(ev.userId), new MessageSegment.Text("太多啦")])
         return false
       }
 
       return true
     }
     catch {
-      ev.quickReply([new MessageSegment.At(ev.userId), new MessageSegment.Text("数量错误，需要指定范围为1-10的数字。")])
+      ev.reply([new MessageSegment.At(ev.userId), new MessageSegment.Text("数量错误，需要指定范围为1-10的数字。")])
       return false
     }
   }
 
   public httpGet(target: string, cb?: (data: Buffer, res: IncomingMessage & http.FollowResponse) => (void | Promise<void>), catchCb?: (err: Error, res?: IncomingMessage & http.FollowResponse) => (void | Promise<void>)): void {
     try {
-      http.https.get(target, {
+      const req = http.https.get(target, {
         timeout: 20000,
         headers: {
           "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36 Edg/120.0.0.0"
@@ -204,6 +211,13 @@ export default class RandomAnimePicture extends Plugin {
           res.on("end", () => cb(Buffer.concat(data), res))
         }
       })
+      if (catchCb) {
+        req.on("error", err => {
+          if (err) {
+            catchCb(err)
+          }
+        })
+      }
     }
     catch (err) {
       if (catchCb) {

@@ -34,7 +34,9 @@ export default class BuiltInPlugin extends Plugin {
         }
         if (!group) {
           this.logger.info(`接收到${type}：${ev.raw}（${ev.messageId}） 来自群聊：${ev.groupId} 发送者：${ev.userId}`)
-          ev.conn!._addGroup(ev.groupId!)
+          if (Object.keys(ev.conn!.getGroups()!).length != 0) {
+            ev.conn!._addGroup(ev.groupId!)
+          }
           return
         }
         const member = group.members[ev.userId]
@@ -172,7 +174,7 @@ export default class BuiltInPlugin extends Plugin {
     }, 999)
 
     this.onCommand("echo", (ev, state, args) => {
-      ev.quickReply(args.join(" "))
+      ev.reply(args.join(" "))
     })
   }
 }

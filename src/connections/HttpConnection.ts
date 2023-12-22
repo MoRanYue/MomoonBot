@@ -110,6 +110,16 @@ export class HttpConnection extends Connection {
         res.end(Utils.dataToJson(ResponseContent.httpClient()))
       })
     })
+    this.server.on("error", err => {
+      if (err) {
+        this.logger.error("==================")
+        this.logger.error("Http Threw A Error")
+        this.logger.error(err)
+      }
+    })
+    this.server.on("close", () => {
+      this.clientAddresses = []
+    })
     
     this.server.listen(port, host, cb)
 

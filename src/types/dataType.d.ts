@@ -8,6 +8,9 @@ import type { EventEnum, ListenerEnum } from "./enums"
 export namespace DataType {
   type AnyFunction = (...args: any[]) => any
 
+  type SendingMessageContent = string | MessageSegment.Segment | MessageSegment.Segment[] | Segment | Segment[]
+  type MessageEventOperationFunc = (ev: MessageEvent) => void | Promise<void>
+
   type RawResponseFunction<T> = (data: T) => void | Promise<void>
   type ResponseFunction<T> = RawResponseFunction<ConnectionContent.Connection.Response<T>>
 

@@ -70,6 +70,10 @@ export class Group {
   public _addMember(member: number): boolean
   public _addMember(member: Event.GroupMemberIncrease): boolean
   public _addMember(member: Event.GroupMemberIncrease | number): boolean {
+    if (!member) {
+      return false
+    }
+
     let id: number
     if (typeof member == "number") {
       id = member

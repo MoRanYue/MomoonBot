@@ -24,7 +24,7 @@ export default class TodayNumber extends Plugin {
       if (!Object.hasOwn(numbers, id)) {
         numbers[id] = Utils.randomInt(1, 100)
       }
-      ev.quickReply([new MessageSegment.At(ev.userId), new MessageSegment.Text(` 今天的数字是：${numbers[id]}`)])
+      ev.reply(new MessageSegment.Text(`今天的数字是：${numbers[id]}`), undefined, true)
     }
 
     this.onCommand("今日数字", handle, ["jrsz", "todaynumber"])

@@ -1,12 +1,12 @@
 import { Event as Ev } from "./Event";
 import { Event } from "../types/event";
-import { ConnectionEnum, EventEnum, MessageSegmentEnum } from "../types/enums";
-import { WrongEventTypeError } from "../exceptions/exceptions";
-import { Segment } from "./messages/MessageSegment";
+import { ConnectionEnum, EventEnum } from "../types/enums";
+import MsgSegment, { Segment } from "./messages/MessageSegment";
 import type { MessageSegment } from "../types/message";
 import { MessageUtils } from "../tools/MessageUtils";
 import type { Connection } from "../connections/Connection";
-import type { ConnectionContent } from "src/types/connectionContent";
+import type { DataType } from "src/types/dataType";
+import { ConnectionContent } from "src/types/connectionContent";
 
 export class MessageEvent extends Ev {
   public time: number
@@ -69,20 +69,63 @@ export class MessageEvent extends Ev {
     return MessageUtils.segmentsToObject(this.message)
   }
 
-  public quickReply(message: string | MessageSegment.Segment | MessageSegment.Segment[] | Segment | Segment[]) {
+  public reply(message: DataType.SendingMessageContent): void
+  public reply(message: DataType.SendingMessageContent, cb?: DataType.MessageEventOperationFunc): void
+  public reply(message: DataType.SendingMessageContent, cb?: DataType.MessageEventOperationFunc, atSender?: boolean): void
+  public reply(message: DataType.SendingMessageContent, cb?: DataType.MessageEventOperationFunc, atSender?: boolean, reply?: boolean): void
+  public reply(message: DataType.SendingMessageContent, cb?: DataType.MessageEventOperationFunc, atSender: boolean = false, reply: boolean = false): void {
+    let msg!: MessageSegment.Segment[]
     if (Array.isArray(message) && message.length != 0 && message[0] instanceof Segment) {
-      message = MessageUtils.segmentsToObject(<Segment[]>message)
+      msg = MessageUtils.segmentsToObject(<Segment[]>message)
+    }
+    else if (typeof message == "string") {
+      msg = MessageUtils.segmentsToObject([new MsgSegment.Text(message)])
     }
     else if (message instanceof Segment) {
       message = message.toObject()
     }
+    else {
+      throw new TypeError(`消息类型错误，应为“SendingMessageContent”而不是“${typeof message}”`)
+    }
+    
+    if (atSender && this.messageType == EventEnum.MessageType.group) {
+      msg.unshift(new MsgSegment.At(this.userId).toObject(), new MsgSegment.Text(" ").toObject())
+    }
+    if (reply) {
+      msg.unshift(new MsgSegment.Reply(this.messageId).toObject())
+    }
+
     this.conn!.send(ConnectionEnum.Action.sendMsg, {
       message_type: this.messageType,
       group_id: this.groupId,
       user_id: this.userId,
       message,
       auto_escape: false
-    })
+    }, cb)
   }
-  public quickOperation() {}
+
+  public recall(): void
+  public recall(cb?: DataType.ResponseFunction<null>): void {
+    this.conn!.send(ConnectionEnum.Action.deleteMsg, {
+      message_id: this.messageId
+    }, cb)
+  }
+
+  public kickSender(reject?: boolean): void
+  public kickSender(reject: boolean = false, cb?: DataType.ResponseFunction<null>): void {
+    this.conn!.send(ConnectionEnum.Action.setGroupKick, {
+      group_id: this.groupId,
+      user_id: this.userId,
+      reject_add_request: reject
+    }, cb)
+  }
+
+  public muteSender(duration: number): void
+  public muteSender(duration: number, cb?: DataType.ResponseFunction<null>): void {
+    this.conn!.send(ConnectionEnum.Action.setGroupBan, {
+      group_id: this.groupId,
+      user_id: this.userId,
+      duration
+    }, cb)
+  }
 }
