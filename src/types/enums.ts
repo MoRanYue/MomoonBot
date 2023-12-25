@@ -204,6 +204,11 @@ export namespace ConnectionEnum {
     getWeatherCityCode = "get_weather_city_code",
     getWeather = "get_weather",
     uploadGroupImage = "upload_group_image",
+
+    favoriteGetItemList = "fav.get_item_list",
+    favoriteGetItemContent = "fav.get_item_content",
+    favoriteAddTextMsg = "fav.add_text_msg",
+    favoriteAddImageMsg = "fav.add_image_msg",
   }
   export enum ResponseStatus {
     ok = "ok",

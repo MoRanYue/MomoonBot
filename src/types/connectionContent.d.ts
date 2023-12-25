@@ -304,6 +304,20 @@ export namespace ConnectionContent {
       sender: number
       troop: number
     }
+    interface FavoriteGetItemList {
+      page_size: number
+      category: number
+      start_pos: number
+    }
+    interface FavoriteGetItemContent {
+      id: string
+    }
+    interface FavoriteAddTextMsg {
+      content: string
+    }
+    interface FavoriteAddImageMsg {
+      file: string
+    }
   }
   namespace ActionResponse {
     interface GetLoginInfo {
@@ -625,5 +639,27 @@ export namespace ConnectionContent {
     }
     type GetWeatherCityCode = WeatherCityCodeItem[]
     type GetWeather = object
+    interface FavoriteItem {
+      id: string
+      author_type: number
+      author: number
+      author_name: string
+      group_name: string
+      group_id: number
+      client_version: string
+      time: number
+    }
+    interface FavoriteGetItemList {
+      items: FavoriteItem[]
+    }
+    interface FavoriteGetItemContent {
+      content: string
+    }
+    interface FavoriteAddTextMsg {
+      id: string
+    }
+    interface FavoriteAddImageMsg {
+      id: string
+    }
   }
 }

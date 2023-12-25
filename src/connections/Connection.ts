@@ -96,7 +96,11 @@ export abstract class Connection {
   public abstract send(action: ConnectionEnum.Action.getModelShow, data: ConnectionContent.Params.GetModelShow, cb?: DataType.ResponseFunction<ConnectionContent.ActionResponse.GetModelShow>): void
   public abstract send(action: ConnectionEnum.Action.setQqProfile, data: ConnectionContent.Params.SetQqProfile, cb?: DataType.ResponseFunction<null>): void
   public abstract send(action: ConnectionEnum.Action.getLoginInfo, data: ConnectionContent.Params.GetLoginInfo, cb?: DataType.ResponseFunction<ConnectionContent.ActionResponse.GetLoginInfo>): void
-  public abstract send(action: ConnectionEnum.Action, data?: Record<string, any> | string | null, cb?: DataType.ResponseFunction<any> | DataType.RawResponseFunction<any>): void
+  public abstract send(action: ConnectionEnum.Action.favoriteGetItemList, data: ConnectionContent.Params.FavoriteGetItemList, cb?: DataType.ResponseFunction<ConnectionContent.ActionResponse.FavoriteGetItemList>): void
+  public abstract send(action: ConnectionEnum.Action.favoriteGetItemContent, data: ConnectionContent.Params.FavoriteGetItemContent, cb?: DataType.ResponseFunction<ConnectionContent.ActionResponse.FavoriteGetItemContent>): void
+  public abstract send(action: ConnectionEnum.Action.favoriteAddTextMsg, data: ConnectionContent.Params.FavoriteAddTextMsg, cb?: DataType.ResponseFunction<ConnectionContent.ActionResponse.FavoriteAddTextMsg>): void
+  public abstract send(action: ConnectionEnum.Action.favoriteAddImageMsg, data: ConnectionContent.Params.FavoriteAddImageMsg, cb?: DataType.ResponseFunction<ConnectionContent.ActionResponse.FavoriteAddImageMsg>): void
+  public abstract send(action: string, data?: Record<string, any> | string | null, cb?: DataType.ResponseFunction<any> | DataType.RawResponseFunction<any>): void
 
   public abstract getGroups(...args: any[]): Record<number, Group> | undefined
   public abstract getGroup(id: number): Group | undefined
