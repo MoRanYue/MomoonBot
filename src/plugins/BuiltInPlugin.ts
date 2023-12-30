@@ -13,6 +13,7 @@ import type {
   PrivateRecall
 } from "src/events/NoticeEvent";
 import { Logger } from "../tools/Logger";
+import MessageSegment from "../events/messages/MessageSegment";
 
 export default class BuiltInPlugin extends Plugin {
   name: string = "内置插件"
@@ -172,7 +173,7 @@ export default class BuiltInPlugin extends Plugin {
         this.logger.info(`接收到好友添加通知：好友：${friend.viewedName}（${ev.userId}）`)
       }
     }, 999)
-
+    
     this.onCommand("echo", (ev, state, args) => {
       ev.reply(args.join(" "))
     })

@@ -53,11 +53,12 @@ export class MessageEvent extends Ev {
   }
 
   public getPlainText(): string {
-    let text: string = ""
-    this.message.forEach(seg => {
-      text += seg.toPlainText()
-    })
-    return text
+    return MessageUtils.segmentsToPlainText(this.message)
+  }
+  public getMessageContent(): string {
+    let str: string = ""
+    this.message.forEach(seg => str += seg.toPlainText())
+    return str
   }
   public messageToObject(): MessageSegment.Segment[] {
     return MessageUtils.segmentsToObject(this.message)

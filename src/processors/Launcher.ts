@@ -32,13 +32,18 @@ export class Launcher {
     const exit = new Exit()
     exit.register()
     exit.addTask(complete => {
+      this.logger.info("正在关闭服务器")
+      this.connections.forEach(conn => conn.stopServer())
+      complete()
+    })
+    exit.addTask(complete => {
       this.logger.info("正在卸载所有插件")
       this.loader.unloadAll(complete)
     })
     exit.addTask(complete => {
       const savedLogFile = path.resolve(path.dirname(this.logger.file), this.logger.formatCurrentTime().replaceAll(" ", "_").replaceAll(":", "_") + ".log")
-      this.logger._save(savedLogFile, complete)
       this.logger.info(`正在保存日志“${savedLogFile}”`)
+      this.logger._save(savedLogFile, complete)
     })
     
     this.logger.info("Momoon Bot")
@@ -47,7 +52,7 @@ export class Launcher {
     this.loader = new PluginLoader()
     // 默认插件文件夹
     this.loader.loadFromFolder("./src/plugins/")
-    config.plugins.files?.forEach(file => this.loader.loadFromFile(file))
+    config.plugins.files?.forEach(file => this.loader.loadPlugin(file))
     config.plugins.folders.forEach(folder => this.loader.loadFromFolder(folder))
     
     config.connections.forEach(conn => {

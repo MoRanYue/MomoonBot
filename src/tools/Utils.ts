@@ -53,4 +53,8 @@ export class Utils {
         return 0
     }
   }
+
+  public static getCurrentTimestamp(): number {
+    return Math.floor(Date.now() / 1000)
+  }
 }

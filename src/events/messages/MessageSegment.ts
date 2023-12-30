@@ -36,7 +36,7 @@ class File extends Segment {
   }
 
   public toPlainText(): string {
-    return ""
+    return `(文件 ID：“${this.id}” 名称：“${this.name}” URL：“${this.url}” 到期时间：“${this.expire}” 大小：“${this.size}” Sub：“${this.sub}” Biz；“${this.biz}”)`
   }
   public toObject(): MessageSegment.FileSegment {
     return {
@@ -61,13 +61,9 @@ class File extends Segment {
 class Json extends Segment {
   public data: any
 
-  constructor(data: string | any) {
+  constructor(data: any) {
     super();
 
-    if (typeof data == "string") {
-      this.data = Utils.jsonToData(data)
-      return
-    }
     this.data = data
   }
 
@@ -607,10 +603,10 @@ class Text extends Segment {
 }
 
 class Image extends Segment {
-  public file!: string
+  public file?: string
   public url?: string
 
-  constructor(file: string | Buffer, url?: string) {
+  constructor(file?: string | Buffer, url?: string) {
     super();
 
     if (typeof file == "string") {
@@ -626,13 +622,17 @@ class Image extends Segment {
     return ""
   }
   public toObject(): MessageSegment.ImageSegment {
-    return {
+    const obj: MessageSegment.ImageSegment = {
       type: MessageSegmentEnum.SegmentType.image,
-      data: {
-        file: this.file,
-        url: this.url
-      }
+      data: {}
     }
+    if (this.file) {
+      obj.data.file = this.file
+    }
+    if (this.url) {
+      obj.data.url = this.url
+    }
+    return obj
   }
   public static fromObject(seg: MessageSegment.ImageSegment): Image {
     this.verify(seg, MessageSegmentEnum.SegmentType.image)

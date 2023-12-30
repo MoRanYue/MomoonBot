@@ -49,7 +49,7 @@ export class ReverseWsConnection extends Connection {
   public createServer(port: number, host?: string | undefined, token?: string | null): this;
   public createServer(port: number, host?: string | undefined, token?: string | null, cb?: VoidFunction | undefined): this {
     if (this.server) {
-      this.server.close()
+      this.stopServer()
     }
 
     this.server = new ws.Server({
@@ -179,6 +179,10 @@ export class ReverseWsConnection extends Connection {
     })
 
     return this
+  }
+
+  public stopServer(cb?: (err?: Error) => void): void {
+    this.server.close(cb)
   }
 
   public connect(address: string): boolean {

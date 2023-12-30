@@ -90,24 +90,24 @@ export namespace CustomEventEmitter {
     on(eventName: "notice", listener: (ev: NoticeEvent) => void): this
     on(eventName: "request", listener: (ev: Ev) => void): this
     on(eventName: "unknown", listener: (ev: Ev) => void): this
-    on(eventName: "load", listener: VoidFunction)
-    on(eventName: "unload", listener: VoidFunction)
+    on(eventName: "load", listener: VoidFunction): this
+    on(eventName: "unload", listener: (complete: () => void) => void): this
     on(eventName: string | symbol, listener: DataType.AnyFunction): this
 
     once(eventName: "message", listener: (ev: MessageEvent) => void): this
     once(eventName: "notice", listener: (ev: NoticeEvent) => void): this
     once(eventName: "request", listener: (ev: Ev) => void): this
     once(eventName: "unknown", listener: (ev: Ev) => void): this
-    once(eventName: "load", listener: VoidFunction)
-    once(eventName: "unload", listener: VoidFunction)
+    once(eventName: "load", listener: VoidFunction): this
+    once(eventName: "unload", listener: (complete: () => void) => void): this
     once(eventName: string | symbol, listener: DataType.AnyFunction): this
 
     emit(eventName: "message", ev: MessageEvent): boolean
     emit(eventName: "notice", ev: NoticeEvent): boolean
     emit(eventName: "request", ev: Ev): boolean
     emit(eventName: "unknown", ev: Ev): boolean
-    emit(eventName: "load", ...args: any[])
-    emit(eventName: "unload", ...args: any[])
-    emit(eventName: string | symbol, ...args: any[]): boolean;
+    emit(eventName: "load", ...args: any[]): boolean
+    emit(eventName: "unload", complete: () => void): boolean
+    emit(eventName: string | symbol, ...args: any[]): boolean
   }
 }

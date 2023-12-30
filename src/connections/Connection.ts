@@ -21,6 +21,8 @@ export abstract class Connection {
   public abstract createServer(port: number, host?: string): this
   public abstract createServer(port: number, host?: string, cb?: VoidFunction): this
 
+  public abstract stopServer(cb?: (err?: Error) => void): void
+
   public abstract connect(address: string): boolean
   public abstract address(): string | undefined
 

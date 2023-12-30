@@ -1,8 +1,11 @@
-import { MessageSegmentEnum } from "../types/enums";
+import { AppMessageEnum, MessageSegmentEnum } from "../types/enums";
 import { MessageSegment } from "../types/message";
 import MsgSegment, { type Segment } from "../events/messages/MessageSegment"
 import type { DataType } from "src/types/dataType";
 import config from "../config";
+import { Utils } from "./Utils";
+import AppMessage from "../events/messages/AppMessage"
+import type { AppMessageContent } from "src/types/AppMessageContent";
 
 export class MessageUtils {
   public static classify(message: MessageSegment.Segment[]) {
@@ -44,7 +47,18 @@ export class MessageUtils {
         return MsgSegment.Share.fromObject(<MessageSegment.ShareSegment>seg)
 
       case MessageSegmentEnum.SegmentType.json:
-        return MsgSegment.Json.fromObject(<MessageSegment.JsonSegment>seg)
+        const data = Utils.jsonToData((<MessageSegment.JsonSegment>seg).data.data)
+        if (data.app && data.app == AppMessageEnum.App.structuredMessage) {
+          const metaContent: any = (<AppMessageContent.StructuredMessage<object>>data).meta
+          if (Object.hasOwn(metaContent, "news")) {
+            switch (metaContent.news.appid) {
+              case AppMessageEnum.AppId.bilibiliVideoShare:
+                return new AppMessage.BilibiliVideoShare(data)
+            }
+          }
+          return new AppMessage.AppMessage(data)
+        }
+        return MsgSegment.Json.fromObject(data)
 
       case MessageSegmentEnum.SegmentType.basketball:
         return MsgSegment.Basketball.fromObject(<MessageSegment.BasketballSegment>seg)
@@ -90,17 +104,79 @@ export class MessageUtils {
     }
   }
 
+  public static segmentsToPlainText(segments: Segment[]): string {
+    let text: string = ""
+    segments.forEach(seg => {
+      if (seg instanceof MsgSegment.Text) {
+        text += seg.text
+      }
+    })
+    return text
+  }
   public static segmentsToObject(segments: Segment[]): MessageSegment.Segment[] {
     let message: MessageSegment.Segment[] = []
     segments.forEach(seg => message.push(seg.toObject()))
     return message
   }
 
-  public static matchMessage(str: string, pattern: DataType.ListenedMessage, ignoreCase: boolean = true): boolean {
-    return (typeof pattern == "string" && (ignoreCase ? str.toLowerCase().includes(<string>pattern.toLowerCase()) : str.includes(<string>pattern))) || 
-    (pattern instanceof RegExp && pattern.test(str))
+  public static matchMessage(message: Segment[], pattern: DataType.ListenedMessage, ignoreCase: boolean = true): boolean | never {
+    if (typeof pattern == "string") {
+      return MessageUtils.matchText(MessageUtils.segmentsToPlainText(message), pattern, ignoreCase)
+    }
+    else if (pattern instanceof RegExp) {
+      return MessageUtils.matchText(MessageUtils.segmentsToPlainText(message), pattern, ignoreCase)
+    }
+    else if (Array.isArray(pattern)) {
+      if (pattern.length == 0) {
+        throw new Error("数组形式消息匹配类型的长度不可为0")
+      }
+
+      let firstItemPos: number | undefined = undefined
+      let matchedItemsCount: number = 0
+      for (let i = 0; i < message.length; i++) {
+        const segment = message[i];
+        const correspondingSegment: Segment | undefined = pattern[i - (firstItemPos ?? 0)]
+
+        if (typeof firstItemPos == "number" && correspondingSegment && MessageUtils.matchMessageSegment(segment, correspondingSegment, ignoreCase)) {
+          matchedItemsCount++
+        }
+        else if (typeof firstItemPos == "undefined" && MessageUtils.matchMessageSegment(segment, pattern[0], ignoreCase)) {
+          firstItemPos = i
+          matchedItemsCount++
+        }
+      }
+      return matchedItemsCount == pattern.length
+    }
+    else {
+      throw new TypeError("类型错误，消息的匹配类型应为 DataType.ListenedMessage")
+    }
   }
-  public static matchCommand(str: string, command: DataType.ListenedMessage, ignoreCase: boolean = true): string[] | undefined {
+  public static matchMessageSegment(a: Segment, b: Segment, ignoreCase: boolean = true): boolean {
+    if (Object.getPrototypeOf(a) === Object.getPrototypeOf(b) || (a instanceof AppMessage.AppMessage && b instanceof MsgSegment.Json)) {
+      if (a instanceof MsgSegment.Text && b instanceof MsgSegment.Text) {
+        return MessageUtils.matchText(a.text, b.text, ignoreCase)
+      }
+
+      return true
+    }
+    return false
+  }
+  public static matchText(content: string, pattern: string | RegExp, ignoreCase: boolean = true): boolean {
+    if (typeof pattern == "string") {
+      if (ignoreCase) {
+        content = content.toLowerCase()
+        pattern = pattern.toLowerCase()
+      }
+      return content.includes(pattern)
+    }
+    else {
+      if (ignoreCase) {
+        pattern = new RegExp(pattern.source, "gi")
+      }
+      return pattern.test(content)
+    }
+  }
+  public static matchCommand(str: string, command: DataType.ListenedCommand, ignoreCase: boolean = true): string[] | undefined {
     let i: number = -1
     let char: string | undefined
     function advance() {
@@ -147,7 +223,7 @@ export class MessageUtils {
       }
 
       const cmd = segments.shift()
-      if (cmd && MessageUtils.matchMessage(cmd, command, ignoreCase)) {
+      if (cmd && MessageUtils.matchText(cmd, command, ignoreCase)) {
         return segments
       }
     }

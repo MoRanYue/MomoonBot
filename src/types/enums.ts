@@ -119,6 +119,19 @@ export namespace MessageSegmentEnum {
     custom = "custom"
   }
 }
+export namespace AppMessageEnum {
+  export enum App {
+    structuredMessage = "com.tencent.structmsg"
+  }
+  export enum AppId {
+    bilibiliVideoShare = 100951776,
+    neteaseMusicShare = 100495085,
+  }
+  export enum View {
+    news = "news",
+    music = "music"
+  }
+}
 
 export namespace ConnectionEnum {
   export enum Action {

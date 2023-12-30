@@ -44,7 +44,7 @@ export namespace MessageSegment {
   interface ImageSegment implements Segment {
     type: MessageSegmentEnum.SegmentType.image
     data: {
-      file: string
+      file?: string
       url?: string
     }
   }

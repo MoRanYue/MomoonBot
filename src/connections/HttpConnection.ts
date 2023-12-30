@@ -26,7 +26,7 @@ export class HttpConnection extends Connection {
   public createServer(port: number, host?: string, token?: string | null): this
   public createServer(port: number, host?: string, token?: string | null, cb?: () => void): this {
     if (this.server) {
-      this.server.close()
+      this.stopServer()
     }
 
     this.server = http.createServer()
@@ -124,6 +124,10 @@ export class HttpConnection extends Connection {
     this.server.listen(port, host, cb)
 
     return this
+  }
+
+  public stopServer(cb?: (err?: Error) => void): void {
+    this.server.close(cb)
   }
 
   public connect(): never {

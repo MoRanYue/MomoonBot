@@ -96,11 +96,10 @@ class MessageListener extends Listener {
       return
     }
 
-    const plainText = ev.getPlainText()
     for (let i = 0; i < this.patterns.length; i++) {
       const pattern = this.patterns[i];
       
-      if (MessageUtils.matchMessage(plainText, pattern, this.ignoreCase)) {
+      if (MessageUtils.matchMessage(ev.message, pattern, this.ignoreCase)) {
         if (this.receivers.length > 0) {
           const conversation = new Conversation(ev)
           this.conversations[ev.userId] = conversation
@@ -116,10 +115,10 @@ class MessageListener extends Listener {
             this.processReceiver(conversation, <boolean | void>this.callback(ev, conversation.state), conversation.step)
           }
     
-          return 
+          return
         }
         this.callback(ev, {})
-        return 
+        return
       }
     }
   }
@@ -155,7 +154,7 @@ class MessageListener extends Listener {
 }
 
 class CommandListener extends Listener {
-  protected patterns: DataType.ListenedMessage[];
+  protected patterns: DataType.ListenedCommand[];
   protected callback: DataType.ListenedCommandFunc;
   protected checkers: DataType.Checker[]
   protected permission: ListenerEnum.Permission
@@ -166,7 +165,7 @@ class CommandListener extends Listener {
   protected receivers: DataType.ListenerReceiverData<DataType.ListenedMessageReceiverFunc>[] = []
   protected conversations: Record<number, Conversation> = {}
 
-  constructor(pattern: DataType.ListenedMessage[], cb: DataType.ListenedCommandFunc, priority: number = 0, permission: ListenerEnum.Permission = ListenerEnum.Permission.user, 
+  constructor(pattern: DataType.ListenedCommand[], cb: DataType.ListenedCommandFunc, priority: number = 0, permission: ListenerEnum.Permission = ListenerEnum.Permission.user, 
   messageType: DataType.MessageTypeChecker = "all", checkers: DataType.Checker | DataType.Checker[] = [], block: boolean = false, ignoreCase: boolean = true, usage?: string) {
     super()
 

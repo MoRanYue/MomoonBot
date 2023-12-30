@@ -1,12 +1,15 @@
 import { Logger } from "../tools/Logger"
+import { Worker, isMainThread, MessageChannel, MessagePort, workerData, threadId, parentPort } from "node:worker_threads"
+
+type Task = (complete: () => void) => void | Promise<void>
 
 export class Exit {
-  private tasks: ((complete?: () => void) => void | Promise<void>)[] = []
+  private tasks: Task[] = []
   private isExiting: boolean = false
   private hasExited: boolean = false
   private logger: Logger = new Logger()
 
-  public register() {
+  public register(): void {
     process.on("exit", code => this.handle(code))
     process.on("SIGHUP", () => this.handle(129))
     process.on("SIGINT", () => this.handle(130))
@@ -14,11 +17,11 @@ export class Exit {
     process.on("SIGBREAK", () => this.handle(149))
   }
 
-  public addTask(cb: ((complete?: () => void) => void | Promise<void>)): void {
+  public addTask(cb: Task): void {
     this.tasks.push(cb)
   }
   
-  private exit(code: number) {
+  private exit(code: number): void {
     if (this.hasExited) {
       return
     }
@@ -41,21 +44,33 @@ export class Exit {
       })
     }
 
-    this.tasks.forEach(task => {
-      if (task.length != 0) {
-        asyncTaskCount++
-        task(asyncTaskCb)
+    const callTasks = async () => {
+      this.tasks.forEach(task => {
+        if (task.length != 0) {
+          asyncTaskCount++
+          task(asyncTaskCb)
+        }
+        else {
+          task(() => {})
+        }
+      })
+    }
+
+    this.logger.warning("至多等待10秒，以保证正常退出")
+    setTimeout(() => {
+      this.logger.warning("正在强制退出进程")
+    }, 10000)
+
+    callTasks().then(() => {
+      if (asyncTaskCount == 0) {
+        this.exit(code)
+        return
       }
-      else {
-        task()
+    }).catch(reason => {
+      if (reason) {
+        this.logger.error("在退出时出现错误：")
+        this.logger.error(reason)
       }
     })
-
-    if (asyncTaskCount > 0) {
-      this.logger.warning("等待以保证正常退出")
-      setTimeout(() => this.exit(code), 10000)
-      return
-    }
-    this.exit(code)
   }
 }

@@ -6,6 +6,7 @@ import { CustomEventEmitter as EventEmitter } from "../tools/CustomEventEmitter"
 import { ListenerEnum } from "../types/enums"
 import { MessageUtils } from "../tools/MessageUtils"
 import { Logger } from "../tools/Logger"
+import { Segment } from "../events/messages/MessageSegment"
 
 export abstract class Plugin {
   public readonly abstract name: string
@@ -106,27 +107,28 @@ export abstract class Plugin {
     })
   }
 
-  public onMessage(message: DataType.ListenedMessage, cb: DataType.ListenedMessageFunc, aliases: DataType.ListenedMessage[] | DataType.ListenedMessage = [], priority: number = 0, messageType: DataType.MessageTypeChecker = "all", 
-  permission: ListenerEnum.Permission = ListenerEnum.Permission.user, checkers: DataType.Checker | DataType.Checker[] = [], 
+  public onMessage(message: DataType.ListenedMessageArgument, cb: DataType.ListenedMessageFunc, aliases: DataType.ListenedMessageArgument[] | DataType.ListenedMessageArgument = [], priority: number = 0, messageType: DataType.MessageTypeChecker = "all", 
+  permission: ListenerEnum.Permission = ListenerEnum.Permission.user, checkers: DataType.Checker[] | DataType.Checker = [], 
   block: boolean = false, ignoreCase: boolean = true, usage?: string): MessageListener {
-    let patterns: DataType.ListenedMessage[] = [message]
+    let patterns: DataType.ListenedMessageArgument[] = [message]
     if (Array.isArray(aliases)) {
       patterns.push(...aliases)
     }
     else {
       patterns.push(aliases)
     }
-    const listener = new MessageListener(patterns, cb, priority, permission, messageType, checkers, block, ignoreCase, usage)
+    const msg: DataType.ListenedMessage = this.processSingleSegment(message)
+    const listener = new MessageListener(this.processSegments(patterns), cb, priority, permission, messageType, checkers, block, ignoreCase, usage)
 
     const messageListeners = this.listeners.message
 
-    if (messageListeners.has(message)) {
-      messageListeners.get(message)!.push(listener)
+    if (messageListeners.has(msg)) {
+      messageListeners.get(msg)!.push(listener)
     }
     else {
-      messageListeners.set(message, [listener])
+      messageListeners.set(msg, [listener])
     }
-    messageListeners.get(message)!.sort((a, b) => {
+    messageListeners.get(msg)!.sort((a, b) => {
       if (a.priority > b.priority) {
         return 1
       }
@@ -138,10 +140,10 @@ export abstract class Plugin {
 
     return listener
   }
-  public onCommand(command: DataType.ListenedMessage, cb: DataType.ListenedCommandFunc, aliases: DataType.ListenedMessage[] | DataType.ListenedMessage = [], priority: number = 0, messageType: DataType.MessageTypeChecker = "all", 
-  permission: ListenerEnum.Permission = ListenerEnum.Permission.user, checkers: DataType.Checker | DataType.Checker[] = [], 
+  public onCommand(command: DataType.ListenedCommand, cb: DataType.ListenedCommandFunc, aliases: DataType.ListenedCommand[] | DataType.ListenedCommand = [], priority: number = 0, messageType: DataType.MessageTypeChecker = "all", 
+  permission: ListenerEnum.Permission = ListenerEnum.Permission.user, checkers: DataType.Checker[] | DataType.Checker = [], 
   block: boolean = false, ignoreCase: boolean = true, usage?: string): CommandListener {
-    let patterns: DataType.ListenedMessage[] = [command]
+    let patterns: DataType.ListenedCommand[] = [command]
     if (Array.isArray(aliases)) {
       patterns.push(...aliases)
     }
@@ -180,7 +182,7 @@ export abstract class Plugin {
     return listener
   }
 
-  private sortListeners(a: Listener, b: Listener) {
+  private sortListeners(a: Listener, b: Listener): number {
     if (a.priority > b.priority) {
       return 1
     }
@@ -188,6 +190,19 @@ export abstract class Plugin {
       return -1
     }
     return 0
+  }
+
+  private processSingleSegment(messageArg: DataType.ListenedMessageArgument): DataType.ListenedMessage {
+    return messageArg instanceof Segment ? [messageArg] : messageArg
+  }
+  private processSegments(messageArgs: DataType.ListenedMessageArgument[]): DataType.ListenedMessage[] {
+    const messages: DataType.ListenedMessage[] = []
+    for (let i = 0; i < messageArgs.length; i++) {
+      const message = messageArgs[i];
+
+      messages.push(this.processSingleSegment(message))
+    }
+    return messages
   }
 }
 

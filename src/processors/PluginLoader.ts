@@ -43,7 +43,7 @@ export class PluginLoader {
       const plugin = this.plugins[i];
       
       if (plugin.name == name) {
-        plugin.ev.emit("unload")
+        plugin.ev.emit("unload", () => {})
         this.logger.success(`成功卸载插件“${plugin.name}”`)
         this.plugins.splice(i, 1)
         return plugin
@@ -51,12 +51,19 @@ export class PluginLoader {
     }
   }
   public unloadAll(cb?: VoidFunction): void {
-    this.plugins.forEach(plugin => {
-      plugin.ev.emit("unload")
-    })
-    if (cb) {
-      cb()
+    let completedPluginCount: number = this.plugins.length
+    const complete = () => {
+      completedPluginCount--
+      if (cb && completedPluginCount == 0) {
+        cb()
+      }
     }
+
+    this.plugins.forEach(plugin => {
+      if (!plugin.ev.emit("unload", complete)) {
+        complete()
+      }
+    })
   }
 
   public reload(name: string): Plugin | undefined {
@@ -94,21 +101,21 @@ export class PluginLoader {
       })
     })
   }
-  public loadFromFile(file: string): void {
-    fs.lstat(file, async (err, stats) => {
+  public loadPlugin(pluginPath: string): void {
+    fs.lstat(pluginPath, async (err, stats) => {
       if (err) {
-        this.logger.failure(`插件“${file}”加载错误：`)
+        this.logger.failure(`插件“${pluginPath}”加载错误：`)
         this.logger.error(err)
       }
 
-      if (stats.isFile() && file.endsWith(".js")) {
-        const name = FileUtils.getFileName(path.basename(file))
-        const filePath = path.relative(path.resolve("./src/processors"), file)
+      if (stats.isFile() && pluginPath.endsWith(".js")) {
+        const name = FileUtils.getFileName(path.basename(pluginPath))
+        const filePath = path.relative(path.resolve("./src/processors"), pluginPath)
         const pluginClass = <typeof Plugin_>(await import(FileUtils.toSlash(filePath))).default.default
         this.load(pluginClass)
       }
       else if (stats.isDirectory()) {
-        this.loadFromFolder(file)
+        this.loadFromFolder(pluginPath)
       }
     })
   }

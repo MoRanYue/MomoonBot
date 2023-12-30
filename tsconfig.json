@@ -2,6 +2,7 @@
   "include": [
     "./*/**.ts",
     "./src/*/**.ts",
+    "./src/plugins/*/**.ts",
     "./config.json",
     "./*.ts"
   ],
