@@ -19,8 +19,6 @@ export default class RandomAnimePicture extends Plugin {
   readonly description: string = "调用多个API来获取动漫图片";
   readonly instruction: string = "randomPic、rdpic、anime";
   readonly version: string = "1.0.0";
-  readonly logPrefix: string = "随机动漫图片"
-  protected logger: Logger;
 
   readonly dataFolder: string = "./data/anime/"
   readonly apiServers: ((conn: Connection, msgType: EventEnum.MessageType, userId: number, groupId?: number, num?: number) => void)[] = [
@@ -109,7 +107,7 @@ export default class RandomAnimePicture extends Plugin {
 
   constructor() {
     super();
-    this.logger = new Logger(this.logPrefix)
+    this.logger.setPrefix("随机动漫图片")
 
     FileUtils.createFolderIfNotExists(this.dataFolder)
 

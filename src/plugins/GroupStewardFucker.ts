@@ -7,16 +7,14 @@ import MessageSegment from "../events/messages/MessageSegment"
 import { Logger } from "../tools/Logger"
 
 export default class GroupStewardFucker extends Plugin {
-  name: string = "Q群管家滚蛋"
-  description: string = "尝试对Q群管家的行为进行反抗。\n重新发出被Q群管家撤回的消息"
+  name: string = "Q群管家反制"
+  description: string = "尝试对Q群管家的行为进行反制。\n重新发出被Q群管家撤回的消息"
   instruction: string = "无"
   version: string = "1.0.0"
-  logPrefix: string = "Q群管家滚蛋"
-  protected logger: Logger;
 
   constructor() {
     super();
-    this.logger = new Logger(this.logPrefix)
+    this.logger.setPrefix("Q群管家反制")
 
     this.onNotice(EventEnum.NoticeType.groupRecall, event => {
       const ev = <GroupRecall>event

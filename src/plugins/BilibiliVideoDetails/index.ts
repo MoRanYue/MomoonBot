@@ -13,13 +13,12 @@ export default class BilibiliVideoDetails extends Plugin {
   public readonly description: string = "在检测到哔哩哔哩视频分享链接与分享卡片时，获取并发送该视频的详情信息。";
   public readonly instruction: string = "发送哔哩哔哩视频短链接、普通链接或分享卡片";
   public readonly version: string = "1.0.0";
-  public readonly logPrefix: string = "哔哩哔哩视频详情";
 
   private api: Api = new Api()
   
   constructor() {
     super();
-    this.logger = new Logger(this.logPrefix)
+    this.logger.setPrefix("哔哩哔哩视频详情")
 
     this.ev.on("init", () => {
       this.api.getWbiKey()  

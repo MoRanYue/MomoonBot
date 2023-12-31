@@ -13,8 +13,7 @@ export abstract class Plugin {
   public readonly abstract description: string
   public readonly abstract instruction: string
   public readonly abstract version: string
-  public readonly logPrefix: string = "插件"
-  protected logger: Logger
+  protected logger: Logger = new Logger("插件")
 
   protected listeners: DataType.ListenerList = {
     message: new Map(),
@@ -25,8 +24,6 @@ export abstract class Plugin {
   readonly ev: CustomEventEmitter.PluginEventEmitter = new EventEmitter()
 
   constructor() {
-    this.logger = new Logger(this.logPrefix)
-
     this.ev.on("message", ev => {
       if (ev.isSelfSent && !config.getConfig().listener.settings.triggerBySelf) {
         return

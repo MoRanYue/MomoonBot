@@ -20,12 +20,10 @@ export default class BuiltInPlugin extends Plugin {
   description: string = "内置插件，不应移除"
   instruction: string = "内置插件"
   version: string = "1.0.0"
-  logPrefix: string = "内置插件"
-  logger: Logger;
 
   constructor() {
     super();
-    this.logger = new Logger(this.logPrefix)
+    this.logger.setPrefix("内置插件")
 
     const reportEvent = (type: string, ev: MessageEvent) => {
       if (ev.messageType == EventEnum.MessageType.group) {

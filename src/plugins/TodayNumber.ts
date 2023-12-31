@@ -10,11 +10,10 @@ export default class TodayNumber extends Plugin {
   description: string = "今日数字"
   instruction: string = "命令：今日数字、jrsz、todaynumber"
   version: string = "1.0.0"
-  logPrefix: string = "今日数字"
 
   constructor() {
     super();
-    this.logger = new Logger(this.logPrefix)
+    this.logger.setPrefix("今日数字")
 
     let numbers: Record<number, number> = {}
     setInterval(() => numbers = {}, 863990000)
