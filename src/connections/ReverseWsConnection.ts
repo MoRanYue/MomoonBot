@@ -132,7 +132,7 @@ export class ReverseWsConnection extends Connection {
         }
       }))
       socket.on("close", () => {
-        delete this.clientAddresses[index]
+        this.clientAddresses.splice(index, 1)
         delete this.groups[address]
         delete this.friends[address]
 
