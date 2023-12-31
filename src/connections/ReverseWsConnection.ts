@@ -10,7 +10,7 @@ import { ConnectionContent } from "src/types/connectionContent";
 import type { DataType } from "src/types/dataType";
 import { Group } from "../processors/sets/Group";
 import { User } from "../processors/sets/User";
-import { Logger } from "src/tools/Logger";
+import { Logger } from "../tools/Logger";
 
 export class ReverseWsConnection extends Connection {
   protected readonly logger: Logger = new Logger("反向 WebSocket");
