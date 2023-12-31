@@ -10,8 +10,10 @@ import { ConnectionContent } from "src/types/connectionContent";
 import type { DataType } from "src/types/dataType";
 import { Group } from "../processors/sets/Group";
 import { User } from "../processors/sets/User";
+import { Logger } from "src/tools/Logger";
 
 export class ReverseWsConnection extends Connection {
+  protected readonly logger: Logger = new Logger("反向 WebSocket");
   protected token: string | null | undefined;
   public groups: Record<string, Record<number, Group>> = {};
   public friends: Record<string, Record<number, User>> = {};
@@ -25,15 +27,14 @@ export class ReverseWsConnection extends Connection {
     super();
   
     this.ev.on("response", (data: ConnectionContent.Connection.Response<any>) => {
-      this.logger.debug("===================================")
-      this.logger.debug("Reverse WebSocket Received Response")
+      this.logger.debug("接收到客户端返回")
       
       let messageInfo: ConnectionContent.Connection.WsRequestDetector
       try {
         messageInfo = <ConnectionContent.Connection.WsRequestDetector>Utils.jsonToData(data.echo)
         this.logger.debug("\n", Utils.dataToJson(messageInfo, 2))
       } catch (err) {
-        this.logger.warning("收到的返回非本服务器发送的请求所应返回的")
+        this.logger.warning("客户端返回的内容非服务端发送的请求对客户端所预期返回的")
         return
       }
 
@@ -57,6 +58,7 @@ export class ReverseWsConnection extends Connection {
       host,
     })
     this.token = token
+    this.logger.setPrefix("反向 WebSocket @ " + Utils.showHostWithPort(host, port))
 
     if (cb) {
       this.server.on("listening", cb)
@@ -65,10 +67,10 @@ export class ReverseWsConnection extends Connection {
     this.server.on("connection", (socket, req) => {
       this.ev.emit("connect")
 
-      this.clientAddresses.push(`${req.socket.remoteAddress}:${req.socket.remotePort}`)
-      this.logger.info("=============================================")
-      this.logger.info("Reverse WebSocket Received Connection Request")
-      this.logger.info("Client:", `${req.socket.remoteAddress}:${req.socket.remotePort}`)
+      const address = Utils.showHostWithPort(req.socket.remoteAddress, req.socket.remotePort)
+      const index = this.clientAddresses.push(address) - 1
+      this.logger.info("接收到客户端连接")
+      this.logger.info("客户端地址：" + address)
 
       const auth = req.headers.authorization
       if (this.token) {
@@ -78,8 +80,8 @@ export class ReverseWsConnection extends Connection {
         }
       }
 
-      this.groups[this.clientAddresses[0]] = {}
-      this.friends[this.clientAddresses[0]] = {}
+      this.groups[this.clientAddresses[index]] = {}
+      this.friends[this.clientAddresses[index]] = {}
 
       socket.on("message", buf => this.receivePacket(buf, dataStr => {
         const data = <object>Utils.jsonToData(dataStr)
@@ -89,36 +91,32 @@ export class ReverseWsConnection extends Connection {
         else {
           switch ((<Event.Reported>data).post_type) {
             case EventEnum.EventType.message:
-              this.logger.debug("=======================================")
-              this.logger.debug("Reverse WebSocket Received Event Report")
-              this.logger.debug("Type: Message")
+              this.logger.debug("接收到事件上报")
+              this.logger.debug("类型：消息（Message）")
               this.logger.debug(dataStr)
 
               this.ev.emit("message", <Event.Message>data)
               break;
 
             case EventEnum.EventType.messageSent:
-              this.logger.debug("=======================================")
-              this.logger.debug("Reverse WebSocket Received Event Report")
-              this.logger.debug("Type: MessageSent")
+              this.logger.debug("接收到事件上报")
+              this.logger.debug("类型：自发送消息（MessageSent）")
               this.logger.debug(dataStr)
             
               this.ev.emit("message", <Event.Message>data)
               break;
           
             case EventEnum.EventType.notice:
-              this.logger.debug("=======================================")
-              this.logger.debug("Reverse WebSocket Received Event Report")
-              this.logger.debug("Type: Notice")
+              this.logger.debug("接收到事件上报")
+              this.logger.debug("类型：通知（Notice）")
               this.logger.debug(dataStr)
 
               this.ev.emit("notice", <Event.Notice>data)
               break;
 
             case EventEnum.EventType.request:
-              this.logger.debug("=======================================")
-              this.logger.debug("Reverse WebSocket Received Event Report")
-              this.logger.debug("Type: Request")
+              this.logger.debug("接收到事件上报")
+              this.logger.debug("类型：请求（Request）")
               this.logger.debug(dataStr)
 
               this.ev.emit("request", <Event.Request>data)
@@ -134,22 +132,17 @@ export class ReverseWsConnection extends Connection {
         }
       }))
       socket.on("close", () => {
-        const clientAddress = `${req.socket.remoteAddress}:${req.socket.remotePort}`
-        this.clientAddresses.forEach((address, i) => {
-          if (address.includes(clientAddress)) {
-            this.clientAddresses.splice(i, 1)
-          }
-        })
-        delete this.groups[clientAddress]
-        delete this.friends[clientAddress]
+        delete this.clientAddresses[index]
+        delete this.groups[address]
+        delete this.friends[address]
 
-        this.logger.info("===================================")
-        this.logger.info("Reverse WebSocket Connection Closed")
-        this.logger.info("Client:", `${req.socket.remoteAddress}:${req.socket.remotePort}`)
+        this.logger.info("客户端连接关闭")
+        this.logger.info("客户端地址：" + address)
       })
       socket.on("error", err => {
         if (err) {
-          throw err
+          this.logger.error(`与客户端“${address}”通信时出现错误`)
+          this.logger.error(err)
         }
       })
 
@@ -167,8 +160,7 @@ export class ReverseWsConnection extends Connection {
     })
     this.server.on("error", err => {
       if (err) {
-        this.logger.error("===============================")
-        this.logger.error("Reverse WebSocket Threw A Error")
+        this.logger.error("服务端出现错误")
         this.logger.error(err)
       }
     })
@@ -187,9 +179,6 @@ export class ReverseWsConnection extends Connection {
 
   public connect(address: string): boolean {
     throw new Error("Method not implemented.");
-  }
-  public address(): string | undefined {
-    return <string>this.server.address()
   }
 
   public getGroups(clientIndex: number = 0): Record<number, Group> | undefined {
@@ -303,6 +292,11 @@ export class ReverseWsConnection extends Connection {
     this.server.clients.forEach(socket => {
       i++
       if (i == clientIndex) {
+        if (socket.readyState != socket.OPEN) {
+          socket.close(1001, "客户端似乎无法连接")
+          return
+        }
+
         action = action.replaceAll("/", ".")
         if (action.startsWith(".")) {
           action = action.substring(1)
@@ -316,7 +310,7 @@ export class ReverseWsConnection extends Connection {
           })
         }), err => {
           if (err) {
-            this.logger.error("向客户端发送数据时出错：")
+            this.logger.error(`向客户端“${this.clientAddresses[clientIndex]}”发送数据时出错：`)
             this.logger.error(err)
           }
         })

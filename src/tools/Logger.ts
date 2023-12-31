@@ -52,6 +52,10 @@ export class Logger {
     }
   }
 
+  public setPrefix(prefix: string): void {
+    this.prefix = prefix
+  }
+
   private writeToStdout(content: string): void {
     process.stdout.write(content)
   }

@@ -1,8 +1,5 @@
-import type { Connection } from "src/connections/Connection"
-import { HttpConnection } from "../connections/HttpConnection"
-import { ReverseWsConnection } from "../connections/ReverseWsConnection"
-import { ConfigEnum, ListenerEnum } from "../types/enums"
 import type { ConnectionContent } from "src/types/connectionContent"
+import { isIPv4, isIPv6 } from "node:net"
 
 export class Utils {
   public static splitToArray(data: string): string[] {
@@ -56,5 +53,29 @@ export class Utils {
 
   public static getCurrentTimestamp(): number {
     return Math.floor(Date.now() / 1000)
+  }
+
+  public static isIpV4(host: string): boolean {
+    return isIPv4(host)
+  }
+  public static isIpV6(host: string): boolean {
+    return isIPv6(host)
+  }
+  public static showHostWithPort(host: string = "0.0.0.0", port?: number): string {
+    if (this.isIpV4(host)) {
+      if (port) {
+        return `${host}:${port}`
+      }
+      return host
+    }
+    else if (this.isIpV6(host)) {
+      if (port) {
+        return `[${host}]:${port}`
+      }
+      return host
+    }
+    else {
+      return `?:${port}`
+    }
   }
 }

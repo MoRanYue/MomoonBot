@@ -12,7 +12,7 @@ export abstract class Connection {
   protected abstract token: string | null | undefined
   
   readonly abstract ev: CustomEventEmitter.ConnectionEventEmitter
-  readonly logger: Logger = new Logger("连接")
+  protected readonly abstract logger: Logger
 
   public abstract groups: Record<string, Record<number, Group>>
   public abstract friends: Record<string, Record<number, User>>
@@ -24,7 +24,6 @@ export abstract class Connection {
   public abstract stopServer(cb?: (err?: Error) => void): void
 
   public abstract connect(address: string): boolean
-  public abstract address(): string | undefined
 
   public abstract send(action: ConnectionEnum.Action.uploadGroupImage, data: ConnectionContent.Params.UploadGroupImage, cb?: DataType.RawResponseFunction<null>): void
   public abstract send(action: ConnectionEnum.Action.getWeather, data: ConnectionContent.Params.GetWeather, cb?: DataType.RawResponseFunction<ConnectionContent.ActionResponse.GetWeather>): void

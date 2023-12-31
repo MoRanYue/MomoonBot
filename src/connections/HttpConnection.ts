@@ -12,8 +12,10 @@ import type { ConnectionContent } from "src/types/connectionContent";
 import type { DataType } from "src/types/dataType";
 import { Group } from "../processors/sets/Group";
 import { User } from "../processors/sets/User";
+import { Logger } from "src/tools/Logger";
 
 export class HttpConnection extends Connection {
+  protected logger: Logger = new Logger("HTTP");
   protected token: string | null | undefined;
   public groups: Record<string, Record<number, Group>> = {};
   public friends: Record<string, Record<number, User>> = {};
@@ -31,23 +33,33 @@ export class HttpConnection extends Connection {
 
     this.server = http.createServer()
     this.token = token
+    this.logger.setPrefix("HTTP @ " + Utils.showHostWithPort(host, port))
 
-    this.ev.once("connect", () => {
+    this.ev.on("connect", address => {
+      for (let i = 0; i < this.clientAddresses.length; i++) {
+        const addr = this.clientAddresses[i];
+        
+        if (addr == address) {
+          return
+        }
+      }
+      const index = this.clientAddresses.push(address) - 1
+
       this.logger.info("正在尝试获取群聊与好友信息")
       if (this.clientAddresses.length == 0) {
-        this.logger.error("“Http”无法获取群聊与好友信息，因为未指定客户端地址")
+        this.logger.error("无法获取群聊与好友信息，因为未指定客户端地址")
         return
       }
       
       this.send(ConnectionEnum.Action.getGroupList, undefined, data => {
         const groups: Record<number, Group> = {}
         data.data.forEach(group => groups[group.group_id] = new Group(group, this))
-        this.groups[this.clientAddresses[0]] = groups
+        this.groups[this.clientAddresses[index]] = groups
       })
       this.send(ConnectionEnum.Action.getFriendList, undefined, data => {
         const friends: Record<number, User> = {}
         data.data.forEach(friend => friends[friend.user_id] = new User(friend, this))
-        this.friends[this.clientAddresses[0]] = friends
+        this.friends[this.clientAddresses[index]] = friends
       })
     })
     
@@ -60,7 +72,8 @@ export class HttpConnection extends Connection {
         }
       }
 
-      this.ev.emit("connect")
+      const address = Utils.showHostWithPort(req.socket.remoteAddress, req.socket.remotePort)
+      this.ev.emit("connect", address)
 
       this.receiveRequest(req, res, async (req, res) => {
         const dataStr: string = req.body
@@ -69,33 +82,32 @@ export class HttpConnection extends Connection {
           this.ev.emit("response", <ConnectionContent.Connection.Response<number | object | object[]>>data)
         }
         else {
-          this.logger.debug("==========================")
-          this.logger.debug("Http Received Event Report")
+          this.logger.debug("接收到事件上报")
 
           switch ((<Event.Reported>data).post_type) {
             case EventEnum.EventType.message:
-              this.logger.debug("Type: Message")
+              this.logger.debug("类型：消息（Message）")
               this.logger.debug(dataStr)
 
               this.ev.emit("message", <Event.Message>data)
               break;
 
             case EventEnum.EventType.messageSent:
-              this.logger.debug("Type: MessageSent")
+              this.logger.debug("类型：自发送消息（MessageSent）")
               this.logger.debug(dataStr)
             
               this.ev.emit("message", <Event.Message>data)
               break;
           
             case EventEnum.EventType.notice:
-              this.logger.debug("Type: Notice")
+              this.logger.debug("类型：通知（Notice）")
               this.logger.debug(dataStr)
 
               this.ev.emit("notice", <Event.Notice>data)
               break;
 
             case EventEnum.EventType.request:
-              this.logger.debug("Type: Request")
+              this.logger.debug("类型：请求（Request）")
               this.logger.debug(dataStr)
 
               this.ev.emit("request", <Event.Request>data)
@@ -112,12 +124,13 @@ export class HttpConnection extends Connection {
     })
     this.server.on("error", err => {
       if (err) {
-        this.logger.error("==================")
-        this.logger.error("Http Threw A Error")
+        this.logger.error("服务端出现错误")
         this.logger.error(err)
       }
     })
     this.server.on("close", () => {
+      this.groups = {}
+      this.friends = {}
       this.clientAddresses = []
     })
     
@@ -132,10 +145,6 @@ export class HttpConnection extends Connection {
 
   public connect(): never {
     throw new Error("Method not implemented.");
-  }
-
-  public address(): string | undefined {
-    return <string>this.server.address()
   }
 
   public getGroups(first?: any): Record<number, Group> | undefined {
@@ -162,10 +171,6 @@ export class HttpConnection extends Connection {
     }
     return this.friends[this.clientAddresses[0]][id]
   }
-
-  public addClient(...address: string[]): void {
-    this.clientAddresses.push(...address)
-  }
   
   private receiveRequest(req: http.IncomingMessage, res: http.ServerResponse, cb: (req: CustomIncomingMessage, res: http.ServerResponse) => void) {
     const msg = <CustomIncomingMessage>req
@@ -175,7 +180,7 @@ export class HttpConnection extends Connection {
     res.setHeader("Cache-Control", "no-cache")
     res.statusCode = 200
   
-    if (msg.method!.toLowerCase() == 'post') {
+    if (msg.method!.toLowerCase() == "post") {
       let data: string = ""
       msg.on("data", async (chunk: string) => data += chunk)
       msg.on("end", () => {
@@ -189,24 +194,23 @@ export class HttpConnection extends Connection {
   }
 
   private async receivePacket(res: http.IncomingMessage, cb?: DataType.ResponseFunction<any>): Promise<void> {
-    res.setEncoding('utf-8')
+    res.setEncoding("utf-8")
 
     let data: string = ""
 
-    res.on('data', chunk => data += chunk)
-    res.on('error', err => {
+    res.on("data", chunk => data += chunk)
+    res.on("error", err => {
       if (err) {
         throw err
       }
     })
-    res.on('end', () => {
+    res.on("end", () => {
       let result
       try {
         result = Utils.jsonToData(data)
       }
       catch (err) {
-        this.logger.error("===========================")
-        this.logger.error("Http Received Error Request")
+        this.logger.error("收到的请求并非预期的")
         this.logger.error(err)
         return 
       }
@@ -303,7 +307,10 @@ export class HttpConnection extends Connection {
       pathname: action.startsWith("/") ? "/" + action : action,
     }, this.receivePacket)
     req.on("error", err => {
-      throw err
+      if (err) {
+        this.logger.error(`与客户端“${Utils.showHostWithPort(req.socket!.remoteAddress, req.socket!.remotePort)}”发送请求时出现错误`)
+        this.logger.error(err)
+      }
     })
     req.write(Utils.dataToJson(data ?? {}))
     req.end()
