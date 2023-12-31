@@ -43,7 +43,7 @@ export class HttpConnection extends Connection {
           return
         }
       }
-      const index = this.clientAddresses.push(address) - 1
+      const index = this.addClient(address)
 
       this.logger.info("正在尝试获取群聊与好友信息")
       if (this.clientAddresses.length == 0) {
@@ -137,6 +137,10 @@ export class HttpConnection extends Connection {
     this.server.listen(port, host, cb)
 
     return this
+  }
+
+  public addClient(address: string): number {
+    return this.clientAddresses.push(address) - 1
   }
 
   public stopServer(cb?: (err?: Error) => void): void {
