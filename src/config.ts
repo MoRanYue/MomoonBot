@@ -281,6 +281,30 @@ export class Config {
       bot: {}
     }
   }
+
+  public getPluginData(pluginClassName: string): any | undefined
+  public getPluginData(pluginClassName: string, key?: string): any | Record<string, any> | undefined {
+    if (Object.hasOwn(this.config.plugins.data, pluginClassName)) {
+      if (key) {
+        return this.config.plugins.data[pluginClassName][key]
+      }
+      return this.config.plugins.data[pluginClassName]
+    }
+    return undefined
+  }
+  public setPluginData(pluginClassName: string, data: Record<string, any>): void
+  public setPluginData(pluginClassName: string, key: string | Record<string, any>, value?: any): void {
+    if (!Object.hasOwn(this.config.plugins.data, pluginClassName)) {
+      this.config.plugins.data[pluginClassName] = {}
+    }
+    if (typeof key == "string") {
+      this.config.plugins.data[pluginClassName][key] = value
+    }
+    else if (typeof key == "object") {
+      this.config.plugins.data[pluginClassName] = key
+    }
+    this._save()
+  }
 }
 
 const config: Config = new Config("./config.json")

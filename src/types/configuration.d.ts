@@ -44,7 +44,7 @@ interface BotConfig {}
 interface PluginConfig {
   files?: string[]
   folders: string[]
-  data: Record<string, object | string[]>
+  data: Record<string, Record<string, any>>
 }
 
 interface LoggerConfig {
