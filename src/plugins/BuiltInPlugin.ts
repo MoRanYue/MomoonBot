@@ -106,7 +106,7 @@ export default class BuiltInPlugin extends Plugin {
         else if (ev.entry == "invite") {
           method = `被邀请，由 ${operator.viewedName}（${ev.operatorId}） 允许加入`
         }
-        this.logger.info(`接收到群聊成员加入通知：群聊：${group.name}（${ev.groupId}） 加入者：${ev.userId ? ev.userId : "未知"} 方式：${method}`)
+        this.logger.info(`接收到群聊成员加入通知：群聊：${group.name}（${ev.groupId}） 加入者：${ev.userId || ev.userId > 0 ? ev.userId : "未知"} 方式：${method}`)
       }
 
       else if (event.noticeType == EventEnum.NoticeType.groupDecrease) {

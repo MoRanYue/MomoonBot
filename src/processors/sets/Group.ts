@@ -87,7 +87,8 @@ export class Group {
 
     // 兼容OpenShamrock的Bug
     // https://github.com/whitechi73/OpenShamrock/issues/150
-    if (!id) {
+    // 2024年1月1日 00:27，OpenShamrock的d44150e提交中，值可能为0或-1
+    if (!id || id < 0) {
       return false
     }
 
