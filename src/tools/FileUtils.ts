@@ -1,4 +1,5 @@
 import fs from "node:fs"
+import path from "node:path"
 
 export class FileUtils {
   public static createFolderIfNotExists(path: string) {
@@ -30,8 +31,15 @@ export class FileUtils {
     })
   }
 
-  public static getFileName(path: string): string {
-    return path.substring(0, path.lastIndexOf("."))
+  public static getFileName(file: string): string {
+    return file.substring(0, file.lastIndexOf("."))
+  }
+  public static getExtendedName(file: string): string | undefined {
+    const fileName = path.basename(file)
+    if (!fileName.includes(".")) {
+      return undefined
+    }
+    return fileName.substring(fileName.lastIndexOf("."))
   }
   public static toSlash(path: string): string {
     return path.replaceAll("\\", "/")

@@ -1,8 +1,8 @@
 import { LoggerEnum } from "../types/enums"
-import config from "../config"
 import fs from "node:fs"
 import path from "node:path"
 import { FileUtils } from "./FileUtils"
+import config from "../config"
 
 const logLevels: Record<LoggerEnum.LogLevel, number> = {
   error: 0,
@@ -22,9 +22,9 @@ const logLevelNames: Record<LoggerEnum.LogLevel, string> = {
 }
 
 export class Logger {
-  public readonly file: string = path.join(config.log.path, "latest.log")
-  private readonly debugMode: boolean = config.log.debug ?? false
-  private readonly level: number = logLevels[config.log.level ?? LoggerEnum.LogLevel.info]
+  public readonly file: string = path.join(config.getConfig().log.path, "latest.log")
+  private readonly debugMode: boolean = config.getConfig().log.debug ?? false
+  private readonly level: number = logLevels[config.getConfig().log.level ?? LoggerEnum.LogLevel.info]
   private prefix?: string
 
   constructor(prefix?: string) {
@@ -44,7 +44,7 @@ export class Logger {
     }
     catch (err) {
       if (err) {
-        fs.writeFileSync(this.file, "日志创建时间：" + this.formatCurrentTime() + "\n", {
+        fs.writeFileSync(this.file, "日志创建时间：" + Logger.formatCurrentTime() + "\n", {
           encoding: "utf-8",
           flag: "w"
         })
@@ -110,7 +110,7 @@ export class Logger {
       return
     }
 
-    const time = "[" + this.formatCurrentTime() + "]"
+    const time = "[" + Logger.formatCurrentTime() + "]"
     let log = "[" + logLevelNames[level] + "] "
     if (this.prefix) {
       log += "[" + this.prefix + "] "
@@ -119,44 +119,44 @@ export class Logger {
     this.writeToFile(time + log, level)
     switch (level) {
       case LoggerEnum.LogLevel.error:
-        return this.writeToStdout(this.controlText(
+        return this.writeToStdout(Logger.controlText(
           LoggerEnum.Color.fDarkGreen, LoggerEnum.Color.bBlue, time, LoggerEnum.Console.removeStyles, 
           LoggerEnum.Color.fRed, LoggerEnum.Color.bBlue, log
         ))
 
       case LoggerEnum.LogLevel.warning:
-        return this.writeToStdout(this.controlText(
+        return this.writeToStdout(Logger.controlText(
           LoggerEnum.Color.fPurple, time, LoggerEnum.Console.removeStyles, 
           LoggerEnum.Color.fYellow, log
         ))
 
       case LoggerEnum.LogLevel.failure:
-        return this.writeToStdout(this.controlText(
+        return this.writeToStdout(Logger.controlText(
           LoggerEnum.Color.bDarkRed, time, LoggerEnum.Console.removeStyles, 
           LoggerEnum.Color.fBlue, LoggerEnum.Color.bDarkRed, log
         ))
 
       case LoggerEnum.LogLevel.success:
-        return this.writeToStdout(this.controlText(
+        return this.writeToStdout(Logger.controlText(
           LoggerEnum.Color.fBlue, time, LoggerEnum.Console.removeStyles, 
           LoggerEnum.Color.fGreen, log
         ))
 
       case LoggerEnum.LogLevel.debug:
-        return this.writeToStdout(this.controlText(
+        return this.writeToStdout(Logger.controlText(
           LoggerEnum.Color.fYellow, time, LoggerEnum.Console.removeStyles, 
           LoggerEnum.Color.fBlue, log
         ))
     
       default:
-        return this.writeToStdout(this.controlText(
+        return this.writeToStdout(Logger.controlText(
           LoggerEnum.Color.fBlue, time, LoggerEnum.Console.removeStyles, 
           log
         ))
     }
   }
 
-  public formatCurrentTime(): string {
+  public static formatCurrentTime(): string {
     const date = new Date()
 
     const year = date.getFullYear()
@@ -173,7 +173,7 @@ export class Logger {
   public cleanUp(): void {
     process.stdout.write(`\x1B[${LoggerEnum.Console.cleanUp}J`)
   }
-  public controlText(...content: (string | LoggerEnum.Color | Exclude<LoggerEnum.Console, LoggerEnum.Console.cleanUp>)[]): string {
+  public static controlText(...content: (string | LoggerEnum.Color | Exclude<LoggerEnum.Console, LoggerEnum.Console.cleanUp>)[]): string {
     let text: string = ""
     content.forEach(seg => {
       if (typeof seg == "number") {

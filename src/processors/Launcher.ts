@@ -1,9 +1,9 @@
 import { HttpConnection } from "../connections/HttpConnection"
 import { ReverseWsConnection } from "../connections/ReverseWsConnection"
 import type { Connection } from "../connections/Connection"
-import type { HttpMiddleware, ReverseWsMiddleware, WsMiddleware } from "../types/config.d.ts"
+import type { HttpMiddleware, ReverseWsMiddleware, WsMiddleware } from "../types/configuration"
 import { ConfigEnum, EventEnum } from "../types/enums"
-import config from "../config"
+import cfg from "../config"
 import { MessageEvent } from "../events/MessageEvent"
 import { PluginLoader } from "./PluginLoader"
 import { NoticeEvent } from "../events/NoticeEvent"
@@ -41,10 +41,12 @@ export class Launcher {
       this.loader.unloadAll(complete)
     })
     exit.addTask(complete => {
-      const savedLogFile = path.resolve(path.dirname(this.logger.file), this.logger.formatCurrentTime().replaceAll(" ", "_").replaceAll(":", "_") + ".log")
+      const savedLogFile = path.resolve(path.dirname(this.logger.file), Logger.formatCurrentTime().replaceAll(" ", "_").replaceAll(":", "_") + ".log")
       this.logger.info(`正在保存日志“${savedLogFile}”`)
       this.logger._save(savedLogFile, complete)
     })
+    
+    const config = cfg.getConfig()
     
     this.logger.info("Momoon Bot")
     this.logger.info("正在尝试启动")

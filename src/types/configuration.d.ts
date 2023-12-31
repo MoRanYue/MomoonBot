@@ -53,7 +53,8 @@ interface LoggerConfig {
   path: string
 }
 
-export interface Config {
+export interface Configuration {
+  configVersion: number
   connections: ConnectionMiddlewareConfig[]
   listener: ListenerConfig
   plugins: PluginConfig

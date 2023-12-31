@@ -193,7 +193,7 @@ export class MessageUtils {
     }
     advance()
 
-    const commandConfig = config.listener.command
+    const commandConfig = config.getConfig().listener.command
     if (commandConfig.ignoreBlanks) {
       skipBlanks()
     }

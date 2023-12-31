@@ -28,7 +28,7 @@ export abstract class Plugin {
     this.logger = new Logger(this.logPrefix)
 
     this.ev.on("message", ev => {
-      if (ev.isSelfSent && !config.listener.settings.triggerBySelf) {
+      if (ev.isSelfSent && !config.getConfig().listener.settings.triggerBySelf) {
         return
       }
 

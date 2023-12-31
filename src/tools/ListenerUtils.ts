@@ -13,7 +13,7 @@ export class ListenerUtils {
     return permissionLevels[a] >= permissionLevels[b]
   }
   public static isSuperuser(id: number): boolean {
-    return config.listener.settings.superusers.includes(id)
+    return config.getConfig().listener.settings.superusers.includes(id)
   }
   public static groupRoleToPermission(role: "owner" | "admin" | "member"): ListenerEnum.Permission {
     switch (role) {
