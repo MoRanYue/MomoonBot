@@ -259,8 +259,8 @@ export class Config {
       ],
       listener: {
         command: {
-          prompt: [" "],
-          separator: ["!", "！", ".", "。", "#"],
+          prompt: ["!", "！", ".", "。", "#"],
+          separator: [" "],
           ignoreBlanks: true
         },
         settings: {
