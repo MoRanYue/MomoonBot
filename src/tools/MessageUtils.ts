@@ -58,7 +58,7 @@ export class MessageUtils {
           }
           return new AppMessage.AppMessage(data)
         }
-        return MsgSegment.Json.fromObject(data)
+        return MsgSegment.Json.fromObject(<MessageSegment.JsonSegment>seg)
 
       case MessageSegmentEnum.SegmentType.basketball:
         return MsgSegment.Basketball.fromObject(<MessageSegment.BasketballSegment>seg)

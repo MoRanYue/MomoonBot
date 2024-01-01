@@ -61,14 +61,19 @@ class File extends Segment {
 class Json extends Segment {
   public data: any
 
-  constructor(data: any) {
+  constructor(data: any | undefined) {
     super();
 
-    this.data = data
+    if (data) {
+      this.data = Utils.jsonToData(data)
+    }
+    else {
+      this.data = undefined
+    }
   }
 
   public toPlainText(): string {
-    return ""
+    return `(JSON 数据：“${Utils.dataToJson(this.data)}”)`
   }
   public toObject(): MessageSegment.JsonSegment {
     return {
@@ -94,7 +99,7 @@ class ForwardNode extends Segment {
   }
 
   public toPlainText(): string {
-    return ""
+    return `(合并转发节点 ID：“${this.id}”)`
   }
   public toObject(): MessageSegment.ForwardNodeSegment {
     return {
@@ -120,7 +125,7 @@ class Forward extends Segment {
   }
 
   public toPlainText(): string {
-    return ""
+    return `(合并转发 ID：“${this.id}”)`
   }
   public toObject(): MessageSegment.ForwardSegment {
     return {
@@ -148,7 +153,7 @@ class Gift extends Segment {
   }
 
   public toPlainText(): string {
-    return ""
+    return `(礼物 ID：“${this.id}” 目标用户：“${this.target}”)`
   }
   public toObject(): MessageSegment.GiftSegment {
     return {
@@ -183,7 +188,7 @@ class Share extends Segment {
   }
 
   public toPlainText(): string {
-    return ""
+    return `(分享链接 URL：“${this.url}” 标题：“${this.title}” 内容：“${this.content}” 图片：“${this.image}” 文件：“${this.file}”)`
   }
   public toObject(): MessageSegment.ShareSegment {
     return {
@@ -219,7 +224,7 @@ class Location extends Segment {
   }
 
   public toPlainText(): string {
-    return ""
+    return `(分享位置 经度：“${this.lon}” 纬度：“${this.lat}” 标题：“${this.title}” 内容：“${this.content}”)`
   }
   public toObject(): MessageSegment.LocationSegment {
     return {
@@ -250,7 +255,7 @@ class Weather extends Segment {
   }
 
   public toPlainText(): string {
-    return ""
+    return `(天气 城市代码：“${this.code}” 城市：“${this.city}”)`
   }
   public toObject(): MessageSegment.WeatherSegment {
     return {
@@ -279,7 +284,7 @@ class Music extends Segment {
   }
 
   public toPlainText(): string {
-    return ""
+    return `(音乐 类型：“${this.type}” ID：“${this.id}”)`
   }
   public toObject(): MessageSegment.MusicSegment {
     return {
@@ -318,7 +323,7 @@ class CustomMusic extends Segment {
   }
 
   public toPlainText(): string {
-    return ""
+    return `(自定义音乐 URL：“${this.url}” 音频URL：“${this.audio}” 标题：“${this.title}” 歌手：“${this.singer}” 图片：“${this.image}”)`
   }
   public toObject(): MessageSegment.CustomMusicSegment {
     return {
@@ -352,7 +357,7 @@ class Touch extends Segment {
   }
 
   public toPlainText(): string {
-    return ""
+    return `(头像戳一戳 ID：“${this.id}”)`
   }
   public toObject(): MessageSegment.TouchSegment {
     return {
@@ -382,7 +387,7 @@ class Poke extends Segment {
   }
 
   public toPlainText(): string {
-    return ""
+    return `(戳一戳 类型：“${this.type}” ID：“${this.id}” 强度：“${this.strength}”)`
   }
   public toObject(): MessageSegment.PokeSegment {
     return {
@@ -450,7 +455,7 @@ class NewDice extends Segment {
   }
 
   public toPlainText(): string {
-    return ""
+    return `(骰子 点数：“${this.id}”)`
   }
   public toObject(): MessageSegment.NewDiceSegment {
     return {
@@ -476,7 +481,20 @@ class NewRps extends Segment {
   }
 
   public toPlainText(): string {
-    return ""
+    let result: string
+    if (this.id == MessageSegmentEnum.RpsId.rock) {
+      result = "石头"
+    }
+    else if (this.id == MessageSegmentEnum.RpsId.scissor) {
+      result = "剪刀"
+    }
+    else if (this.id == MessageSegmentEnum.RpsId.paper) {
+      result = "布"
+    }
+    else {
+      result = String(this.id)
+    }
+    return `(猜拳 结果：“${result}”)`
   }
   public toObject(): MessageSegment.NewRpsSegment {
     return {
@@ -502,7 +520,26 @@ class Basketball extends Segment {
   }
 
   public toPlainText(): string {
-    return ""
+    let result: string
+    if (this.id == MessageSegmentEnum.BasketballId.missed) {
+      result = "未投中"
+    }
+    else if (this.id == MessageSegmentEnum.BasketballId.closeMissed) {
+      result = "擦边未投中"
+    }
+    else if (this.id == MessageSegmentEnum.BasketballId.stuck) {
+      result = "卡住"
+    }
+    else if (this.id == MessageSegmentEnum.BasketballId.closeHit) {
+      result = "擦边投中"
+    }
+    else if (this.id == MessageSegmentEnum.BasketballId.hit) {
+      result = "投中"
+    }
+    else {
+      result = String(this.id)
+    }
+    return `(篮球 结果：“${result}”)`
   }
   public toObject(): MessageSegment.BasketballSegment {
     return {
@@ -532,7 +569,7 @@ class Record extends Segment {
   }
 
   public toPlainText(): string {
-    return ""
+    return `(语音 文件：”${this.file}“ URL：“${this.url}” 魔法语音：“${this.magic}”)`
   }
   public toObject(): MessageSegment.RecordSegment {
     return {
@@ -560,7 +597,7 @@ class Video extends Segment {
   }
 
   public toPlainText(): string {
-    return ""
+    return `(视频 文件：“${this.file}”)`
   }
   public toObject(): MessageSegment.VideoSegment {
     return {
@@ -619,7 +656,7 @@ class Image extends Segment {
   }
 
   public toPlainText(): string {
-    return ""
+    return `(图片 文件：“${this.file}” URL：“${this.url}”)`
   }
   public toObject(): MessageSegment.ImageSegment {
     const obj: MessageSegment.ImageSegment = {
@@ -650,7 +687,7 @@ class At extends Segment {
   }
 
   public toPlainText(): string {
-    return ""
+    return `@${this.qq}`
   }
   public toObject(): MessageSegment.AtSegment {
     return {
@@ -676,7 +713,7 @@ class Reply extends Segment {
   }
 
   public toPlainText(): string {
-    return ""
+    return `(回复 目标消息：“${this.id}”)`
   }
   public toObject(): MessageSegment.ReplySegment {
     return {
@@ -702,7 +739,7 @@ class Face extends Segment {
   }
 
   public toPlainText(): string {
-    return ""
+    return `(表情符号 ID：“${this.id}”)`
   }
   public toObject(): MessageSegment.FaceSegment {
     return {
@@ -728,7 +765,7 @@ class MarketFace extends Segment {
   }
 
   public toPlainText(): string {
-    return ""
+    return `(市场表情符号 ID："${this.id}")`
   }
   public toObject(): MessageSegment.MarketFaceSegment {
     return {
@@ -754,7 +791,7 @@ class Unknown extends Segment {
   }
 
   public toPlainText(): string {
-    return ""
+    return `(未知 数据：“${Utils.dataToJson(this.data)}”)`
   }
   public toObject(): MessageSegment.Segment {
     return {

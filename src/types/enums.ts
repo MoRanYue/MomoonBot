@@ -121,11 +121,13 @@ export namespace MessageSegmentEnum {
 }
 export namespace AppMessageEnum {
   export enum App {
-    structuredMessage = "com.tencent.structmsg"
+    structuredMessage = "com.tencent.structmsg",
+    miniapp1 = "com.tencent.miniapp_01"
   }
   export enum AppId {
-    bilibiliVideoShare = 100951776,
-    neteaseMusicShare = 100495085,
+    bilibiliVideoShare = "100951776",
+    bilibiliMiniappVideoShare = "1109937557",
+    neteaseMusicShare = "100495085",
   }
   export enum View {
     news = "news",

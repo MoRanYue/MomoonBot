@@ -21,6 +21,53 @@ export namespace AppMessageContent {
     }
     meta: T
   }
+  interface BilibiliMiniappVideoShare {
+    app: AppMessageEnum.App.miniapp1
+    desc: string
+    view: string
+    ver: string
+    prompt: string
+    appID: ""
+    sourceName: ""
+    actionData: ""
+    actionData_A: ""
+    sourceUrl: ""
+    text: ""
+    meta: {
+      detail_1: {
+        appId: AppMessageEnum.AppId.bilibiliMiniappVideoShare
+        appType: number
+        title: "哔哩哔哩"
+        desc: string
+        icon: string
+        preview: string
+        url: string
+        scene: number
+        host: {
+          uin: number
+          nick: string
+        }
+        shareTemplateId: string
+        shareTemplateData: {}
+        qqdocurl: string
+        showLittleTail: ""
+        gamePoints: ""
+        gamePointsUrl: ""
+      }
+    }
+    config: {
+      type: string
+      widtH: 0
+      height: 0
+      forward: 1
+      autoSize: 0
+      ctime: number
+      token: string
+    }
+    extraApps: []
+    sourceAd: ""
+    extra: ""
+  }
   interface BilibiliVideoShare {
     news: {
       action: string

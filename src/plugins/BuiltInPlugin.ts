@@ -1,4 +1,4 @@
-import { EventEnum } from "../types/enums";
+import { EventEnum, LoggerEnum } from "../types/enums";
 import { Plugin } from "../processors/Plugin";
 import type { MessageEvent } from "src/events/MessageEvent";
 import type { 
@@ -12,8 +12,8 @@ import type {
   GroupRecall,
   PrivateRecall
 } from "src/events/NoticeEvent";
+import MessageSegment, { type Segment } from "../events/messages/MessageSegment";
 import { Logger } from "../tools/Logger";
-import MessageSegment from "../events/messages/MessageSegment";
 
 export default class BuiltInPlugin extends Plugin {
   name: string = "内置插件"
@@ -24,15 +24,15 @@ export default class BuiltInPlugin extends Plugin {
   constructor() {
     super();
     this.logger.setPrefix("内置插件")
-
-    const reportEvent = (type: string, ev: MessageEvent) => {
+    
+    const reportEvent = async (type: string, ev: MessageEvent) => {
       if (ev.messageType == EventEnum.MessageType.group) {
         const group = ev.conn!.getGroup(ev.groupId!)
         if (ev.isSelfSent) {
           type = "自发送" + type
         }
         if (!group) {
-          this.logger.info(`接收到${type}：${ev.raw}（${ev.messageId}） 来自群聊：${ev.groupId} 发送者：${ev.userId}`)
+          this.logger.info(`接收到${type}：${this.styleMessage(ev.message)}（${ev.messageId}） 来自群聊：${ev.groupId} 发送者：${ev.userId}`)
           if (Object.keys(ev.conn!.getGroups()!).length != 0) {
             ev.conn!._addGroup(ev.groupId!)
           }
@@ -40,28 +40,28 @@ export default class BuiltInPlugin extends Plugin {
         }
         const member = group.members[ev.userId]
         if (member) {
-          this.logger.info(`接收到${type}：${ev.raw}（${ev.messageId}） 来自群聊：${group.name}（${ev.groupId}） 发送者：${member.viewedName}（${ev.userId}）`)
+          this.logger.info(`接收到${type}：${this.styleMessage(ev.message)}（${ev.messageId}） 来自群聊：${group.name}（${ev.groupId}） 发送者：${member.viewedName}（${ev.userId}）`)
           return
         }
         ev.conn!._addGroupMember({
           groupId: group.id,
           id: ev.userId
         })
-        this.logger.info(`接收到${type}：${ev.raw}（${ev.messageId}） 来自群聊：${group.name}（${ev.groupId}） 发送者：${ev.userId}`)
+        this.logger.info(`接收到${type}：${this.styleMessage(ev.message)}（${ev.messageId}） 来自群聊：${group.name}（${ev.groupId}） 发送者：${ev.userId}`)
       }
       else if (ev.messageType == EventEnum.MessageType.private) {
         const friend = ev.conn!.getFriend(ev.userId)
         if (friend) {
-          this.logger.info(`接收到${type}：${ev.raw}（${ev.messageId}） 来自私聊 发送者：${friend.viewedName}（${ev.userId}）`)
+          this.logger.info(`接收到${type}：${this.styleMessage(ev.message)}（${ev.messageId}） 来自私聊 发送者：${friend.viewedName}（${ev.userId}）`)
           return 
         }
-        this.logger.info(`接收到${type}：${ev.raw}（${ev.messageId}） 来自私聊 发送者：${ev.userId}`)
+        this.logger.info(`接收到${type}：${this.styleMessage(ev.message)}（${ev.messageId}） 来自私聊 发送者：${ev.userId}`)
       }
     }
 
     this.onMessage("", ev => reportEvent("消息", ev), [], 999)
     this.onCommand("", ev => reportEvent("命令", ev), [], 999)
-    this.onNotice("", event => {
+    this.onNotice("", async (event) => {
       if (event.noticeType == EventEnum.NoticeType.groupRecall) {
         const ev = <GroupRecall>event
         const group = ev.conn!.getGroup(ev.groupId)!
@@ -175,5 +175,13 @@ export default class BuiltInPlugin extends Plugin {
     this.onCommand("echo", (ev, state, args) => {
       ev.reply(args.join(" "))
     })
+  }
+
+  private styleMessage(segments: Segment[]): string {
+    let content: string = ""
+    segments.forEach(seg => {
+      content += seg.toPlainText()
+    })
+    return content
   }
 }
