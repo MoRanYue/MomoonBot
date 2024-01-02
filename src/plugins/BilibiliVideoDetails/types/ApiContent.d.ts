@@ -69,16 +69,16 @@ export namespace ApiContent {
       mission_id: number
       redirect_url: string
       rights: {
-        bp: boolean
-        elec: boolean
-        download: boolean
-        movie: boolean
-        pay: boolean
-        hd5: boolean
-        no_reprint: boolean
-        autoplay: boolean
-        ugc_pay: boolean
-        is_cooperation: boolean
+        bp: number
+        elec: number
+        download: number
+        movie: number
+        pay: number
+        hd5: number
+        no_reprint: number
+        autoplay: number
+        ugc_pay: number
+        is_cooperation: number
         ugc_pay_review: 0
         no_background: 0
         clean_mode: 0

@@ -24,30 +24,34 @@ export default class BilibiliVideoDetails extends Plugin {
       this.api.getWbiKey()  
     })
 
-    const sendMessage = (ev: MessageEvent, data: ApiContent.Response.VideoDetails) => {
+    const sendMessage = (ev: MessageEvent, data: ApiContent.Response.VideoDetails, isShortLink: boolean = false) => {
       const message: Segment[] = [
         new MessageSegment.Text(`====哔哩哔哩=视频解析====\n`),
-        new MessageSegment.Image("", data.pic),
-        new MessageSegment.Text(`\n${data.copyright == 1 ? "原创视频" : "转载视频"}
-标题：${data.title}
-投稿时间：${Tools.formatSecondTimestamp(data.ctime)}
-发布时间：${Tools.formatSecondTimestamp(data.pubdate)}
-时长：${Tools.formatSeconds(data.duration)}
-UP主：${data.owner.name}  ID：${data.owner.mid}
-AVID：av${data.aid}  BVID：${data.bvid}
+        new MessageSegment.Image(undefined, data.pic),
+        new MessageSegment.Text(`\n${data.copyright == 1 ? "【原创视频】" : "【转载视频】"}${data.rights.is_cooperation == 1 ? "【联合投稿】" : ""}${data.rights.is_stein_gate == 1 ? "【互动视频】" : ""}${data.rights.is_360 == 1 ? "【全景视频】" : ""}
+【标题】：${data.title}
+【分区】：${data.tname}
+【投稿时间】：${Tools.formatSecondTimestamp(data.ctime)}
+【发布时间】：${Tools.formatSecondTimestamp(data.pubdate)}
+【长度】：${Tools.formatSeconds(data.duration)}
+【UP主】：${data.owner.name}  ID：${data.owner.mid}
 
-简介：
+AVID：av${data.aid}  BVID：${data.bvid}
+【视频链接】：https://www.bilibili.com/video/av${data.aid}
+${isShortLink ? "检测到使用B23.TV短链接，此处建议不要使用该方法，因为它将跟踪用户的隐私信息\n" : ""}
+【简介】：
 ${data.desc}
 
-👍${data.stat.like}  📽${data.stat.view}
-🪙${data.stat.coin}  🗨${data.stat.reply}
-🎉${data.stat.share}  📂${data.stat.favorite}
-
+【数据】：
+👍${data.stat.like}  ▶${data.stat.view}
+🪙${data.stat.coin}  💬${data.stat.reply}
+↪${data.stat.share}  📂${data.stat.favorite}
+💭${data.stat.danmaku}
 `)
       ]
       ev.reply(message)
     }
-    const getVideoDetails = (ev: MessageEvent, link: string): void => {
+    const getVideoDetails = (ev: MessageEvent, link: string, isShortLink: boolean = false): void => {
       if (link.includes("bilibili.com")) {
         const maybeId = (/av\d*|BV[1-9a-z]{10}/gi).exec(link)
         if (!maybeId) {
@@ -61,13 +65,12 @@ ${data.desc}
           if (result.code != 0) {
             return
           }
-          sendMessage(ev, result.data)
+          sendMessage(ev, result.data, isShortLink)
         })
       }
       else if (link.includes("b23.tv")) {
-        
         this.logger.info(`正在获取短链接“${link}”的真实链接`)
-        this.resolveShortLink(link, (realLink) => getVideoDetails(ev, realLink))
+        this.resolveShortLink(link, (realLink) => getVideoDetails(ev, realLink, isShortLink))
         return
       }
     }
