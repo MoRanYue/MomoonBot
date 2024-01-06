@@ -1,3 +1,4 @@
+import type { Plugin_ } from './processors/Plugin'
 import { FileUtils } from './tools/FileUtils'
 import { Logger } from './tools/Logger'
 import { Utils } from './tools/Utils'
@@ -282,28 +283,41 @@ export class Config {
     }
   }
 
-  public getPluginData(pluginClassName: string): any | undefined
-  public getPluginData(pluginClassName: string, key?: string): any | Record<string, any> | undefined {
-    if (Object.hasOwn(this.config.plugins.data, pluginClassName)) {
+  public getPluginData(plugin: string | Plugin_): Record<string, any> | undefined
+  public getPluginData(plugin: string | Plugin_, key: string): any | undefined
+  public getPluginData(plugin: string | Plugin_, key?: string): any | Record<string, any> | undefined {
+    if (typeof plugin == "object") {
+      plugin = plugin.constructor.name
+    }
+
+    if (Object.hasOwn(this.config.plugins.data, plugin)) {
       if (key) {
-        return this.config.plugins.data[pluginClassName][key]
+        return this.config.plugins.data[plugin][key]
       }
-      return this.config.plugins.data[pluginClassName]
+      return this.config.plugins.data[plugin]
     }
     return undefined
   }
-  public setPluginData(pluginClassName: string, data: Record<string, any>): void
-  public setPluginData(pluginClassName: string, key: string | Record<string, any>, value?: any): void {
-    if (!Object.hasOwn(this.config.plugins.data, pluginClassName)) {
-      this.config.plugins.data[pluginClassName] = {}
+
+  public setPluginData(plugin: string | Plugin_, data: Record<string, any>): Record<string, any>
+  public setPluginData(plugin: string | Plugin_, key: string, value: any): Record<string, any>
+  public setPluginData(plugin: string | Plugin_, key: string | Record<string, any>, value?: any): Record<string, any> {
+    if (typeof plugin == "object") {
+      plugin = plugin.constructor.name
+    }
+
+    if (!Object.hasOwn(this.config.plugins.data, plugin)) {
+      this.config.plugins.data[plugin] = {}
     }
     if (typeof key == "string") {
-      this.config.plugins.data[pluginClassName][key] = value
+      this.config.plugins.data[plugin][key] = value
     }
     else if (typeof key == "object") {
-      this.config.plugins.data[pluginClassName] = key
+      this.config.plugins.data[plugin] = key
     }
     this._save()
+
+    return this.config.plugins.data[plugin]
   }
 }
 

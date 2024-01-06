@@ -25,12 +25,6 @@ export abstract class Plugin {
 
   constructor() {
     this.ev.on("message", ev => {
-      if (ev.isSelfSent && !config.getConfig().listener.settings.triggerBySelf) {
-        return
-      }
-
-      const plainText = ev.getPlainText()
-      
       const messageListeners = this.listeners.message
       for (const message of messageListeners.keys()) {
         if (messageListeners.has(message)) {
@@ -106,7 +100,7 @@ export abstract class Plugin {
 
   public onMessage(message: DataType.ListenedMessageArgument, cb: DataType.ListenedMessageFunc, aliases: DataType.ListenedMessageArgument[] | DataType.ListenedMessageArgument = [], priority: number = 0, messageType: DataType.MessageTypeChecker = "all", 
   permission: ListenerEnum.Permission = ListenerEnum.Permission.user, checkers: DataType.Checker[] | DataType.Checker = [], 
-  block: boolean = false, ignoreCase: boolean = true, usage?: string): MessageListener {
+  block: boolean = false, ignoreCase: boolean = true, triggerBySelf: boolean = config.getConfig().listener.settings.triggerBySelf, usage?: string): MessageListener {
     let patterns: DataType.ListenedMessageArgument[] = [message]
     if (Array.isArray(aliases)) {
       patterns.push(...aliases)
@@ -115,7 +109,7 @@ export abstract class Plugin {
       patterns.push(aliases)
     }
     const msg: DataType.ListenedMessage = this.processSingleSegment(message)
-    const listener = new MessageListener(this.processSegments(patterns), cb, priority, permission, messageType, checkers, block, ignoreCase, usage)
+    const listener = new MessageListener(this.processSegments(patterns), cb, priority, permission, messageType, checkers, block, ignoreCase, triggerBySelf, usage)
 
     const messageListeners = this.listeners.message
 
@@ -139,7 +133,7 @@ export abstract class Plugin {
   }
   public onCommand(command: DataType.ListenedCommand, cb: DataType.ListenedCommandFunc, aliases: DataType.ListenedCommand[] | DataType.ListenedCommand = [], priority: number = 0, messageType: DataType.MessageTypeChecker = "all", 
   permission: ListenerEnum.Permission = ListenerEnum.Permission.user, checkers: DataType.Checker[] | DataType.Checker = [], 
-  block: boolean = false, ignoreCase: boolean = true, usage?: string): CommandListener {
+  block: boolean = false, ignoreCase: boolean = true, triggerBySelf: boolean = config.getConfig().listener.settings.triggerBySelf, usage?: string): CommandListener {
     let patterns: DataType.ListenedCommand[] = [command]
     if (Array.isArray(aliases)) {
       patterns.push(...aliases)
@@ -147,7 +141,7 @@ export abstract class Plugin {
     else {
       patterns.push(aliases)
     }
-    const listener = new CommandListener(patterns, cb, priority, permission, messageType, checkers, block, ignoreCase, usage)
+    const listener = new CommandListener(patterns, cb, priority, permission, messageType, checkers, block, ignoreCase, triggerBySelf, usage)
 
     const commandListeners = this.listeners.command
 

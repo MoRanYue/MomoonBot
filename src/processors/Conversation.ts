@@ -13,56 +13,13 @@ export class Conversation {
   public state: DataType.State = {}
   protected queue: MessageEvent[] = []
 
-  constructor(origin: MessageEvent | number, connectionIndex: number = 0) {
-    if (typeof origin == "object") {
-      this.origin = origin.messageId
-      this.userId = origin.userId
-      this.queue.push(origin)
-    }
-    else {
-      this.origin = origin
-
-      const client = launcher.getConnections()[connectionIndex]
-      client.send(ConnectionEnum.Action.getMsg, {
-        message_id: origin
-      }, data => {
-        if (data.retcode != ConnectionEnum.ResponseCode.ok) {
-          throw new Error(`消息“${origin}”无效`);
-        }
-
-        const message = data.data
-        const isGroup = message.message_type == EventEnum.MessageType.group
-        const inst = new MessageEvent({
-          post_type: EventEnum.EventType.message,
-          font: 0,
-          time: message.time,
-          message_type: message.message_type,
-          message_id: message.message_id,
-          message: message.message,
-          raw_message: "",
-          group_id: message.group_id,
-          target_id: message.target_id,
-          peer_id: message.peer_id,
-          user_id: message.sender.user_id,
-          sub_type: isGroup ? EventEnum.MessageSubType.normal : EventEnum.MessageSubType.friend,
-          self_id: 0,
-          temp_source: isGroup ? EventEnum.MessageTempSource.group : EventEnum.MessageTempSource.finding,
-          sender: {
-            nickname: message.sender.nickname,
-            card: "",
-            level: "",
-            role: "member",
-            title: "",
-            user_id: message.sender.user_id
-          }
-        }, client)
-        this.userId = message.sender.user_id
-        this.queue.push(inst)
-      })
-    }
+  constructor(origin: MessageEvent) {
+    this.origin = origin.messageId
+    this.userId = origin.userId
+    this.queue.push(origin)
   }
 
-  public append(...events: MessageEvent[]): number {
+  public push(...events: MessageEvent[]): number {
     return this.queue.push(...events)
   }
   public pop(): MessageEvent | undefined {

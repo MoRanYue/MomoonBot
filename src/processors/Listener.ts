@@ -7,6 +7,7 @@ import { Conversation } from "./Conversation";
 import { ListenerUtils } from "../tools/ListenerUtils";
 import { isPromise } from "node:util/types";
 import { MessageUtils } from "../tools/MessageUtils";
+import config from "../config";
 
 abstract class Listener {
   public priority!: number
@@ -23,6 +24,7 @@ class MessageListener extends Listener {
   protected checkers: DataType.Checker[]
   protected permission: ListenerEnum.Permission
   protected messageType: DataType.MessageTypeChecker
+  protected triggerBySelf: boolean
   protected usage?: string
   protected ignoreCase?: boolean
 
@@ -30,7 +32,8 @@ class MessageListener extends Listener {
   protected conversations: Record<number, Conversation> = {}
 
   constructor(pattern: DataType.ListenedMessage[], cb: DataType.ListenedMessageFunc, priority: number = 0, permission: ListenerEnum.Permission = ListenerEnum.Permission.user, 
-  messageType: DataType.MessageTypeChecker = "all", checkers: DataType.Checker | DataType.Checker[] = [], block: boolean = false, ignoreCase: boolean = true, usage?: string) {
+  messageType: DataType.MessageTypeChecker = "all", checkers: DataType.Checker | DataType.Checker[] = [], block: boolean = false, ignoreCase: boolean = true, 
+  triggerBySelf: boolean = config.getConfig().listener.settings.triggerBySelf, usage?: string) {
     super()
 
     this.patterns = pattern
@@ -45,11 +48,16 @@ class MessageListener extends Listener {
       this.checkers = [checkers]
     }
     this.block = block
+    this.triggerBySelf = triggerBySelf
     this.usage = usage
     this.ignoreCase = ignoreCase
   }
 
   public trigger(ev: MessageEvent) {
+    if (ev.isSentBySelf && !this.triggerBySelf) {
+      return
+    }
+
     if (ev.messageType != this.messageType && this.messageType != "all") {
       return
     }
@@ -82,7 +90,7 @@ class MessageListener extends Listener {
 
     if (Object.hasOwn(this.conversations, ev.userId)) {
       const conversation = this.conversations[ev.userId]
-      conversation.append(ev)
+      conversation.push(ev)
 
       const status = this.processReceiver(conversation, conversation.lastStatus, conversation.step, ev)
       conversation.lastStatus = status
@@ -159,6 +167,7 @@ class CommandListener extends Listener {
   protected checkers: DataType.Checker[]
   protected permission: ListenerEnum.Permission
   protected messageType: DataType.MessageTypeChecker
+  protected triggerBySelf: boolean
   protected usage?: string
   protected ignoreCase?: boolean
 
@@ -166,7 +175,8 @@ class CommandListener extends Listener {
   protected conversations: Record<number, Conversation> = {}
 
   constructor(pattern: DataType.ListenedCommand[], cb: DataType.ListenedCommandFunc, priority: number = 0, permission: ListenerEnum.Permission = ListenerEnum.Permission.user, 
-  messageType: DataType.MessageTypeChecker = "all", checkers: DataType.Checker | DataType.Checker[] = [], block: boolean = false, ignoreCase: boolean = true, usage?: string) {
+  messageType: DataType.MessageTypeChecker = "all", checkers: DataType.Checker | DataType.Checker[] = [], block: boolean = false, ignoreCase: boolean = true, 
+  triggerBySelf: boolean = config.getConfig().listener.settings.triggerBySelf, usage?: string) {
     super()
 
     this.patterns = pattern
@@ -181,11 +191,16 @@ class CommandListener extends Listener {
       this.checkers = [checkers]
     }
     this.block = block
+    this.triggerBySelf = triggerBySelf
     this.usage = usage
     this.ignoreCase = ignoreCase
   }
 
   public trigger(ev: MessageEvent) {
+    if (ev.isSentBySelf && !this.triggerBySelf) {
+      return
+    }
+    
     if (ev.messageType != this.messageType && this.messageType != "all") {
       return
     }
@@ -218,7 +233,7 @@ class CommandListener extends Listener {
 
     if (Object.hasOwn(this.conversations, ev.userId)) {
       const conversation = this.conversations[ev.userId]
-      conversation.append(ev)
+      conversation.push(ev)
 
       const status = this.processReceiver(conversation, conversation.lastStatus, conversation.step, ev)
       conversation.lastStatus = status

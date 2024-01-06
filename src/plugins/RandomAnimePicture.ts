@@ -145,7 +145,7 @@ export default class RandomAnimePicture extends Plugin {
       }
       this.getPictures(ev)
       return true
-    }, ["rdpic", "anime", "随机图片"], 1, undefined, undefined, undefined, undefined, undefined, "<COMMAND_PROMPT>randomPic <数量>").receive("count", (ev, state) => {
+    }, ["rdpic", "anime", "随机图片"], 1, undefined, undefined, undefined, undefined, undefined, undefined, "randomPic <数量>").receive("count", (ev, state) => {
       const count = ev.getPlainText().trim()
       if (this.resolveCount(ev, count)) {
         state.count = parseInt(count)

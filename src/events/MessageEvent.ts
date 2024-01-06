@@ -22,14 +22,14 @@ export class MessageEvent extends Ev {
   public raw: string
   public sender: Event.MessageSender
   public messageId: number
-  public isSelfSent: boolean
+  public isSentBySelf: boolean
 
   constructor(ev: Event.Message, conn?: Connection) {
     super();
 
     this.checkEventType(ev, [EventEnum.EventType.message, EventEnum.EventType.messageSent])
 
-    this.isSelfSent = ev.post_type == EventEnum.EventType.messageSent
+    this.isSentBySelf = ev.post_type == EventEnum.EventType.messageSent
     this.type = EventEnum.EventType.message
     this.conn = conn
     this.selfId = ev.self_id

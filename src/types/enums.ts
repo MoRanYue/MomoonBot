@@ -96,10 +96,10 @@ export namespace MessageSegmentEnum {
     deprecatedDice = "dice",
     marketFace = "mface",
 
-    forward = "foward",
-    forwardNode = "foward_node",
-    xml = "",
-    textToSpeech = ""
+    forward = "forward",
+    forwardNode = "forward_node",
+    xml = "xml",
+    textToSpeech = "tts"
   }
   export enum BasketballId {
     missed = 5,
