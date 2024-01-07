@@ -2,6 +2,7 @@ import type { DataType } from "src/types/dataType";
 import type { Event } from "src/events/Event";
 import type { MessageEvent } from "src/events/MessageEvent";
 import type { NoticeEvent } from "src/events/NoticeEvent";
+import type { RequestEvent } from "src/events/RequestEvent";
 import { EventEnum, ListenerEnum } from "../types/enums";
 import { Conversation } from "./Conversation";
 import { ListenerUtils } from "../tools/ListenerUtils";
@@ -10,8 +11,8 @@ import { MessageUtils } from "../tools/MessageUtils";
 import config from "../config";
 
 abstract class Listener {
-  public priority!: number
-  public block!: boolean
+  public abstract priority: number
+  public abstract block: boolean
   protected abstract callback: Function
   protected abstract patterns: any[]
 
@@ -19,6 +20,8 @@ abstract class Listener {
 }
 
 class MessageListener extends Listener {
+  public priority: number;
+  public block: boolean;
   protected callback: DataType.ListenedMessageFunc;
   protected patterns: DataType.ListenedMessage[] = []
   protected checkers: DataType.Checker[]
@@ -64,7 +67,7 @@ class MessageListener extends Listener {
     
     let permission: ListenerEnum.Permission = ListenerEnum.Permission.user
     if (ev.messageType == EventEnum.MessageType.group) {
-      const group = ev.conn!.getGroup(ev.groupId!)
+      const group = ev.conn.getGroup(ev.groupId!)
       if (group) {
         const user = group.members[ev.userId]
         if (user) {
@@ -73,7 +76,7 @@ class MessageListener extends Listener {
       }
     }
     else {
-      const user = ev.conn!.getFriend(ev.userId)
+      const user = ev.conn.getFriend(ev.userId)
       if (user) {
         permission = user.permission
       }
@@ -162,6 +165,8 @@ class MessageListener extends Listener {
 }
 
 class CommandListener extends Listener {
+  public priority: number;
+  public block: boolean;
   protected patterns: DataType.ListenedCommand[];
   protected callback: DataType.ListenedCommandFunc;
   protected checkers: DataType.Checker[]
@@ -207,7 +212,7 @@ class CommandListener extends Listener {
     
     let permission: ListenerEnum.Permission = ListenerEnum.Permission.user
     if (ev.messageType == EventEnum.MessageType.group) {
-      const group = ev.conn!.getGroup(ev.groupId!)
+      const group = ev.conn.getGroup(ev.groupId!)
       if (group) {
         const user = group.members[ev.userId]
         if (user) {
@@ -216,7 +221,7 @@ class CommandListener extends Listener {
       }
     }
     else {
-      const user = ev.conn!.getFriend(ev.userId)
+      const user = ev.conn.getFriend(ev.userId)
       if (user) {
         permission = user.permission
       }
@@ -304,6 +309,8 @@ class CommandListener extends Listener {
 }
 
 class NoticeListener extends Listener {
+  public priority: number;
+  public block: boolean;
   protected callback: DataType.ListenedNoticeFunc;
   protected patterns: DataType.ListenedNotice[]
   protected checkers: DataType.NoticeChecker[]
@@ -333,9 +340,56 @@ class NoticeListener extends Listener {
   }
 
   public trigger(ev: NoticeEvent): void | Promise<void> {
-    if (!(this.patterns.includes(ev.noticeType) || (ev.notifyType && this.patterns.includes(ev.notifyType))) && this.patterns.length != 0) {
+    if (this.patterns.length != 0 && !(this.patterns.includes(ev.noticeType) || (ev.notifyType && this.patterns.includes(ev.notifyType)))) {
       return
     }
+    
+    for (let i = 0; i < this.checkers.length; i++) {
+      if (!this.checkers[i](ev)) {
+        return
+      }
+    }
+
+    this.callback(ev)
+  }
+}
+
+class RequestListener extends Listener {
+  public priority: number;
+  public block: boolean;
+  protected callback: DataType.ListenedRequestFunc;
+  protected checkers: DataType.RequestChecker[]
+  protected patterns: DataType.ListenedRequest[];
+
+  constructor(requests: DataType.ListenedRequest | DataType.ListenedRequest[] | "", cb: DataType.ListenedRequestFunc, priority: number = 0, 
+  checkers: DataType.RequestChecker | DataType.RequestChecker[] = [], block: boolean = false) {
+    super();
+
+    if (Array.isArray(requests)) {
+      this.patterns = requests
+    }
+    else if (requests === "") {
+      this.patterns = []
+    }
+    else {
+      this.patterns = [requests]
+    }
+    this.callback = cb
+    this.priority = priority
+    this.block = block
+    if (Array.isArray(checkers)) {
+      this.checkers = checkers
+    }
+    else {
+      this.checkers = [checkers]
+    }
+  }
+
+  public trigger(ev: RequestEvent): void | Promise<void> {
+    if (this.patterns.length != 0 && !this.patterns.includes(ev.requestType)) {
+      return
+    }
+
     for (let i = 0; i < this.checkers.length; i++) {
       if (!this.checkers[i](ev)) {
         return
@@ -347,5 +401,5 @@ class NoticeListener extends Listener {
 }
 
 export {
-  Listener, MessageListener, CommandListener, NoticeListener
+  Listener, MessageListener, CommandListener, NoticeListener, RequestListener
 }

@@ -5,6 +5,7 @@ import type { NoticeEvent } from "../events/NoticeEvent";
 import type { ConnectionContent } from "./connectionContent"
 import type { EventEnum, ListenerEnum } from "./enums"
 import type { Segment } from "src/events/messages/MessageSegment";
+import type { RequestEvent } from "src/events/RequestEvent";
 
 export namespace DataType {
   type AnyFunction = (...args: any[]) => any
@@ -33,6 +34,7 @@ export namespace DataType {
   type State = Record<string, any>
   type Checker = (ev: MessageEvent) => boolean
   type NoticeChecker = (ev: NoticeEvent) => boolean
+  type RequestChecker = (ev: RequestEvent) => boolean
   type MessageTypeChecker = EventEnum.MessageType | "all"
   type ListenedMessage = string | RegExp | Segment[]
   type ListenedMessageArgument = ListenedMessage | Segment
@@ -44,4 +46,7 @@ export namespace DataType {
   type ListenedNotice = EventEnum.NoticeType | EventEnum.NotifySubType
   type ListenedNoticeFuncReturn = void | Promise<void>
   type ListenedNoticeFunc = (ev: NoticeEvent) => ListenedNoticeFuncReturn
+  type ListenedRequest = EventEnum.RequestType
+  type ListenedRequestFuncReturn = void | Promise<void>
+  type ListenedRequestFunc = (ev: RequestEvent) => ListenedRequestFuncReturn
 }

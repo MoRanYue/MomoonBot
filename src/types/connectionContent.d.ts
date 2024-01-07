@@ -396,7 +396,7 @@ export namespace ConnectionContent {
       unique_name: string
       area: string
       level: number
-      role: "member" | "admin" | "owner"
+      role: EventEnum.GroupMemberRole
       unfriendly: boolean
       card_changeable: boolean
     }

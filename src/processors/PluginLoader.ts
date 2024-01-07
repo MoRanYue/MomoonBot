@@ -18,6 +18,9 @@ export class PluginLoader {
     this.ev.on("notice", async (ev) => this.plugins.forEach(plugin => {
       plugin.ev.emit("notice", ev)
     }))
+    this.ev.on("request", async (ev) => this.plugins.forEach(plugin => {
+      plugin.ev.emit("request", ev)
+    }))
   }
 
   public load(pluginClass: typeof Plugin_): Plugin | undefined {

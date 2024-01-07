@@ -4,17 +4,17 @@ import type { Event } from "src/types/event";
 import { EventEnum } from "../types/enums";
 
 export class NoticeEvent extends Ev {
+  public conn: Connection;
   public selfId: number;
   public time: number;
   public noticeType: EventEnum.NoticeType
   public notifyType?: EventEnum.NotifySubType
 
-  constructor(ev: Event.Notice, conn?: Connection) {
+  constructor(ev: Event.Notice, conn: Connection) {
     super();
 
     this.checkEventType(ev, EventEnum.EventType.notice)
 
-    this.type = EventEnum.EventType.notice
     this.conn = conn
     this.selfId = ev.self_id
     this.time = ev.time
@@ -22,7 +22,7 @@ export class NoticeEvent extends Ev {
     this.notifyType = (<Event.ReportedSystemNotice>ev).sub_type
   }
 
-  public static fromObject(ev: Event.Notice, conn?: Connection): NoticeEvent {
+  public static fromObject(ev: Event.ReportedNotice, conn: Connection): NoticeEvent {
     switch (ev.notice_type) {
       case EventEnum.NoticeType.groupRecall:
         return new GroupRecall(<Event.GroupRecall>ev, conn)
@@ -86,7 +86,7 @@ export class Title extends NoticeEvent {
   public groupId: number
   public title: string
 
-  constructor(ev: Event.Title, conn?: Connection) {
+  constructor(ev: Event.Title, conn: Connection) {
     super(ev, conn);
 
     this.userId = ev.user_id
@@ -99,7 +99,7 @@ export class Honor extends NoticeEvent {
   public groupId: number
   public honorType: string
 
-  constructor(ev: Event.Honor, conn?: Connection) {
+  constructor(ev: Event.Honor, conn: Connection) {
     super(ev, conn);
 
     this.userId = ev.user_id
@@ -112,7 +112,7 @@ export class LuckyKing extends NoticeEvent {
   public targetId: number
   public groupId: number
 
-  constructor(ev: Event.LuckyKing, conn?: Connection) {
+  constructor(ev: Event.LuckyKing, conn: Connection) {
     super(ev, conn);
 
     this.userId = ev.user_id
@@ -128,7 +128,7 @@ export class Poke extends NoticeEvent {
   public iconUrl: string
   public suffix: string
 
-  constructor(ev: Event.Poke, conn?: Connection) {
+  constructor(ev: Event.Poke, conn: Connection) {
     super(ev, conn);
 
     this.userId = ev.user_id
@@ -143,7 +143,7 @@ export class ClientStatus extends NoticeEvent {
   public online: boolean
   public client: object
 
-  constructor(ev: Event.ClientStatus, conn?: Connection) {
+  constructor(ev: Event.ClientStatus, conn: Connection) {
     super(ev, conn);
 
     this.online = ev.online
@@ -157,7 +157,7 @@ export class Essence extends NoticeEvent {
   public messageId: number
   public operation: "add" | "delete"
 
-  constructor(ev: Event.Essence, conn?: Connection) {
+  constructor(ev: Event.Essence, conn: Connection) {
     super(ev, conn);
 
     this.userId = ev.sender_id
@@ -173,7 +173,7 @@ export class OfflineFile extends NoticeEvent {
   public size: number
   public url: string
 
-  constructor(ev: Event.OfflineFile, conn?: Connection) {
+  constructor(ev: Event.OfflineFile, conn: Connection) {
     super(ev, conn);
 
     this.userId = ev.user_id
@@ -185,7 +185,7 @@ export class OfflineFile extends NoticeEvent {
 export class FriendAdd extends NoticeEvent {
   public userId: number
 
-  constructor(ev: Event.FriendAdd, conn?: Connection) {
+  constructor(ev: Event.FriendAdd, conn: Connection) {
     super(ev, conn);
 
     this.userId = ev.user_id
@@ -197,7 +197,7 @@ export class GroupCardChange extends NoticeEvent {
   public old: string
   public new: string
 
-  constructor(ev: Event.GroupCardChange, conn?: Connection) {
+  constructor(ev: Event.GroupCardChange, conn: Connection) {
     super(ev, conn);
 
     this.userId = ev.user_id
@@ -213,7 +213,7 @@ export class GroupBan extends NoticeEvent {
   public duration: number
   public status: "ban" | "lift_ban"
 
-  constructor(ev: Event.GroupBan, conn?: Connection) {
+  constructor(ev: Event.GroupBan, conn: Connection) {
     super(ev, conn);
 
     this.userId = ev.user_id
@@ -231,7 +231,7 @@ export class PrivateFileUpload extends NoticeEvent {
   public url: string
   public expires: number
 
-  constructor(ev: Event.PrivateFileUpload, conn?: Connection) {
+  constructor(ev: Event.PrivateFileUpload, conn: Connection) {
     super(ev, conn);
 
     this.userId = ev.user_id
@@ -251,7 +251,7 @@ export class GroupFileUpload extends NoticeEvent {
   public busid: number
   public url: string
 
-  constructor(ev: Event.GroupFileUpload, conn?: Connection) {
+  constructor(ev: Event.GroupFileUpload, conn: Connection) {
     super(ev, conn);
 
     this.userId = ev.user_id
@@ -268,7 +268,7 @@ export class GroupAdminChange extends NoticeEvent {
   public groupId: number
   public status: "set" | "unset"
 
-  constructor(ev: Event.GroupAdminChange, conn?: Connection) {
+  constructor(ev: Event.GroupAdminChange, conn: Connection) {
     super(ev, conn);
 
     this.userId = ev.user_id
@@ -282,7 +282,7 @@ export class GroupMemberDecrease extends NoticeEvent {
   public groupId: number
   public reason: "leave" | "kick" | "kick_me"
 
-  constructor(ev: Event.GroupMemberDecrease, conn?: Connection) {
+  constructor(ev: Event.GroupMemberDecrease, conn: Connection) {
     super(ev, conn);
 
     this.userId = ev.user_id
@@ -297,7 +297,7 @@ export class GroupMemberIncrease extends NoticeEvent {
   public groupId: number
   public entry: "approve" | "invite"
 
-  constructor(ev: Event.GroupMemberIncrease, conn?: Connection) {
+  constructor(ev: Event.GroupMemberIncrease, conn: Connection) {
     super(ev, conn);
 
     this.userId = ev.user_id
@@ -311,7 +311,7 @@ export class PrivateRecall extends NoticeEvent {
   public operatorId: number
   public messageId: number
 
-  constructor(ev: Event.PrivateRecall, conn?: Connection) {
+  constructor(ev: Event.PrivateRecall, conn: Connection) {
     super(ev, conn);
 
     this.userId = ev.user_id
@@ -325,7 +325,7 @@ export class GroupRecall extends NoticeEvent {
   public groupId: number
   public messageId: number
 
-  constructor(ev: Event.GroupRecall, conn?: Connection) {
+  constructor(ev: Event.GroupRecall, conn: Connection) {
     super(ev, conn);
 
     this.userId = ev.user_id
@@ -337,7 +337,7 @@ export class GroupRecall extends NoticeEvent {
 export class Unknown extends NoticeEvent {
   public data: object
 
-  constructor(ev: Event.ReportedNotice, conn?: Connection) {
+  constructor(ev: Event.ReportedNotice, conn: Connection) {
     super(ev, conn);
 
     this.data = ev

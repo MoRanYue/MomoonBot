@@ -9,7 +9,7 @@ export namespace Event {
   interface GroupMessageSender extends PrivateMessageSender {
     card: string
     level: string
-    role: string
+    role: EventEnum.GroupMemberRole
     title: string
   }
   type MessageSender = PrivateMessageSender | GroupMessageSender
@@ -53,6 +53,9 @@ export namespace Event {
   interface ReportedSystemNotice extends ReportedNotice {
     notice_type: EventEnum.NoticeType.notify
     sub_type: EventEnum.NotifySubType
+  }
+  interface ReportedRequest extends Reported {
+    request_type: EventEnum.RequestType
   }
   interface PrivateRecall extends ReportedNotice {
     user_id: number
@@ -171,7 +174,7 @@ export namespace Event {
     user_id: number
     file: OffileFileMessage
   }
-  interface FriendRequest extends Reported {
+  interface FriendRequest extends ReportedRequest {
     user_id: number
     comment: string
     flag: string
@@ -180,7 +183,7 @@ export namespace Event {
     approve: boolean
     remark: string
   }
-  interface GroupRequest extends Reported {
+  interface GroupRequest extends ReportedRequest {
     group_id: number
     user_id: number
     comment: string
@@ -210,7 +213,7 @@ export namespace Event {
   type Notice = PrivateRecall | GroupRecall | GroupMemberIncrease | GroupMemberDecrease | GroupAdminChange | 
   GroupFileUpload | PrivateFileUpload | GroupBan | GroupCardChange | FriendAdd | OfflineFile | Title | 
   Essence | ClientStatus | Poke | LuckyKing | Honor | ReportedNotice | ReportedSystemNotice
-  type Request = FriendRequest | GroupRequest
+  type Request = FriendRequest | GroupRequest | ReportedRequest
   type Operation = MessageQuickOperation | MessageQuickReply | GroupRequestQuickOperation | FriendRequestQuickOperation
   type Unknown = Reported
 }

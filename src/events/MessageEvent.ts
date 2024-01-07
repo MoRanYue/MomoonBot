@@ -6,9 +6,9 @@ import type { MessageSegment } from "../types/message";
 import { MessageUtils } from "../tools/MessageUtils";
 import type { Connection } from "../connections/Connection";
 import type { DataType } from "src/types/dataType";
-import { ConnectionContent } from "src/types/connectionContent";
 
 export class MessageEvent extends Ev {
+  public conn: Connection;
   public time: number
   public selfId: number
   public peerId: number
@@ -20,17 +20,21 @@ export class MessageEvent extends Ev {
   public messageSubType: EventEnum.MessageSubType
   public message: Segment[]
   public raw: string
-  public sender: Event.MessageSender
+  public sender: {
+    nickname: string
+    groupCard?: string
+    role?: EventEnum.GroupMemberRole
+  }
   public messageId: number
+  
   public isSentBySelf: boolean
 
-  constructor(ev: Event.Message, conn?: Connection) {
+  constructor(ev: Event.Message, conn: Connection) {
     super();
 
     this.checkEventType(ev, [EventEnum.EventType.message, EventEnum.EventType.messageSent])
 
     this.isSentBySelf = ev.post_type == EventEnum.EventType.messageSent
-    this.type = EventEnum.EventType.message
     this.conn = conn
     this.selfId = ev.self_id
     this.time = ev.time
@@ -42,7 +46,19 @@ export class MessageEvent extends Ev {
     this.message = MessageUtils.classify(ev.message)
     this.messageId = ev.message_id
     this.raw = ev.raw_message
-    this.sender = ev.sender
+    if (Object.hasOwn(ev.sender, "role")) {
+      const senderInfo = <Event.GroupMessageSender>ev.sender
+      this.sender = {
+        nickname: senderInfo.nickname,
+        groupCard: senderInfo.card,
+        role: senderInfo.role,
+      }
+    }
+    else {
+      this.sender = {
+        nickname: ev.sender.nickname
+      }
+    }
     if (ev.message_type == EventEnum.MessageType.group) {
       this.groupId = ev.group_id
     }

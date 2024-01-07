@@ -24,8 +24,21 @@ export namespace EventEnum {
     private = "private",
     group = "group"
   }
+  export enum GroupMemberRole {
+    owner = "owner",
+    admin = "admin",
+    member = "member"
+  }
   export enum MessageTempSource {
-    group, consultation, finding, movie, heatChatting, validationMessage, multiplePeople, dating, addressBook
+    group = 0, 
+    consultation = 1, 
+    finding = 2, 
+    movie = 3, 
+    heatChatting = 4, 
+    validationMessage = 6, 
+    multiplePeople = 7, 
+    dating = 8, 
+    addressBook = 9
   }
   export enum MessageSubType {
     friend = "friend",
@@ -148,6 +161,7 @@ export namespace ConnectionEnum {
     getUnidirectionalFriendList = "get_unidirectional_friend_list",
     getGroupInfo = "get_group_info",
     getGroupList = "get_group_list",
+
     getGroupMemberInfo = "get_group_member_info",
     getGroupMemberList = "get_group_member_list",
     getGroupHonorInfo = "get_group_honor_info",
@@ -224,6 +238,8 @@ export namespace ConnectionEnum {
     favoriteGetItemContent = "fav.get_item_content",
     favoriteAddTextMsg = "fav.add_text_msg",
     favoriteAddImageMsg = "fav.add_image_msg",
+
+    handleQuickOperation = ".handle_quick_operation"
   }
   export enum ResponseStatus {
     ok = "ok",

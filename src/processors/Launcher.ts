@@ -5,8 +5,9 @@ import type { HttpMiddleware, ReverseWsMiddleware, WsMiddleware } from "../types
 import { ConfigEnum, EventEnum } from "../types/enums"
 import cfg from "../config"
 import { MessageEvent } from "../events/MessageEvent"
-import { PluginLoader } from "./PluginLoader"
+import { RequestEvent } from "../events/RequestEvent"
 import { NoticeEvent } from "../events/NoticeEvent"
+import { PluginLoader } from "./PluginLoader"
 import type { Event } from "src/types/event"
 import path from "node:path"
 import { Logger } from "../tools/Logger"
@@ -95,6 +96,7 @@ export class Launcher {
 
         this.loader.ev.emit("notice", NoticeEvent.fromObject(ev, inst))
       })
+      inst.ev.on("request", ev => this.loader.ev.emit("request", RequestEvent.fromObject(ev, inst)))
       
       this.connections.push(inst)
     })

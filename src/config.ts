@@ -15,8 +15,7 @@ export class Config {
 
   constructor(filePath: string = "./config.json") {
     if (FileUtils.getExtendedName(filePath)?.toLowerCase() != ".json") {
-      console.error("文件类型不正确，应为JSON文件")
-      process.exit()
+      throw new Error("文件类型不正确，应为JSON文件")
     }
     this.filePath = path.resolve(filePath)
     let fileContent: string

@@ -165,7 +165,7 @@ export default class RandomAnimePicture extends Plugin {
 
   public getPictures(ev: MessageEvent, count: number = 1): void {
     ev.reply("正在获取中", undefined, true)
-    Utils.randomChoice(this.apiServers)(ev.conn!, ev.messageType, ev.userId, ev.groupId, count)
+    Utils.randomChoice(this.apiServers)(ev.conn, ev.messageType, ev.userId, ev.groupId, count)
   }
 
   public resolveCount(ev: MessageEvent, num: string): boolean {

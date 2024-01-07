@@ -4,6 +4,7 @@ import type { Event } from "./event";
 import type { DataType } from "./dataType";
 import type { MessageEvent } from "../events/MessageEvent";
 import type { NoticeEvent } from "../events/NoticeEvent";
+import type { RequestEvent } from "../events/RequestEvent";
 import type { Event as Ev } from "../events/Event";
 import type { ConnectionContent } from "./connectionContent";
 
@@ -69,26 +70,26 @@ export namespace CustomEventEmitter {
   interface PluginLoaderEventEmitter extends CustomEventEmitter {
     on(eventName: "message", listener: (ev: MessageEvent) => void): this
     on(eventName: "notice", listener: (ev: NoticeEvent) => void): this
-    on(eventName: "request", listener: (ev: Ev) => void): this
+    on(eventName: "request", listener: (ev: RequestEvent) => void): this
     on(eventName: "unknown", listener: (ev: Ev) => void): this
     on(eventName: string | symbol, listener: DataType.AnyFunction): this
 
     once(eventName: "message", listener: (ev: MessageEvent) => void): this
     once(eventName: "notice", listener: (ev: NoticeEvent) => void): this
-    once(eventName: "request", listener: (ev: Ev) => void): this
+    once(eventName: "request", listener: (ev: RequestEvent) => void): this
     once(eventName: "unknown", listener: (ev: Ev) => void): this
     once(eventName: string | symbol, listener: DataType.AnyFunction): this
 
     emit(eventName: "message", ev: MessageEvent): boolean
     emit(eventName: "notice", ev: NoticeEvent): boolean
-    emit(eventName: "request", ev: Ev): boolean
+    emit(eventName: "request", ev: RequestEvent): boolean
     emit(eventName: "unknown", ev: Ev): boolean
     emit(eventName: string | symbol, ...args: any[]): boolean;
   }
   interface PluginEventEmitter extends CustomEventEmitter {
     on(eventName: "message", listener: (ev: MessageEvent) => void): this
     on(eventName: "notice", listener: (ev: NoticeEvent) => void): this
-    on(eventName: "request", listener: (ev: Ev) => void): this
+    on(eventName: "request", listener: (ev: RequestEvent) => void): this
     on(eventName: "unknown", listener: (ev: Ev) => void): this
     on(eventName: "load", listener: VoidFunction): this
     on(eventName: "unload", listener: (complete: () => void) => void): this
@@ -96,7 +97,7 @@ export namespace CustomEventEmitter {
 
     once(eventName: "message", listener: (ev: MessageEvent) => void): this
     once(eventName: "notice", listener: (ev: NoticeEvent) => void): this
-    once(eventName: "request", listener: (ev: Ev) => void): this
+    once(eventName: "request", listener: (ev: RequestEvent) => void): this
     once(eventName: "unknown", listener: (ev: Ev) => void): this
     once(eventName: "load", listener: VoidFunction): this
     once(eventName: "unload", listener: (complete: () => void) => void): this
@@ -104,7 +105,7 @@ export namespace CustomEventEmitter {
 
     emit(eventName: "message", ev: MessageEvent): boolean
     emit(eventName: "notice", ev: NoticeEvent): boolean
-    emit(eventName: "request", ev: Ev): boolean
+    emit(eventName: "request", ev: RequestEvent): boolean
     emit(eventName: "unknown", ev: Ev): boolean
     emit(eventName: "load", ...args: any[]): boolean
     emit(eventName: "unload", complete: () => void): boolean

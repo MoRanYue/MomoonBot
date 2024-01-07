@@ -1,10 +1,9 @@
-import { CommandListener, Listener, MessageListener, NoticeListener } from "./Listener"
+import { CommandListener, Listener, MessageListener, NoticeListener, RequestListener } from "./Listener"
 import type { DataType } from "../types/dataType"
 import config from "../config"
 import { CustomEventEmitter } from "src/types/CustomEventEmitter"
 import { CustomEventEmitter as EventEmitter } from "../tools/CustomEventEmitter"
 import { ListenerEnum } from "../types/enums"
-import { MessageUtils } from "../tools/MessageUtils"
 import { Logger } from "../tools/Logger"
 import { Segment } from "../events/messages/MessageSegment"
 
@@ -96,6 +95,31 @@ export abstract class Plugin {
         }
       }
     })
+
+    this.ev.on("request", ev => {
+      const requestListeners = this.listeners.request
+      for (const request of requestListeners.keys()) {
+        if (requestListeners.has(request)) {
+          const listeners = requestListeners.get(request)!
+          
+          for (let i = 0; i < listeners.length; i++) {
+            const listener = listeners[i];
+            
+            try {
+              listener.trigger(ev)
+            }
+            catch (err) {
+              this.logger.error(`在触发通知监听器“${request}”（优先级：${listener.priority}，执行顺序：${i + 1}）时捕获到错误`)
+              this.logger.error(err)
+            }
+
+            if (listener.block) {
+              break
+            }
+          }
+        }
+      }
+    })
   }
 
   public onMessage(message: DataType.ListenedMessageArgument, cb: DataType.ListenedMessageFunc, aliases: DataType.ListenedMessageArgument[] | DataType.ListenedMessageArgument = [], priority: number = 0, messageType: DataType.MessageTypeChecker = "all", 
@@ -169,6 +193,23 @@ export abstract class Plugin {
       noticeListeners.set(noticeStr, [listener])
     }
     noticeListeners.get(noticeStr)!.sort(this.sortListeners)
+
+    return listener
+  }
+  public onRequest(requests: DataType.ListenedRequest | DataType.ListenedRequest[] | "", cb: DataType.ListenedRequestFunc, priority: number = 0,
+  checkers: DataType.RequestChecker | DataType.RequestChecker[] = [], block: boolean = false): RequestListener {
+    const listener = new RequestListener(requests, cb, priority, checkers, block)
+
+    const requestListeners = this.listeners.request
+
+    const requestStr = Array.isArray(requests) ? requests.join("、") : requests
+    if (requestListeners.has(requestStr)) {
+      requestListeners.get(requestStr)!.push(listener)
+    }
+    else {
+      requestListeners.set(requestStr, [listener])
+    }
+    requestListeners.get(requestStr)!.sort(this.sortListeners)
 
     return listener
   }
