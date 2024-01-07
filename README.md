@@ -60,7 +60,7 @@ Momoon Bot尚处于快速开发阶段。
 
 ### 兼容协议
 
-Momoon Bot目前兼容[OneBotV12](https://onebot.dev)内容，所有的API均根据[OpenShamrock文档](https://whitechi73.github.io/OpenShamrock/)进行编写。此项目依赖于OpenShamrock的部分功能运行。
+Momoon Bot目前兼容[OneBotV12](https://onebot.dev)内容，所有的API均根据[OpenShamrock文档](https://whitechi73.github.io/OpenShamrock/)进行编写。
 
 ### 连接方式
 
