@@ -22,6 +22,6 @@
   "dependencies": {
     "follow-redirects": "^1.15.3",
     "md5": "^2.3.0",
-    "ws": "^8.14.2"
+    "ws": "^8.16.0"
   }
 }
