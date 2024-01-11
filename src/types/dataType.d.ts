@@ -5,6 +5,7 @@ import type { NoticeEvent } from "../events/NoticeEvent";
 import type { ConnectionContent } from "./connectionContent"
 import type { EventEnum, ListenerEnum } from "./enums"
 import type { Segment } from "src/events/messages/MessageSegment";
+import type { MessageSegment } from "./message";
 import type { RequestEvent } from "src/events/RequestEvent";
 
 export namespace DataType {

@@ -17,6 +17,9 @@ coverage
 /cypress/videos/
 /cypress/screenshots/
 
+src/plugins/*
+!src/plugins/BuiltInPlugin.ts
+
 # Editor directories and files
 .vscode/*
 .vscode

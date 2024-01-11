@@ -47,18 +47,22 @@ export class MessageUtils {
         return MsgSegment.Share.fromObject(<MessageSegment.ShareSegment>seg)
 
       case MessageSegmentEnum.SegmentType.json:
-        const data = Utils.jsonToData((<MessageSegment.JsonSegment>seg).data.data)
-        if (data.app && data.app == AppMessageEnum.App.structuredMessage) {
-          const metaContent: any = (<AppMessageContent.StructuredMessage<object>>data).meta
-          if (Object.hasOwn(metaContent, "news")) {
-            switch (metaContent.news.appid) {
-              case AppMessageEnum.AppId.bilibiliVideoShare:
-                return new AppMessage.BilibiliVideoShare(data)
+        try {
+          const data = Utils.jsonToData((<MessageSegment.JsonSegment>seg).data.data)
+          if (data.app && data.app == AppMessageEnum.App.structuredMessage) {
+            const metaContent: any = (<AppMessageContent.StructuredMessage<object>>data).meta
+            if (Object.hasOwn(metaContent, "news")) {
+              switch (metaContent.news.appid) {
+                case AppMessageEnum.AppId.bilibiliVideoShare:
+                  return new AppMessage.BilibiliVideoShare(data)
+              }
             }
+            return new AppMessage.AppMessage(data)
           }
-          return new AppMessage.AppMessage(data)
         }
-        return MsgSegment.Json.fromObject(<MessageSegment.JsonSegment>seg)
+        catch (err) {
+          return MsgSegment.Json.fromObject(<MessageSegment.JsonSegment>seg)
+        }
 
       case MessageSegmentEnum.SegmentType.basketball:
         return MsgSegment.Basketball.fromObject(<MessageSegment.BasketballSegment>seg)
