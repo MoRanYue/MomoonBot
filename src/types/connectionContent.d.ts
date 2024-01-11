@@ -238,6 +238,9 @@ export namespace ConnectionContent {
     interface GetProhibitedMemberList {
       group_id: number
     }
+    interface GetGroupAtAllRemain {
+      group_id: number
+    }
     interface UploadPrivateFile {
       user_id: number
       file: string
@@ -556,6 +559,11 @@ export namespace ConnectionContent {
       time: number
     }
     type GetProhibitedMemberList = ProhibitedMemberItem[]
+    interface GetGroupAtAllRemain {
+      can_at_all: boolean
+      remain_at_all_count_for_group: number
+      remain_at_all_count_for_uin: number
+    }
     interface UploadPrivateFile {
       msg_id: number
       bizid: number
