@@ -217,6 +217,7 @@ export namespace ConnectionEnum {
     setGroupLeave = "set_group_leave",
     groupTouch = "group_touch",
     getProhibitedMemberList = "get_prohibited_member_list",
+    getGroupAtAllRemain = "get_group_at_all_remain",
 
     uploadPrivateFile = "upload_private_file",
     uploadGroupFile = "upload_group_file",
