@@ -6,6 +6,7 @@ export namespace ConfigEnum {
   }
 
   export enum SupportedProtocol {
+    onebotV11 = "onebot/v11",
     onebotV12 = "onebot/v12",
     shamrock = "shamrock"
   }
@@ -89,6 +90,7 @@ export namespace MessageSegmentEnum {
     text = "text",
     at = "at",
     face = "face",
+    marketFace = "mface",
     reply = "reply",
     file = "file",
     image = "image",
@@ -107,12 +109,17 @@ export namespace MessageSegmentEnum {
     newDice = "new_dice",
     deprecatedRps = "rps",
     deprecatedDice = "dice",
-    marketFace = "mface",
 
     forward = "forward",
-    forwardNode = "forward_node",
+    
+    forwardNode = "node",
     xml = "xml",
-    textToSpeech = "tts"
+    cardImage = "cardimage",
+    textToSpeech = "tts",
+    shake = "shake",
+    anonymous = "anonymous",
+    contact = "contact",
+    redbag = "redbag",
   }
   export enum BasketballId {
     missed = 5,
