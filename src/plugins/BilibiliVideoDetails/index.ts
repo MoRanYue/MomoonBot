@@ -84,7 +84,7 @@ ${data.desc}
       }
     }
 
-    this.onMessage(/((www\.|m\.)?bilibili\.com|b23\.tv)\/.*/, processMessage, [new MessageSegment.Json(undefined)])
+    this.onMessage(/av\d*|BV[1-9a-z]{10}/gi, processMessage, [new MessageSegment.Json(undefined)])
   }
 
   private resolveShortLink(link: string, cb: (link: string) => void) {

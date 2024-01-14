@@ -19,6 +19,10 @@ coverage
 
 src/plugins/*
 !src/plugins/BuiltInPlugin.ts
+!src/plugins/GroupStewardFucker.ts
+!src/plugins/RandomAnimPicture.ts
+!src/plugins/TodayNumber.ts
+!src/plugins/BilibiliVideoDetails
 
 # Editor directories and files
 .vscode/*
