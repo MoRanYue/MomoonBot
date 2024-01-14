@@ -37,11 +37,11 @@ export default class BuiltInPlugin extends Plugin {
       const messageContent: string = ev.getMessageContent()
 
       if (ev.messageType == EventEnum.MessageType.group) {
-        const group = ev.conn.getGroup(ev.groupId!)
+        const group = ev.client.groups[ev.groupId!]
         if (!group) {
           this.logger.info(`接收到${type}：${messageContent}（${ev.messageId}） 来自群聊：${ev.groupId} 发送者：${ev.userId}`)
-          if (Object.keys(ev.conn.getGroups()!).length != 0 && config.getPluginData(this, "autoAddMissingGroupInfo")) {
-            ev.conn._addGroup(ev.groupId!)
+          if (Object.keys(ev.client.groups).length != 0 && config.getPluginData(this, "autoAddMissingGroupInfo")) {
+            ev.client._addGroup(ev.groupId!)
           }
           return
         }
@@ -51,7 +51,7 @@ export default class BuiltInPlugin extends Plugin {
           return
         }
         if (config.getPluginData(this, "autoAddMissingGroupMemberInfo")) {
-          ev.conn._addGroupMember({
+          ev.client._addGroupMember({
             groupId: group.id,
             id: ev.userId
           })
@@ -59,7 +59,7 @@ export default class BuiltInPlugin extends Plugin {
         this.logger.info(`接收到${type}：${messageContent}（${ev.messageId}） 来自群聊：${group.name}（${ev.groupId}） 发送者：${ev.userId}`)
       }
       else if (ev.messageType == EventEnum.MessageType.private) {
-        const friend = ev.conn.getFriend(ev.userId)
+        const friend = ev.client.friends[ev.userId]
         if (friend) {
           this.logger.info(`接收到${type}：${messageContent}（${ev.messageId}） 来自私聊 发送者：${friend.viewedName}（${ev.userId}）`)
           return 
@@ -73,7 +73,7 @@ export default class BuiltInPlugin extends Plugin {
     this.onNotice("", async (event) => {
       if (event.noticeType == EventEnum.NoticeType.groupRecall) {
         const ev = <GroupRecall>event
-        const group = ev.conn.getGroup(ev.groupId)!
+        const group = ev.client.groups[ev.groupId]
         const user = group.members[ev.userId]
         if (ev.userId == ev.operatorId) {
           this.logger.info(`接收到群聊消息撤回通知：群聊：${group.name}（${ev.groupId}） ${user.viewedName}（${ev.userId}） 撤回消息 ${ev.messageId}`)
@@ -85,13 +85,13 @@ export default class BuiltInPlugin extends Plugin {
 
       else if (event.noticeType == EventEnum.NoticeType.friendRecall) {
         const ev = <PrivateRecall>event
-        const user = ev.conn.getFriend(ev.userId)!
+        const user = ev.client.friends[ev.userId]
         this.logger.info(`接收到私聊消息撤回通知：${user.viewedName}（${ev.userId}） 撤回消息 ${ev.messageId}`)
       }
 
       else if (event.noticeType == EventEnum.NoticeType.essence) {
         const ev = <Essence>event
-        const group = ev.conn.getGroup(ev.groupId)!
+        const group = ev.client.groups[ev.groupId]
         const user = group.members[ev.userId]
         const operator = group.members[ev.operatorId]
         let operation: string = ev.operation
@@ -106,7 +106,7 @@ export default class BuiltInPlugin extends Plugin {
 
       else if (event.noticeType == EventEnum.NoticeType.groupIncrease) {
         const ev = <GroupMemberIncrease>event
-        const group = ev.conn.getGroup(ev.groupId)!
+        const group = ev.client.groups[ev.groupId]
         const operator = group.members[ev.operatorId]
         let method: string = ev.entry
         if (ev.entry == "approve") {
@@ -120,7 +120,7 @@ export default class BuiltInPlugin extends Plugin {
 
       else if (event.noticeType == EventEnum.NoticeType.groupDecrease) {
         const ev = <GroupMemberDecrease>event
-        const group = ev.conn.getGroup(ev.groupId)!
+        const group = ev.client.groups[ev.groupId]
         let reason: string = ev.reason
         if (ev.reason == "leave") {
           reason = "退出群聊"
@@ -147,7 +147,7 @@ export default class BuiltInPlugin extends Plugin {
 
       else if (event.noticeType == EventEnum.NoticeType.groupAdmin) {
         const ev = <GroupAdminChange>event
-        const group = ev.conn.getGroup(ev.groupId)!
+        const group = ev.client.groups[ev.groupId]
         const member = group.members[ev.userId]
         let status: string = ev.status
         if (ev.status == "set") {
@@ -161,14 +161,14 @@ export default class BuiltInPlugin extends Plugin {
 
       else if (event.noticeType == EventEnum.NoticeType.groupCard) {
         const ev = <GroupCardChange>event
-        const group = ev.conn.getGroup(ev.groupId)!
+        const group = ev.client.groups[ev.groupId]
         const member = group.members[ev.userId]
         this.logger.info(`接收到群聊成员名片修改通知：群聊：${group.name}（${ev.groupId}） 成员：${member.name}（${ev.userId}） 旧名片：${ev.old} 新名片：${ev.new}`)
       }
       
       else if (event.noticeType == EventEnum.NoticeType.groupBan) {
         const ev = <GroupBan>event
-        const group = ev.conn.getGroup(ev.groupId)!
+        const group = ev.client.groups[ev.groupId]
         const member = group.members[ev.userId]
         const operator = group.members[ev.operatorId]
         this.logger.info(`接收到群聊禁言通知：群聊：${group.name}（${ev.groupId}） 被禁言者：${member.viewedName}（${ev.userId}） 操作者：${operator.viewedName}（${ev.operatorId}）${ev.duration ? " 时长：" + ev.duration.toString() + "秒" : ""}`)
@@ -176,7 +176,7 @@ export default class BuiltInPlugin extends Plugin {
 
       else if (event.noticeType == EventEnum.NoticeType.friendAdd) {
         const ev = <FriendAdd>event
-        const friend = ev.conn.getFriend(ev.userId)!
+        const friend = ev.client.friends[ev.userId]
         this.logger.info(`接收到好友添加通知：好友：${friend.viewedName}（${ev.userId}）`)
       }
     }, 999)
@@ -188,7 +188,7 @@ export default class BuiltInPlugin extends Plugin {
 
       else if (event.requestType == EventEnum.RequestType.group) {
         const ev = <GroupRequest>event
-        const group = ev.conn.getGroup(ev.groupId)!
+        const group = ev.client.groups[ev.groupId]
         let joiningType: string = ev.joiningType
         if (ev.joiningType == "add") {
           joiningType = "正常添加"

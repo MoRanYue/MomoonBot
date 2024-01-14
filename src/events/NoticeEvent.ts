@@ -2,81 +2,82 @@ import type { Connection } from "src/connections/Connection";
 import { Event as Ev } from "./Event";
 import type { Event } from "src/types/event";
 import { EventEnum } from "../types/enums";
+import type { Client } from "src/connections/Client";
 
 export class NoticeEvent extends Ev {
-  public conn: Connection;
+  public client: Client;
   public selfId: number;
   public time: number;
   public noticeType: EventEnum.NoticeType
   public notifyType?: EventEnum.NotifySubType
 
-  constructor(ev: Event.Notice, conn: Connection) {
+  constructor(ev: Event.Notice, client: Client) {
     super();
 
     this.checkEventType(ev, EventEnum.EventType.notice)
 
-    this.conn = conn
+    this.client = client
     this.selfId = ev.self_id
     this.time = ev.time
     this.noticeType = ev.notice_type
     this.notifyType = (<Event.ReportedSystemNotice>ev).sub_type
   }
 
-  public static fromObject(ev: Event.ReportedNotice, conn: Connection): NoticeEvent {
+  public static fromObject(ev: Event.ReportedNotice, client: Client): NoticeEvent {
     switch (ev.notice_type) {
       case EventEnum.NoticeType.groupRecall:
-        return new GroupRecall(<Event.GroupRecall>ev, conn)
+        return new GroupRecall(<Event.GroupRecall>ev, client)
 
       case EventEnum.NoticeType.friendRecall:
-        return new PrivateRecall(<Event.PrivateRecall>ev, conn)
+        return new PrivateRecall(<Event.PrivateRecall>ev, client)
 
       case EventEnum.NoticeType.groupIncrease:
-        return new GroupMemberIncrease(<Event.GroupMemberIncrease>ev, conn)
+        return new GroupMemberIncrease(<Event.GroupMemberIncrease>ev, client)
 
       case EventEnum.NoticeType.groupDecrease:
-        return new GroupMemberDecrease(<Event.GroupMemberDecrease>ev, conn)
+        return new GroupMemberDecrease(<Event.GroupMemberDecrease>ev, client)
 
       case EventEnum.NoticeType.clientStatus:
-        return new ClientStatus(<Event.ClientStatus>ev, conn)
+        return new ClientStatus(<Event.ClientStatus>ev, client)
 
       case EventEnum.NoticeType.essence:
-        return new Essence(<Event.Essence>ev, conn)
+        return new Essence(<Event.Essence>ev, client)
 
       case EventEnum.NoticeType.friendAdd:
-        return new FriendAdd(<Event.FriendAdd>ev, conn)
+        return new FriendAdd(<Event.FriendAdd>ev, client)
 
       case EventEnum.NoticeType.groupAdmin:
-        return new GroupAdminChange(<Event.GroupAdminChange>ev, conn)
+        return new GroupAdminChange(<Event.GroupAdminChange>ev, client)
 
       case EventEnum.NoticeType.groupBan:
-        return new GroupBan(<Event.GroupBan>ev, conn)
+        return new GroupBan(<Event.GroupBan>ev, client)
 
       case EventEnum.NoticeType.groupCard:
-        return new GroupCardChange(<Event.GroupCardChange>ev, conn)
+        return new GroupCardChange(<Event.GroupCardChange>ev, client)
 
       case EventEnum.NoticeType.groupUpload:
-        return new GroupFileUpload(<Event.GroupFileUpload>ev, conn)
+        return new GroupFileUpload(<Event.GroupFileUpload>ev, client)
 
       case EventEnum.NoticeType.notify:
         switch ((<Event.ReportedSystemNotice>ev).sub_type) {
           case EventEnum.NotifySubType.poke:
-            return new Poke(<Event.Poke>ev, conn)
+            return new Poke(<Event.Poke>ev, client)
 
           case EventEnum.NotifySubType.luckyKing:
-            return new LuckyKing(<Event.LuckyKing>ev, conn)
+            return new LuckyKing(<Event.LuckyKing>ev, client)
 
           case EventEnum.NotifySubType.honor:
-            return new Honor(<Event.Honor>ev, conn)
+            return new Honor(<Event.Honor>ev, client)
 
           case EventEnum.NotifySubType.title:
-            return new Title(<Event.Title>ev, conn)
+            return new Title(<Event.Title>ev, client)
 
           default:
-            return new Unknown(ev, conn)
+            return new Unknown(ev, client)
         }
     
       default:
-        return new Unknown(ev, conn)
+        return new Unknown(ev, client)
     }
   }
 }
@@ -86,8 +87,8 @@ export class Title extends NoticeEvent {
   public groupId: number
   public title: string
 
-  constructor(ev: Event.Title, conn: Connection) {
-    super(ev, conn);
+  constructor(ev: Event.Title, client: Client) {
+    super(ev, client);
 
     this.userId = ev.user_id
     this.groupId = ev.group_id
@@ -99,8 +100,8 @@ export class Honor extends NoticeEvent {
   public groupId: number
   public honorType: string
 
-  constructor(ev: Event.Honor, conn: Connection) {
-    super(ev, conn);
+  constructor(ev: Event.Honor, client: Client) {
+    super(ev, client);
 
     this.userId = ev.user_id
     this.groupId = ev.group_id
@@ -112,8 +113,8 @@ export class LuckyKing extends NoticeEvent {
   public targetId: number
   public groupId: number
 
-  constructor(ev: Event.LuckyKing, conn: Connection) {
-    super(ev, conn);
+  constructor(ev: Event.LuckyKing, client: Client) {
+    super(ev, client);
 
     this.userId = ev.user_id
     this.groupId = ev.group_id
@@ -128,8 +129,8 @@ export class Poke extends NoticeEvent {
   public iconUrl: string
   public suffix: string
 
-  constructor(ev: Event.Poke, conn: Connection) {
-    super(ev, conn);
+  constructor(ev: Event.Poke, client: Client) {
+    super(ev, client);
 
     this.userId = ev.user_id
     this.groupId = ev.group_id
@@ -141,13 +142,13 @@ export class Poke extends NoticeEvent {
 }
 export class ClientStatus extends NoticeEvent {
   public online: boolean
-  public client: object
+  public status: object
 
-  constructor(ev: Event.ClientStatus, conn: Connection) {
-    super(ev, conn);
+  constructor(ev: Event.ClientStatus, client: Client) {
+    super(ev, client);
 
     this.online = ev.online
-    this.client = ev.client
+    this.status = ev.client
   }
 }
 export class Essence extends NoticeEvent {
@@ -157,8 +158,8 @@ export class Essence extends NoticeEvent {
   public messageId: number
   public operation: "add" | "delete"
 
-  constructor(ev: Event.Essence, conn: Connection) {
-    super(ev, conn);
+  constructor(ev: Event.Essence, client: Client) {
+    super(ev, client);
 
     this.userId = ev.sender_id
     this.operatorId = ev.operator_id
@@ -173,8 +174,8 @@ export class OfflineFile extends NoticeEvent {
   public size: number
   public url: string
 
-  constructor(ev: Event.OfflineFile, conn: Connection) {
-    super(ev, conn);
+  constructor(ev: Event.OfflineFile, client: Client) {
+    super(ev, client);
 
     this.userId = ev.user_id
     this.name = ev.file.name
@@ -185,8 +186,8 @@ export class OfflineFile extends NoticeEvent {
 export class FriendAdd extends NoticeEvent {
   public userId: number
 
-  constructor(ev: Event.FriendAdd, conn: Connection) {
-    super(ev, conn);
+  constructor(ev: Event.FriendAdd, client: Client) {
+    super(ev, client);
 
     this.userId = ev.user_id
   }
@@ -197,8 +198,8 @@ export class GroupCardChange extends NoticeEvent {
   public old: string
   public new: string
 
-  constructor(ev: Event.GroupCardChange, conn: Connection) {
-    super(ev, conn);
+  constructor(ev: Event.GroupCardChange, client: Client) {
+    super(ev, client);
 
     this.userId = ev.user_id
     this.groupId = ev.group_id
@@ -213,8 +214,8 @@ export class GroupBan extends NoticeEvent {
   public duration: number
   public status: "ban" | "lift_ban"
 
-  constructor(ev: Event.GroupBan, conn: Connection) {
-    super(ev, conn);
+  constructor(ev: Event.GroupBan, client: Client) {
+    super(ev, client);
 
     this.userId = ev.user_id
     this.operatorId = ev.operator_id
@@ -231,8 +232,8 @@ export class PrivateFileUpload extends NoticeEvent {
   public url: string
   public expires: number
 
-  constructor(ev: Event.PrivateFileUpload, conn: Connection) {
-    super(ev, conn);
+  constructor(ev: Event.PrivateFileUpload, client: Client) {
+    super(ev, client);
 
     this.userId = ev.user_id
     this.id = ev.private_file.id
@@ -251,8 +252,8 @@ export class GroupFileUpload extends NoticeEvent {
   public busid: number
   public url: string
 
-  constructor(ev: Event.GroupFileUpload, conn: Connection) {
-    super(ev, conn);
+  constructor(ev: Event.GroupFileUpload, client: Client) {
+    super(ev, client);
 
     this.userId = ev.user_id
     this.groupId = ev.group_id
@@ -268,8 +269,8 @@ export class GroupAdminChange extends NoticeEvent {
   public groupId: number
   public status: "set" | "unset"
 
-  constructor(ev: Event.GroupAdminChange, conn: Connection) {
-    super(ev, conn);
+  constructor(ev: Event.GroupAdminChange, client: Client) {
+    super(ev, client);
 
     this.userId = ev.user_id
     this.groupId = ev.group_id
@@ -282,8 +283,8 @@ export class GroupMemberDecrease extends NoticeEvent {
   public groupId: number
   public reason: "leave" | "kick" | "kick_me"
 
-  constructor(ev: Event.GroupMemberDecrease, conn: Connection) {
-    super(ev, conn);
+  constructor(ev: Event.GroupMemberDecrease, client: Client) {
+    super(ev, client);
 
     this.userId = ev.user_id
     this.operatorId = ev.operator_id
@@ -297,8 +298,8 @@ export class GroupMemberIncrease extends NoticeEvent {
   public groupId: number
   public entry: "approve" | "invite"
 
-  constructor(ev: Event.GroupMemberIncrease, conn: Connection) {
-    super(ev, conn);
+  constructor(ev: Event.GroupMemberIncrease, client: Client) {
+    super(ev, client);
 
     this.userId = ev.user_id
     this.operatorId = ev.operator_id
@@ -311,8 +312,8 @@ export class PrivateRecall extends NoticeEvent {
   public operatorId: number
   public messageId: number
 
-  constructor(ev: Event.PrivateRecall, conn: Connection) {
-    super(ev, conn);
+  constructor(ev: Event.PrivateRecall, client: Client) {
+    super(ev, client);
 
     this.userId = ev.user_id
     this.operatorId = ev.operator_id
@@ -325,8 +326,8 @@ export class GroupRecall extends NoticeEvent {
   public groupId: number
   public messageId: number
 
-  constructor(ev: Event.GroupRecall, conn: Connection) {
-    super(ev, conn);
+  constructor(ev: Event.GroupRecall, client: Client) {
+    super(ev, client);
 
     this.userId = ev.user_id
     this.operatorId = ev.operator_id
@@ -337,8 +338,8 @@ export class GroupRecall extends NoticeEvent {
 export class Unknown extends NoticeEvent {
   public data: object
 
-  constructor(ev: Event.ReportedNotice, conn: Connection) {
-    super(ev, conn);
+  constructor(ev: Event.ReportedNotice, client: Client) {
+    super(ev, client);
 
     this.data = ev
   }

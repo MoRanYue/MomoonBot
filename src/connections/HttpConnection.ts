@@ -1,5 +1,5 @@
 import { Connection } from "./Connection";
-import http from "node:http"
+import http from "http"
 import url from "node:url"
 import { ResponseContent } from "../tools/ResponseContent";
 import { CustomIncomingMessage } from "../types/http";
@@ -13,108 +13,114 @@ import type { DataType } from "src/types/dataType";
 import { Group } from "../processors/sets/Group";
 import { User } from "../processors/sets/User";
 import { Logger } from "../tools/Logger";
+import { HttpClient } from "./HttpClient";
+import { ConnectionIsClosedError } from "../exceptions/exceptions";
 
 export class HttpConnection extends Connection {
   protected logger: Logger = new Logger("HTTP");
   protected token: string | null | undefined;
-  public groups: Record<string, Record<number, Group>> = {};
-  public friends: Record<string, Record<number, User>> = {};
-  protected server!: http.Server
+  protected api?: string
+  protected server?: http.Server
+  protected clients: HttpClient[] = []
   readonly ev: CustomEventEmitter.HttpEventEmitter = new EventEmitter()
-  public clientAddresses: string[] = []
 
   public createServer(port: number): this
   public createServer(port: number, host?: string): this
   public createServer(port: number, host?: string, token?: string | null): this
-  public createServer(port: number, host?: string, token?: string | null, cb?: () => void): this {
+  public createServer(port: number, host?: string, token?: string | null, api?: string): this
+  public createServer(port: number, host?: string, token?: string | null, api?: string, cb?: () => void): this
+  public createServer(port: number, host?: string, token?: string | null, api?: string, cb?: () => void): this {
     if (this.server) {
       this.stopServer()
     }
-
     this.server = http.createServer()
     this.token = token
+    this.api = api
     this.logger.setPrefix("HTTP @ " + Utils.showHostWithPort(host, port))
 
-    this.ev.on("connect", address => {
-      for (let i = 0; i < this.clientAddresses.length; i++) {
-        const addr = this.clientAddresses[i];
+    this.ev.on("connect", (address, port) => {
+      for (let i = 0; i < this.clients.length; i++) {
+        const addr = this.clients[i].address;
         
         if (addr == address) {
           return
         }
       }
-      const index = this.addClient(address)
+      const index = this.addClient(address, this.api, this.token)
 
       this.logger.info("正在尝试获取群聊与好友信息")
-      if (this.clientAddresses.length == 0) {
+      if (this.clients.length == 0) {
         this.logger.error("无法获取群聊与好友信息，因为未指定客户端地址")
         return
       }
-      
-      this.send(ConnectionEnum.Action.getGroupList, undefined, data => {
+        
+      this.clients[index].send(ConnectionEnum.Action.getGroupList, undefined, data => {
         const groups: Record<number, Group> = {}
-        data.data.forEach(group => groups[group.group_id] = new Group(group, this))
-        this.groups[this.clientAddresses[index]] = groups
+        data.data.forEach(group => groups[group.group_id] = new Group(group, this.clients[index]))
+        this.clients[index].groups = groups
       })
-      this.send(ConnectionEnum.Action.getFriendList, undefined, data => {
+      this.clients[index].send(ConnectionEnum.Action.getFriendList, undefined, data => {
         const friends: Record<number, User> = {}
-        data.data.forEach(friend => friends[friend.user_id] = new User(friend, this))
-        this.friends[this.clientAddresses[index]] = friends
+        data.data.forEach(friend => friends[friend.user_id] = new User(friend, this.clients[index]))
+        this.clients[index].friends = friends
       })
     })
     
     this.server.on("request", (req: http.IncomingMessage, res: http.ServerResponse) => {
-      const auth = req.headers.authorization
-      if (token) {
-        if (!auth || auth.split(" ", 2).pop() != token) {
-          this.logger.info("客户端鉴权失败")
-          return
+      this.ev.emit("connect", req.socket.remoteAddress!, req.socket.remotePort!)
+
+      let client: HttpClient
+      for (let i = 0; i < this.clients.length; i++) {
+        const cl = this.clients[i];
+        
+        if (cl.address == req.socket.remoteAddress!) {
+          client = cl
+          break
         }
       }
 
-      const address = Utils.showHostWithPort(req.socket.remoteAddress, req.socket.remotePort)
-      this.ev.emit("connect", address)
-
       this.receiveRequest(req, res, async (req, res) => {
-        const dataStr: string = req.body
-        const data = <object>Utils.jsonToData(dataStr)
+        const data = <object>Utils.jsonToData(req.body)
+        const address = client.getAddress()
         if (Object.hasOwn(data, "echo")) {
+          this.logger.debug(`接收到客户端“${address}”返回`)
           this.ev.emit("response", <ConnectionContent.Connection.Response<number | object | object[]>>data)
         }
         else {
-          this.logger.debug("接收到事件上报")
+          this.logger.debug(`接收到“${address}”事件上报`)
 
+          const dataStr: string = Utils.dataToJson(data)
           switch ((<Event.Reported>data).post_type) {
             case EventEnum.EventType.message:
               this.logger.debug("类型：消息（Message）")
               this.logger.debug(dataStr)
 
-              this.ev.emit("message", <Event.Message>data)
+              this.ev.emit("message", <Event.Message>data, client)
               break;
 
             case EventEnum.EventType.messageSent:
               this.logger.debug("类型：自发送消息（MessageSent）")
               this.logger.debug(dataStr)
             
-              this.ev.emit("message", <Event.Message>data)
+              this.ev.emit("message", <Event.Message>data, client)
               break;
           
             case EventEnum.EventType.notice:
               this.logger.debug("类型：通知（Notice）")
               this.logger.debug(dataStr)
 
-              this.ev.emit("notice", <Event.Notice>data)
+              this.ev.emit("notice", <Event.Notice>data, client)
               break;
 
             case EventEnum.EventType.request:
               this.logger.debug("类型：请求（Request）")
               this.logger.debug(dataStr)
 
-              this.ev.emit("request", <Event.Request>data)
+              this.ev.emit("request", <Event.Request>data, client)
               break;
           
             default:
-              this.ev.emit("unknown", <Event.Unknown>data)
+              this.ev.emit("unknown", <Event.Unknown>data, client)
               break;
           }
         }
@@ -128,52 +134,45 @@ export class HttpConnection extends Connection {
         this.logger.error(err)
       }
     })
-    this.server.on("close", () => {
-      this.groups = {}
-      this.friends = {}
-      this.clientAddresses = []
-    })
     
     this.server.listen(port, host, cb)
 
     return this
   }
 
-  public addClient(address: string): number {
-    return this.clientAddresses.push(address) - 1
+  public addClient(address: string, host?: string, token?: string | null | undefined): number {
+    return this.clients.push(new HttpClient(this, address, host, token)) - 1
   }
 
   public stopServer(cb?: (err?: Error) => void): void {
-    this.server.close(cb)
+    this.server?.close(cb)
+    this.clients = []
+    this.logger.setPrefix("HTTP")
   }
 
   public connect(): never {
     throw new Error("Method not implemented.");
   }
 
-  public getGroups(first?: any): Record<number, Group> | undefined {
-    if (this.clientAddresses.length == 0) {
-      return undefined
+  public getGroups(clientIndex: number = 0): Record<number, Group> | undefined {
+    if (this.clients[clientIndex]) {
+      return this.clients[clientIndex].groups
     }
-    return this.groups[this.clientAddresses[0]]
   }
-  public getGroup(id: number, first?: any): Group | undefined {
-    if (!(this.clientAddresses.length != 0 && Object.hasOwn(this.groups, this.clientAddresses[0]) && Object.hasOwn(this.groups[this.clientAddresses[0]], id))) {
-      return undefined
+  public getGroup(id: number, clientIndex: number = 0): Group | undefined {
+    if (this.clients[clientIndex]) {
+      return this.clients[clientIndex].groups[id]
     }
-    return this.groups[this.clientAddresses[0]][id]
   }
-  public getFriends(first?: any): Record<number, User> | undefined {
-    if (this.clientAddresses.length == 0) {
-      return undefined
+  public getFriends(clientIndex: number = 0): Record<number, User> | undefined {
+    if (this.clients[clientIndex]) {
+      return this.clients[clientIndex].friends
     }
-    return this.friends[this.clientAddresses[0]]
   }
-  public getFriend(id: number, first?: any): User | undefined {
-    if (!(this.clientAddresses.length != 0 && Object.hasOwn(this.friends, this.clientAddresses[0]) && Object.hasOwn(this.friends[this.clientAddresses[0]], id))) {
-      return undefined
+  public getFriend(id: number, clientIndex: number = 0): User | undefined {
+    if (this.clients[clientIndex]) {
+      return this.clients[clientIndex].friends[id]
     }
-    return this.friends[this.clientAddresses[0]][id]
   }
   
   private receiveRequest(req: http.IncomingMessage, res: http.ServerResponse, cb: (req: CustomIncomingMessage, res: http.ServerResponse) => void) {
@@ -195,35 +194,6 @@ export class HttpConnection extends Connection {
     else {
       cb(req, res)
     }
-  }
-
-  private async receivePacket(res: http.IncomingMessage, cb?: DataType.ResponseFunction<any>): Promise<void> {
-    res.setEncoding("utf-8")
-
-    let data: string = ""
-
-    res.on("data", chunk => data += chunk)
-    res.on("error", err => {
-      if (err) {
-        throw err
-      }
-    })
-    res.on("end", () => {
-      let result
-      try {
-        result = Utils.jsonToData(data)
-      }
-      catch (err) {
-        this.logger.error("收到的请求并非预期的")
-        this.logger.error(err)
-        return 
-      }
-
-      if (cb) {
-        cb(result)
-      }
-      this.ev.emit("response", result)
-    })
   }
 
   public send(action: ConnectionEnum.Action.uploadGroupImage, data: ConnectionContent.Params.UploadGroupImage, cb?: DataType.RawResponseFunction<null> | undefined, clientIndex?: number): void;
@@ -303,77 +273,43 @@ export class HttpConnection extends Connection {
   public send(action: ConnectionEnum.Action.favoriteGetItemContent, data: ConnectionContent.Params.FavoriteGetItemContent, cb?: DataType.ResponseFunction<ConnectionContent.ActionResponse.FavoriteGetItemContent>, clientIndex?: number): void
   public send(action: ConnectionEnum.Action.favoriteAddTextMsg, data: ConnectionContent.Params.FavoriteAddTextMsg, cb?: DataType.ResponseFunction<ConnectionContent.ActionResponse.FavoriteAddTextMsg>, clientIndex?: number): void
   public send(action: ConnectionEnum.Action.favoriteAddImageMsg, data: ConnectionContent.Params.FavoriteAddImageMsg, cb?: DataType.ResponseFunction<ConnectionContent.ActionResponse.FavoriteAddImageMsg>, clientIndex?: number): void
+  public send(action: string, data?: string | Record<string, any> | null | undefined, cb?: DataType.ResponseFunction<any> | DataType.RawResponseFunction<any> | undefined, clientIndex?: number): void
   public send(action: string, data?: string | Record<string, any> | null | undefined, cb?: DataType.ResponseFunction<any> | DataType.RawResponseFunction<any> | undefined, clientIndex: number = 0): void {
-    action = action.replaceAll(".", "/")
-    const req = http.request({
-      method: "post",
-      protocol: "http:",
-      host: this.clientAddresses[clientIndex],
-      pathname: action.startsWith("/") ? "/" + action : action,
-    }, this.receivePacket)
-    req.on("error", err => {
-      if (err) {
-        this.logger.error(`与客户端“${Utils.showHostWithPort(req.socket!.remoteAddress, req.socket!.remotePort)}”发送请求时出现错误`)
-        this.logger.error(err)
-      }
-    })
-    req.write(Utils.dataToJson(data ?? {}))
-    req.end()
+    if (this.clients[clientIndex]) {
+      this.clients[clientIndex].send(action, data, cb)
+    }
+    throw new ConnectionIsClosedError(`找不到客户端 ${clientIndex}`)
+  }
+
+  public get _logger(): Logger {
+    return this.logger
   }
 
   // 以下函数仅被内置类调用
-  public _addGroup(group: number, first?: any): void {
-    if (!this.getGroup(group) && this.clientAddresses.length != 0) {
-      this.groups[this.clientAddresses[0]][group] = new Group(group, this)
-    }
+  public _addGroup(group: number, clientIndex: number = 0): void {
+    this.clients[clientIndex]._addGroup(group)
   }
-  public _removeGroup(id: number, first?: any): void {
-    if (this.getGroup(id)) {
-      delete this.groups[this.clientAddresses[0]][id]
-    }
+  public _removeGroup(id: number, clientIndex: number = 0): void {
+    this.clients[clientIndex]._removeGroup(id)
   }
-  public _addGroupMember(member: Event.GroupMemberIncrease, first?: any): void
-  public _addGroupMember(member: DataType.GroupMemberParams, first?: any): void
-  public _addGroupMember(member: Event.GroupMemberIncrease | DataType.GroupMemberParams, first?: any): void {
-    let userId: number
-    let groupId: number
-    if (Object.hasOwn(member, "groupId")) {
-      member = <DataType.GroupMemberParams>member
-      userId = member.id
-      groupId = member.groupId
-    }
-    else {
-      member = <Event.GroupMemberIncrease>member
-      userId = member.user_id
-      groupId = member.group_id
-    }
-    if (this.getGroup(groupId)) {
-      this.groups[this.clientAddresses[0]][groupId]._addMember(userId)
-    }
+  public _addGroupMember(member: Event.GroupMemberIncrease, clientIndex?: number): void
+  public _addGroupMember(member: DataType.GroupMemberParams, clientIndex?: number): void
+  public _addGroupMember(member: Event.GroupMemberIncrease | DataType.GroupMemberParams, clientIndex: number = 0): void {
+    this.clients[clientIndex]._addGroupMember(member)
   }
-  public _removeGroupMember(member: Event.GroupMemberDecrease, first?: any): void {
-    if (this.getGroup(member.group_id)) {
-      this.groups[this.clientAddresses[0]][member.group_id]._removeMember(member)
-    }
+  public _removeGroupMember(member: Event.GroupMemberDecrease, clientIndex: number = 0): void {
+    this.clients[clientIndex]._removeGroupMember(member)
   }
-  public _processGroupAdminChange(admin: Event.GroupAdminChange, first?: any): void {
-    if (this.getGroup(admin.group_id)) {
-      this.groups[this.clientAddresses[0]][admin.group_id]._processAdminChange(admin)
-    }
+  public _processGroupAdminChange(admin: Event.GroupAdminChange, clientIndex: number = 0): void {
+    this.clients[clientIndex]._processGroupAdminChange(admin)
   }
-  public _processGroupMemberCardChange(card: Event.GroupCardChange, first?: any): void {
-    if (this.getGroup(card.group_id)) {
-      this.groups[this.clientAddresses[0]][card.group_id]._processMemberCardChange(card)
-    }
+  public _processGroupMemberCardChange(card: Event.GroupCardChange, clientIndex: number = 0): void {
+    this.clients[clientIndex]._processGroupMemberCardChange(card)
   }
-  public _addFriend(friend: Event.FriendAdd, first?: any): void {
-    if (!this.getFriend(friend.user_id) && this.clientAddresses.length != 0) {
-      this.friends[this.clientAddresses[0]][friend.user_id] = new User(friend, this)
-    }
+  public _addFriend(friend: Event.FriendAdd, clientIndex: number = 0): void {
+    this.clients[clientIndex]._addFriend(friend)
   }
-  public _removeFriend(id: number, first?: any): void {
-    if (this.getGroup(id)) {
-      delete this.friends[this.clientAddresses[0]][id]
-    }
+  public _removeFriend(id: number, clientIndex: number = 0): void {
+    this.clients[clientIndex]._removeFriend(id)
   }
 }

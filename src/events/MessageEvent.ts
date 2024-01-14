@@ -6,9 +6,10 @@ import type { MessageSegment } from "../types/message";
 import { MessageUtils } from "../tools/MessageUtils";
 import type { Connection } from "../connections/Connection";
 import type { DataType } from "src/types/dataType";
+import type { Client } from "src/connections/Client";
 
 export class MessageEvent extends Ev {
-  public conn: Connection;
+  public client: Client;
   public time: number
   public selfId: number
   public peerId: number
@@ -29,13 +30,13 @@ export class MessageEvent extends Ev {
   
   public isSentBySelf: boolean
 
-  constructor(ev: Event.Message, conn: Connection) {
+  constructor(ev: Event.Message, client: Client) {
     super();
 
     this.checkEventType(ev, [EventEnum.EventType.message, EventEnum.EventType.messageSent])
 
     this.isSentBySelf = ev.post_type == EventEnum.EventType.messageSent
-    this.conn = conn
+    this.client = client
     this.selfId = ev.self_id
     this.time = ev.time
 
@@ -106,7 +107,7 @@ export class MessageEvent extends Ev {
       msg.unshift(new MsgSegment.Reply(this.messageId).toObject())
     }
 
-    this.conn!.send(ConnectionEnum.Action.sendMsg, {
+    this.client.send(ConnectionEnum.Action.sendMsg, {
       message_type: this.messageType,
       group_id: this.groupId,
       user_id: this.userId,
@@ -117,14 +118,14 @@ export class MessageEvent extends Ev {
 
   public recall(): void
   public recall(cb?: DataType.ResponseFunction<null>): void {
-    this.conn!.send(ConnectionEnum.Action.deleteMsg, {
+    this.client.send(ConnectionEnum.Action.deleteMsg, {
       message_id: this.messageId
     }, cb)
   }
 
   public kickSender(reject?: boolean): void
   public kickSender(reject: boolean = false, cb?: DataType.ResponseFunction<null>): void {
-    this.conn!.send(ConnectionEnum.Action.setGroupKick, {
+    this.client.send(ConnectionEnum.Action.setGroupKick, {
       group_id: this.groupId,
       user_id: this.userId,
       reject_add_request: reject
@@ -133,7 +134,7 @@ export class MessageEvent extends Ev {
 
   public muteSender(duration: number): void
   public muteSender(duration: number, cb?: DataType.ResponseFunction<null>): void {
-    this.conn!.send(ConnectionEnum.Action.setGroupBan, {
+    this.client.send(ConnectionEnum.Action.setGroupBan, {
       group_id: this.groupId,
       user_id: this.userId,
       duration

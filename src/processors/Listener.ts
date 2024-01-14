@@ -67,7 +67,7 @@ class MessageListener extends Listener {
     
     let permission: ListenerEnum.Permission = ListenerEnum.Permission.user
     if (ev.messageType == EventEnum.MessageType.group) {
-      const group = ev.conn.getGroup(ev.groupId!)
+      const group = ev.client.groups[ev.groupId!]
       if (group) {
         const user = group.members[ev.userId]
         if (user) {
@@ -75,8 +75,8 @@ class MessageListener extends Listener {
         }
       }
     }
-    else {
-      const user = ev.conn.getFriend(ev.userId)
+    else if (ev.messageType == EventEnum.MessageType.private) {
+      const user = ev.client.friends[ev.userId]
       if (user) {
         permission = user.permission
       }
@@ -212,7 +212,7 @@ class CommandListener extends Listener {
     
     let permission: ListenerEnum.Permission = ListenerEnum.Permission.user
     if (ev.messageType == EventEnum.MessageType.group) {
-      const group = ev.conn.getGroup(ev.groupId!)
+      const group = ev.client.groups[ev.groupId!]
       if (group) {
         const user = group.members[ev.userId]
         if (user) {
@@ -220,8 +220,8 @@ class CommandListener extends Listener {
         }
       }
     }
-    else {
-      const user = ev.conn.getFriend(ev.userId)
+    else if (ev.messageType == EventEnum.MessageType.private) {
+      const user = ev.client.friends[ev.userId]
       if (user) {
         permission = user.permission
       }

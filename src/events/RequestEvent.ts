@@ -1,35 +1,35 @@
-import type { Connection } from "src/connections/Connection";
 import { EventEnum } from "../types/enums";
 import { Event as Ev } from "./Event";
 import type { Event } from "src/types/event";
+import type { Client } from "src/connections/Client";
 
 export class RequestEvent extends Ev {
-  public conn: Connection;
+  public client: Client;
   public selfId: number;
   public time: number;
   public requestType: EventEnum.RequestType
 
-  constructor(ev: Event.Request, conn: Connection) {
+  constructor(ev: Event.Request, client: Client) {
     super();
 
     this.checkEventType(ev, EventEnum.EventType.request)
 
-    this.conn = conn
+    this.client = client
     this.selfId = ev.self_id
     this.time = ev.time
     this.requestType = ev.request_type
   }
 
-  public static fromObject(ev: Event.ReportedRequest, conn: Connection): RequestEvent {
+  public static fromObject(ev: Event.ReportedRequest, client: Client): RequestEvent {
     switch (ev.request_type) {
       case EventEnum.RequestType.friend:
-        return new FriendRequest(<Event.FriendRequest>ev, conn)
+        return new FriendRequest(<Event.FriendRequest>ev, client)
 
       case EventEnum.RequestType.group:
-        return new GroupRequest(<Event.GroupRequest>ev, conn)
+        return new GroupRequest(<Event.GroupRequest>ev, client)
     
       default:
-        return new Unknown(ev, conn)
+        return new Unknown(ev, client)
     }
   }
 }
@@ -39,8 +39,8 @@ export class FriendRequest extends RequestEvent {
   public comment: string
   public flag: string
 
-  constructor(ev: Event.FriendRequest, conn: Connection) {
-    super(ev, conn);
+  constructor(ev: Event.FriendRequest, client: Client) {
+    super(ev, client);
 
     this.userId = ev.user_id
     this.comment = ev.comment
@@ -55,8 +55,8 @@ export class GroupRequest extends RequestEvent {
   public flag: string
   public joiningType: "add" | "invite"
 
-  constructor(ev: Event.GroupRequest, conn: Connection) {
-    super(ev, conn);
+  constructor(ev: Event.GroupRequest, client: Client) {
+    super(ev, client);
 
     this.groupId = ev.group_id
     this.userId = ev.user_id
@@ -69,8 +69,8 @@ export class GroupRequest extends RequestEvent {
 export class Unknown extends RequestEvent {
   public data: object
 
-  constructor(ev: Event.ReportedRequest, conn: Connection) {
-    super(ev, conn);
+  constructor(ev: Event.ReportedRequest, client: Client) {
+    super(ev, client);
 
     this.data = ev
   }

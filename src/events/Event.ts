@@ -1,10 +1,10 @@
 import { WrongEventTypeError } from "../exceptions/exceptions";
-import type { Connection } from "../connections/Connection";
 import type { Event as Ev } from "src/types/event";
 import { EventEnum } from "../types/enums";
+import type { Client } from "src/connections/Client";
 
 export abstract class Event {
-  public abstract conn: Connection
+  public abstract client: Client
   public abstract selfId: number
   public abstract time: number
 

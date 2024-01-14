@@ -8,11 +8,8 @@ import path from "node:path"
 import { FileUtils } from "../tools/FileUtils";
 import type { ConnectionContent } from "src/types/connectionContent";
 import { MessageUtils } from "../tools/MessageUtils";
-import type { Connection } from "src/connections/Connection";
-import url from "node:url";
-import fs from "node:fs"
 import type { IncomingMessage } from "node:http";
-import { Logger } from "../tools/Logger";
+import type { Client } from "src/connections/Client";
 
 export default class RandomAnimePicture extends Plugin {
   readonly name: string = "随机动漫图片";
@@ -21,8 +18,8 @@ export default class RandomAnimePicture extends Plugin {
   readonly version: string = "1.0.0";
 
   readonly dataFolder: string = "./data/anime/"
-  readonly apiServers: ((conn: Connection, msgType: EventEnum.MessageType, userId: number, groupId?: number, num?: number) => void)[] = [
-    (conn: Connection, msgType: EventEnum.MessageType, userId: number, groupId?: number, num: number = 1): void => {
+  readonly apiServers: ((client: Client, msgType: EventEnum.MessageType, userId: number, groupId?: number, num?: number) => void)[] = [
+    (client: Client, msgType: EventEnum.MessageType, userId: number, groupId?: number, num: number = 1): void => {
       const apis = [
         "https://t.mwm.moe/moe",
         "https://t.mwm.moe/ys",
@@ -82,7 +79,7 @@ export default class RandomAnimePicture extends Plugin {
           messages.push(this.buildForwardNode([new MessageSegment.Image(data)]))
           index++
           if (index == num) {
-            this.ev.emit("finishCollecting", conn, msgType, userId, groupId, messages)
+            this.ev.emit("finishCollecting", client, msgType, userId, groupId, messages)
           }
 
           const stream = FileUtils.writeFileWithStream(path.join(this.dataFolder, Utils.randomChar(7) + "." + format))
@@ -111,15 +108,15 @@ export default class RandomAnimePicture extends Plugin {
 
     FileUtils.createFolderIfNotExists(this.dataFolder)
 
-    this.ev.on("finishCollecting", (conn: Connection, msgType: EventEnum.MessageType, userId: number, groupId: number, messages: ConnectionContent.Params.CustomForwardMessageNode[]) => {
+    this.ev.on("finishCollecting", (client: Client, msgType: EventEnum.MessageType, userId: number, groupId: number, messages: ConnectionContent.Params.CustomForwardMessageNode[]) => {
       this.logger.info("正在发送图片中")
       if (msgType == EventEnum.MessageType.group) {
-        conn.send(ConnectionEnum.Action.sendGroupForwardMsg, {
+        client.send(ConnectionEnum.Action.sendGroupForwardMsg, {
           group_id: groupId,
           messages
         }, data => {
           if (data.retcode != ConnectionEnum.ResponseCode.ok) {
-            conn.send(ConnectionEnum.Action.sendGroupMsg, {
+            client.send(ConnectionEnum.Action.sendGroupMsg, {
               group_id: groupId,
               message: MessageUtils.segmentsToObject([new MessageSegment.At(userId), new MessageSegment.Text(" 消息发送失败")])
             })
@@ -127,7 +124,7 @@ export default class RandomAnimePicture extends Plugin {
         })
       }
       else if (msgType == EventEnum.MessageType.private) {
-        conn.send(ConnectionEnum.Action.sendPrivateForwardMsg, {
+        client.send(ConnectionEnum.Action.sendPrivateForwardMsg, {
           user_id: userId,
           messages
         })
@@ -165,7 +162,7 @@ export default class RandomAnimePicture extends Plugin {
 
   public getPictures(ev: MessageEvent, count: number = 1): void {
     ev.reply("正在获取中", undefined, true)
-    Utils.randomChoice(this.apiServers)(ev.conn, ev.messageType, ev.userId, ev.groupId, count)
+    Utils.randomChoice(this.apiServers)(ev.client, ev.messageType, ev.userId, ev.groupId, count)
   }
 
   public resolveCount(ev: MessageEvent, num: string): boolean {

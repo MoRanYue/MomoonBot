@@ -4,18 +4,17 @@ import type { DataType } from "src/types/dataType"
 import type { Group } from "../processors/sets/Group"
 import type { User } from "../processors/sets/User"
 import type { Event } from "src/types/event"
-import { Logger } from "../tools/Logger"
+import type { Logger } from "../tools/Logger"
 import type { ConnectionContent } from "src/types/connectionContent"
+import type { Client } from "./Client"
 
 export abstract class Connection {
-  protected abstract server: unknown
+  protected abstract server?: unknown
+  protected abstract clients: Client[]
   protected abstract token: string | null | undefined
   
   readonly abstract ev: CustomEventEmitter.ConnectionEventEmitter
   protected readonly abstract logger: Logger
-
-  public abstract groups: Record<string, Record<number, Group>>
-  public abstract friends: Record<string, Record<number, User>>
 
   public abstract createServer(port: number): this
   public abstract createServer(port: number, host?: string): this
@@ -102,6 +101,7 @@ export abstract class Connection {
   public abstract send(action: ConnectionEnum.Action.favoriteGetItemContent, data: ConnectionContent.Params.FavoriteGetItemContent, cb?: DataType.ResponseFunction<ConnectionContent.ActionResponse.FavoriteGetItemContent>): void
   public abstract send(action: ConnectionEnum.Action.favoriteAddTextMsg, data: ConnectionContent.Params.FavoriteAddTextMsg, cb?: DataType.ResponseFunction<ConnectionContent.ActionResponse.FavoriteAddTextMsg>): void
   public abstract send(action: ConnectionEnum.Action.favoriteAddImageMsg, data: ConnectionContent.Params.FavoriteAddImageMsg, cb?: DataType.ResponseFunction<ConnectionContent.ActionResponse.FavoriteAddImageMsg>): void
+  public abstract send(action: string, data?: Record<string, any> | string | null, cb?: DataType.ResponseFunction<any> | DataType.RawResponseFunction<any>): void
   public abstract send(action: string, data?: Record<string, any> | string | null, cb?: DataType.ResponseFunction<any> | DataType.RawResponseFunction<any>): void
 
   public abstract getGroups(...args: any[]): Record<number, Group> | undefined

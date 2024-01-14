@@ -3,7 +3,6 @@ import { Connection } from "./Connection";
 import { CustomEventEmitter as EventEmitter } from "../tools/CustomEventEmitter";
 import type { Event } from "src/types/event";
 import ws from "ws"
-import config from "../config"
 import { Utils } from "../tools/Utils";
 import { ConnectionEnum, EventEnum } from "../types/enums";
 import { ConnectionContent } from "src/types/connectionContent";
@@ -11,14 +10,14 @@ import type { DataType } from "src/types/dataType";
 import { Group } from "../processors/sets/Group";
 import { User } from "../processors/sets/User";
 import { Logger } from "../tools/Logger";
+import { ReverseWsClient } from "./ReverseWsClient";
+import { ConnectionIsClosedError } from "../exceptions/exceptions";
 
 export class ReverseWsConnection extends Connection {
+  protected clients: ReverseWsClient[] = [];
   protected readonly logger: Logger = new Logger("反向 WebSocket");
   protected token: string | null | undefined;
-  public groups: Record<string, Record<number, Group>> = {};
-  public friends: Record<string, Record<number, User>> = {};
   protected server!: ws.Server;
-  public clientAddresses: string[] = []
   protected messageCbs: Record<string, DataType.ResponseFunction<any> | DataType.RawResponseFunction<any>> = {}
 
   readonly ev: CustomEventEmitter.ReverseWsEventEmitter = new EventEmitter()
@@ -28,19 +27,17 @@ export class ReverseWsConnection extends Connection {
   
     this.ev.on("response", (data: ConnectionContent.Connection.Response<any>) => {
       this.logger.debug("接收到客户端返回")
-      
-      let messageInfo: ConnectionContent.Connection.WsRequestDetector
-      try {
-        messageInfo = <ConnectionContent.Connection.WsRequestDetector>Utils.jsonToData(data.echo)
-        this.logger.debug("\n", Utils.dataToJson(messageInfo, 2))
-      } catch (err) {
-        this.logger.warning("客户端返回的内容非服务端发送的请求对客户端所预期返回的")
-        return
-      }
-
-      if (Object.hasOwn(this.messageCbs, messageInfo.id)) {
-        this.messageCbs[messageInfo.id](data)
-        delete this.messageCbs[messageInfo.id]
+      this.logger.debug(Utils.dataToJson(data))
+      this.clients.forEach(client => client._processResponse(data))
+    })
+    this.ev.on("_removeClient", removedClient => {
+      for (let i = 0; i < this.clients.length; i++) {
+        const client = this.clients[i];
+        
+        if (client.getAddress() == removedClient.getAddress()) {
+          delete this.clients[i]
+          break
+        }
       }
     })
   }
@@ -68,7 +65,6 @@ export class ReverseWsConnection extends Connection {
       this.ev.emit("connect")
 
       const address = Utils.showHostWithPort(req.socket.remoteAddress, req.socket.remotePort)
-      const index = this.clientAddresses.push(address) - 1
       this.logger.info("接收到客户端连接")
       this.logger.info("客户端地址：" + address)
 
@@ -80,8 +76,8 @@ export class ReverseWsConnection extends Connection {
         }
       }
 
-      this.groups[this.clientAddresses[index]] = {}
-      this.friends[this.clientAddresses[index]] = {}
+      const client = new ReverseWsClient(this, socket, req.socket.remoteAddress!, req.socket.remotePort!)
+      const index = this.clients.push(client) - 1
 
       socket.on("message", buf => this.receivePacket(buf, dataStr => {
         const data = <object>Utils.jsonToData(dataStr)
@@ -91,11 +87,11 @@ export class ReverseWsConnection extends Connection {
         else {
           switch ((<Event.Reported>data).post_type) {
             case EventEnum.EventType.message:
-              this.logger.debug("接收到事件上报")
+              this.logger.debug(`接收到“${client.getAddress()}”的事件上报`)
               this.logger.debug("类型：消息（Message）")
               this.logger.debug(dataStr)
 
-              this.ev.emit("message", <Event.Message>data)
+              this.ev.emit("message", <Event.Message>data, client)
               break;
 
             case EventEnum.EventType.messageSent:
@@ -103,7 +99,7 @@ export class ReverseWsConnection extends Connection {
               this.logger.debug("类型：自发送消息（MessageSent）")
               this.logger.debug(dataStr)
             
-              this.ev.emit("message", <Event.Message>data)
+              this.ev.emit("message", <Event.Message>data, client)
               break;
           
             case EventEnum.EventType.notice:
@@ -111,7 +107,7 @@ export class ReverseWsConnection extends Connection {
               this.logger.debug("类型：通知（Notice）")
               this.logger.debug(dataStr)
 
-              this.ev.emit("notice", <Event.Notice>data)
+              this.ev.emit("notice", <Event.Notice>data, client)
               break;
 
             case EventEnum.EventType.request:
@@ -119,23 +115,20 @@ export class ReverseWsConnection extends Connection {
               this.logger.debug("类型：请求（Request）")
               this.logger.debug(dataStr)
 
-              this.ev.emit("request", <Event.Request>data)
+              this.ev.emit("request", <Event.Request>data, client)
               break;
             
             case EventEnum.EventType.meta:
-              this.ev.emit("meta", <Event.MetaEvent>data)
+              this.ev.emit("meta", <Event.MetaEvent>data, client)
           
             default:
-              this.ev.emit("unknown", <Event.Unknown>data)
+              this.ev.emit("unknown", <Event.Unknown>data, client)
               break;
           }
         }
       }))
       socket.on("close", () => {
-        this.clientAddresses.splice(index, 1)
-        delete this.groups[address]
-        delete this.friends[address]
-
+        delete this.clients[index]
         this.logger.info("客户端连接关闭")
         this.logger.info("客户端地址：" + address)
       })
@@ -147,15 +140,15 @@ export class ReverseWsConnection extends Connection {
       })
 
       this.logger.info("正在尝试获取群聊与好友信息")
-      this.send(ConnectionEnum.Action.getGroupList, undefined, data => {
+      this.clients[index].send(ConnectionEnum.Action.getGroupList, undefined, data => {
         const groups: Record<number, Group> = {}
-        data.data.forEach(group => groups[group.group_id] = new Group(group, this))
-        this.groups[this.clientAddresses[0]] = groups
+        data.data.forEach(group => groups[group.group_id] = new Group(group, this.clients[index]))
+        this.clients[index].groups = groups
       })
-      this.send(ConnectionEnum.Action.getFriendList, undefined, data => {
+      this.clients[index].send(ConnectionEnum.Action.getFriendList, undefined, data => {
         const friends: Record<number, User> = {}
-        data.data.forEach(friend => friends[friend.user_id] = new User(friend, this))
-        this.friends[this.clientAddresses[0]] = friends
+        data.data.forEach(friend => friends[friend.user_id] = new User(friend, this.clients[index]))
+        this.clients[index].friends = friends
       })
     })
     this.server.on("error", err => {
@@ -164,17 +157,21 @@ export class ReverseWsConnection extends Connection {
         this.logger.error(err)
       }
     })
-    this.server.on("close", () => {
-      this.groups = {}
-      this.friends = {}
-      this.clientAddresses = []
-    })
 
     return this
   }
 
+  public _processUnavailableClient(): void {
+    this.clients.forEach((client, i) => {
+      if (!client._connectable) {
+        delete this.clients[i]
+      }
+    })
+  }
+
   public stopServer(cb?: (err?: Error) => void): void {
     this.server.close(cb)
+    this.clients = []
   }
 
   public connect(address: string): boolean {
@@ -182,28 +179,24 @@ export class ReverseWsConnection extends Connection {
   }
 
   public getGroups(clientIndex: number = 0): Record<number, Group> | undefined {
-    if (!this.clientAddresses[clientIndex]) {
-      return undefined
+    if (this.clients[clientIndex]) {
+      return this.clients[clientIndex].groups
     }
-    return this.groups[this.clientAddresses[clientIndex]]
   }
   public getGroup(id: number, clientIndex: number = 0): Group | undefined {
-    if (!(this.clientAddresses[clientIndex] && Object.hasOwn(this.groups, this.clientAddresses[clientIndex]) && Object.hasOwn(this.groups[this.clientAddresses[clientIndex]], id))) {
-      return undefined
+    if (this.clients[clientIndex]) {
+      return this.clients[clientIndex].groups[id]
     }
-    return this.groups[this.clientAddresses[clientIndex]][id]
   }
   public getFriends(clientIndex: number = 0): Record<number, User> | undefined {
-    if (!this.clientAddresses[clientIndex]) {
-      return undefined
+    if (this.clients[clientIndex]) {
+      return this.clients[clientIndex].friends
     }
-    return this.friends[this.clientAddresses[clientIndex]]
   }
   public getFriend(id: number, clientIndex: number = 0): User | undefined {
-    if (!(this.clientAddresses[clientIndex] && Object.hasOwn(this.friends, this.clientAddresses[clientIndex]) && Object.hasOwn(this.friends[this.clientAddresses[clientIndex]], id))) {
-      return undefined
+    if (this.clients[clientIndex]) {
+      return this.clients[clientIndex].friends[id]
     }
-    return this.friends[this.clientAddresses[clientIndex]][id]
   }
 
   public send(action: ConnectionEnum.Action.uploadGroupImage, data: ConnectionContent.Params.UploadGroupImage, cb?: DataType.RawResponseFunction<null> | undefined, clientIndex?: number): void;
@@ -283,43 +276,13 @@ export class ReverseWsConnection extends Connection {
   public send(action: ConnectionEnum.Action.favoriteGetItemContent, data: ConnectionContent.Params.FavoriteGetItemContent, cb?: DataType.ResponseFunction<ConnectionContent.ActionResponse.FavoriteGetItemContent>): void
   public send(action: ConnectionEnum.Action.favoriteAddTextMsg, data: ConnectionContent.Params.FavoriteAddTextMsg, cb?: DataType.ResponseFunction<ConnectionContent.ActionResponse.FavoriteAddTextMsg>): void
   public send(action: ConnectionEnum.Action.favoriteAddImageMsg, data: ConnectionContent.Params.FavoriteAddImageMsg, cb?: DataType.ResponseFunction<ConnectionContent.ActionResponse.FavoriteAddImageMsg>): void
+  public send(action: string, data?: string | Record<string, any> | null | undefined, cb?: DataType.ResponseFunction<any> | DataType.RawResponseFunction<any> | undefined, clientIndex?: number): void
   public send(action: string, data?: string | Record<string, any> | null | undefined, cb?: DataType.ResponseFunction<any> | DataType.RawResponseFunction<any> | undefined, clientIndex: number = 0): void {
-    const id: string = Utils.randomChar()
-    if (cb) {
-      this.messageCbs[id] = cb
+    if (this.clients[clientIndex] && this.server.clients.has(this.clients[clientIndex]._client)) {
+      this.clients[clientIndex].send(action, data, cb)
+      return
     }
-
-    let i: number = -1
-    this.server.clients.forEach(socket => {
-      i++
-      if (i == clientIndex) {
-        if (socket.readyState != socket.OPEN) {
-          socket.close(1001, "客户端似乎无法连接")
-          return
-        }
-
-        action = action.replaceAll("/", ".")
-        if (action.startsWith(".")) {
-          action = action.substring(1)
-        }
-        socket.send(Utils.dataToJson(<ConnectionContent.Connection.WsRequest<typeof data>>{
-          action,
-          params: data,
-          echo: Utils.dataToJson(<ConnectionContent.Connection.WsRequestDetector>{
-            platform: "Momoon Bot",
-            id
-          })
-        }), err => {
-          if (err) {
-            this.logger.error(`向客户端“${this.clientAddresses[clientIndex]}”发送数据时出错：`)
-            this.logger.error(err)
-          }
-        })
-
-        return
-      }
-    })
-    
+    throw new ConnectionIsClosedError(`找不到客户端 ${clientIndex}`)
   }
   
   private receivePacket(data: ws.RawData, cb: (data: string) => void) {
@@ -328,57 +291,29 @@ export class ReverseWsConnection extends Connection {
 
   // 以下函数仅被内置类调用
   public _addGroup(group: number, clientIndex: number = 0): void {
-    if (!this.getGroup(group, clientIndex) && this.clientAddresses[clientIndex]) {
-      this.groups[this.clientAddresses[clientIndex]][group] = new Group(group, this)
-    }
+    this.clients[clientIndex]._addGroup(group)
   }
   public _removeGroup(id: number, clientIndex: number = 0): void {
-    if (this.getGroup(id, clientIndex)) {
-      delete this.groups[this.clientAddresses[clientIndex]][id]
-    }
+    this.clients[clientIndex]._removeGroup(id)
   }
   public _addGroupMember(member: Event.GroupMemberIncrease, clientIndex?: number): void
   public _addGroupMember(member: DataType.GroupMemberParams, clientIndex?: number): void
   public _addGroupMember(member: Event.GroupMemberIncrease | DataType.GroupMemberParams, clientIndex: number = 0): void {
-    let userId: number
-    let groupId: number
-    if (Object.hasOwn(member, "groupId")) {
-      member = <DataType.GroupMemberParams>member
-      userId = member.id
-      groupId = member.groupId
-    }
-    else {
-      member = <Event.GroupMemberIncrease>member
-      userId = member.user_id
-      groupId = member.group_id
-    }
-    if (this.getGroup(groupId)) {
-      this.groups[this.clientAddresses[clientIndex]][groupId]._addMember(userId)
-    }
+    this.clients[clientIndex]._addGroupMember(member)
   }
   public _removeGroupMember(member: Event.GroupMemberDecrease, clientIndex: number = 0): void {
-    if (this.getGroup(member.group_id, clientIndex)) {
-      this.groups[this.clientAddresses[clientIndex]][member.group_id]._removeMember(member)
-    }
+    this.clients[clientIndex]._removeGroupMember(member)
   }
   public _processGroupAdminChange(admin: Event.GroupAdminChange, clientIndex: number = 0): void {
-    if (this.getGroup(admin.group_id, clientIndex)) {
-      this.groups[this.clientAddresses[clientIndex]][admin.group_id]._processAdminChange(admin)
-    }
+    this.clients[clientIndex]._processGroupAdminChange(admin)
   }
   public _processGroupMemberCardChange(card: Event.GroupCardChange, clientIndex: number = 0): void {
-    if (this.getGroup(card.group_id, clientIndex)) {
-      this.groups[this.clientAddresses[clientIndex]][card.group_id]._processMemberCardChange(card)
-    }
+    this.clients[clientIndex]._processGroupMemberCardChange(card)
   }
   public _addFriend(friend: Event.FriendAdd, clientIndex: number = 0): void {
-    if (!this.getFriend(friend.user_id, clientIndex) && this.clientAddresses[clientIndex]) {
-      this.friends[this.clientAddresses[clientIndex]][friend.user_id] = new User(friend, this)
-    }
+    this.clients[clientIndex]._addFriend(friend)
   }
   public _removeFriend(id: number, clientIndex: number = 0): void {
-    if (this.getGroup(id, clientIndex)) {
-      delete this.friends[this.clientAddresses[clientIndex]][id]
-    }
+    this.clients[clientIndex]._removeFriend(id)
   }
 }

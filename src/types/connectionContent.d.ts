@@ -12,7 +12,8 @@ export namespace ConnectionContent {
       echo: string
     }
     interface WsRequestDetector {
-      platform: "Momoon Bot",
+      platform: "Momoon Bot"
+      version: string
       id: string
     }
     interface WsRequest<T> {

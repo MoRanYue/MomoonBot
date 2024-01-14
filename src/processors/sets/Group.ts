@@ -1,8 +1,8 @@
 import type { ConnectionContent } from "src/types/connectionContent"
-import type { Connection } from "../../connections/Connection"
 import { ConnectionEnum } from "../../types/enums"
 import { User } from "./User"
 import type { Event } from "src/types/event"
+import type { Client } from "../../connections/Client"
 
 export class Group {
   public id: number
@@ -14,16 +14,16 @@ export class Group {
   public admins: Record<number, User> = {}
   public members: Record<number, User> = {}
 
-  protected conn: Connection
+  protected client: Client
 
-  constructor(group: number, conn: Connection)
-  constructor(group: ConnectionContent.ActionResponse.GetGroupInfo, conn: Connection)
-  constructor(group: number | ConnectionContent.ActionResponse.GetGroupInfo, conn: Connection) {
-    this.conn = conn
+  constructor(group: number, client: Client)
+  constructor(group: ConnectionContent.ActionResponse.GetGroupInfo, client: Client)
+  constructor(group: number | ConnectionContent.ActionResponse.GetGroupInfo, client: Client) {
+    this.client = client
 
     if (typeof group == "number") {
       this.id = group
-      this.conn.send(ConnectionEnum.Action.getGroupInfo, {
+      this.client.send(ConnectionEnum.Action.getGroupInfo, {
         group_id: this.id
       }, data => {
         const result = data.data
@@ -33,11 +33,11 @@ export class Group {
         this.maxMemberNumber = result.max_member
         this.memberNumber = result.member_num
 
-        this.conn.send(ConnectionEnum.Action.getGroupMemberList, {
+        this.client.send(ConnectionEnum.Action.getGroupMemberList, {
           group_id: this.id
         }, data => {
           data.data.forEach(member => {
-            const user = new User(member, this.conn)
+            const user = new User(member, this.client)
             this.members[member.user_id] = user
             if (["admin", "owner"].includes(member.role)) {
               this.admins[member.user_id] = user
@@ -51,11 +51,11 @@ export class Group {
       this.name = group.group_name
       this.remark = group.group_remark
       this.isFrozen = group.is_frozen
-      this.conn.send(ConnectionEnum.Action.getGroupMemberList, {
+      this.client.send(ConnectionEnum.Action.getGroupMemberList, {
         group_id: this.id
       }, data => {
         data.data.forEach(member => {
-          const user = new User(member, this.conn)
+          const user = new User(member, this.client)
           this.members[member.user_id] = user
           if (["admin", "owner"].includes(member.role)) {
             this.admins[member.user_id] = user
@@ -95,7 +95,7 @@ export class Group {
     this.members[id] = new User({
       id,
       groupId: this.id
-    }, this.conn)
+    }, this.client)
 
     return true
   }
