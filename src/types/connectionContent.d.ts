@@ -88,11 +88,13 @@ export namespace ConnectionContent {
       user_id: number
       message: MessageSegment.Segment | MessageSegment.Segment[] | string
       auto_escape?: boolean
+      recall_duration?: number
     }
     interface SendGroupMsg {
       group_id: number
       message: MessageSegment.Segment | MessageSegment.Segment[] | string
       auto_escape?: boolean
+      recall_duration?: number
     }
     interface SendMsg {
       message_type: EventEnum.MessageType
@@ -100,7 +102,8 @@ export namespace ConnectionContent {
       group_id: number
       discuss_id: number
       message: MessageSegment.Segment | MessageSegment.Segment[] | string
-      auto_escape: boolean
+      auto_escape?: boolean
+      recall_duration?: number
     }
     interface GetMsg {
       message_id: number
