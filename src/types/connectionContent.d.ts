@@ -56,8 +56,17 @@ export namespace ConnectionContent {
     interface GetStrangerInfo {
       user_id: number
     }
+    interface GetNotJoinedGroupInfo {
+      group_id: number
+    }
     interface GetGroupInfo {
       group_id: number
+    }
+    interface GetUinByUid {
+      uid_list: number[]
+    }
+    interface GetUid {
+      uin_list: string[]
     }
     interface GetGroupMemberInfo {
       group_id: number
@@ -255,14 +264,23 @@ export namespace ConnectionContent {
       file: string
       name: string
     }
-    interface DeleteGroupFile {
+    interface CreateGroupFileFolder {
       group_id: number
-      file_id: string
-      busid: number
+      name: string
+    }
+    interface RenameGroupFolder {
+      group_id: number
+      folder_id: string
+      name: string
     }
     interface DeleteGroupFolder {
       group_id: number
       folder_id: string
+    }
+    interface DeleteGroupFile {
+      group_id: number
+      file_id: string
+      busid: number
     }
     interface GetGroupFileSystemInfo {
       group_id: number
@@ -373,6 +391,17 @@ export namespace ConnectionContent {
       source: string
     }
     type GetUnidirectionalFriendList = UnidirectionalFriendListItem[]
+    interface GetNotJoinedGroupInfo {
+      group_id: number
+      max_member_cnt: number
+      member_count: number
+      group_name: string
+      group_desc: string
+      owner: number
+      create_time: number
+      group_flag: number
+      group_flag_ext: number
+    }
     interface GetGroupInfo {
       group_id: number
       group_name: string
@@ -407,6 +436,8 @@ export namespace ConnectionContent {
       unfriendly: boolean
       card_changeable: boolean
     }
+    type GetUinByUid = Record<string, string>
+    type GetUid = Record<string, number>
     type GetGroupMemberList = GetGroupMemberInfo[]
     interface HonorInfo {
       user_id: number
@@ -581,7 +612,13 @@ export namespace ConnectionContent {
       file_id: string
     }
     interface CreateGroupFileFolder {
-      msg_id: number
+      folder_id: string
+      parent_folder_id: string
+      folder_name: string
+      create_time: number
+      modify_time: number
+      creator_uin: number
+      modifier_uin: number
     }
     interface GetGroupFileSystemInfo {
       file_count: number

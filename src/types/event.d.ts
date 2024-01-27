@@ -71,13 +71,17 @@ export namespace Event {
   interface GroupMemberIncrease extends ReportedNotice {
     group_id: number
     user_id: number
+    user_uid: string
     operator_id: number
+    operator_uid: string
     sub_type: "approve" | "invite"
   }
   interface GroupMemberDecrease extends ReportedNotice {
     group_id: number
     user_id: number
+    user_uid: string
     operator_id: number
+    operator_uid: string
     sub_type: "leave" | "kick" | "kick_me"
   }
   interface GroupAdminChange extends ReportedNotice {
