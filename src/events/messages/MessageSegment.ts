@@ -642,8 +642,10 @@ class Text extends Segment {
 class Image extends Segment {
   public file?: string
   public url?: string
+  public imageType?: "show" | "flash" | "original"
+  public subType?: MessageSegmentEnum.ImageSubType
 
-  constructor(file?: string | Buffer, url?: string) {
+  constructor(file?: string | Buffer, url?: string, type?: "show" | "flash" | "original", subType?: MessageSegmentEnum.ImageSubType) {
     super();
 
     if (typeof file == "string") {
@@ -653,10 +655,12 @@ class Image extends Segment {
       this.file = "base64://" + file.toString("base64")
     }
     this.url = url
+    this.imageType = type
+    this.subType = subType
   }
 
   public toPlainText(): string {
-    return `(图片 文件：“${this.file}” URL：“${this.url}”)`
+    return `(图片 文件：“${this.file}” URL：“${this.url}” 类型：${this.imageType} 子类型：${this.subType})`
   }
   public toObject(): MessageSegment.ImageSegment {
     const obj: MessageSegment.ImageSegment = {
@@ -669,11 +673,15 @@ class Image extends Segment {
     if (this.url) {
       obj.data.url = this.url
     }
+    if (this.imageType && this.subType) {
+      obj.data.type = this.imageType
+      obj.data.sub_type = this.subType
+    }
     return obj
   }
   public static fromObject(seg: MessageSegment.ImageSegment): Image {
     this.verify(seg, MessageSegmentEnum.SegmentType.image)
-    return new Image(seg.data.file, seg.data.url)
+    return new Image(seg.data.file, seg.data.url, seg.data.type, seg.data.sub_type)
   }
 }
 
@@ -731,27 +739,59 @@ class Reply extends Segment {
 
 class Face extends Segment {
   public id: number
+  public big: boolean
 
-  constructor(id: number) {
+  constructor(id: number, big: boolean = false) {
     super();
 
     this.id = id
+    this.big = big
   }
 
   public toPlainText(): string {
-    return `(表情符号 ID：“${this.id}”)`
+    return `(表情符号 ID：“${this.id}” 大型：${this.big ? "是" : "否"})`
   }
   public toObject(): MessageSegment.FaceSegment {
     return {
       type: MessageSegmentEnum.SegmentType.face,
       data: {
-        id: this.id
+        id: this.id,
+        big: this.big
       }
     }
   }
   public static fromObject(seg: MessageSegment.FaceSegment): Face {
     this.verify(seg, MessageSegmentEnum.SegmentType.face)
-    return new Face(seg.data.id)
+    return new Face(seg.data.id, seg.data.big)
+  }
+}
+
+class BubbleFace extends Segment {
+  public id: number
+  public count: number
+
+  constructor(id: number, count: number) {
+    super();
+
+    this.id = id
+    this.count = count
+  }
+
+  public toPlainText(): string {
+    return `(弹射表情 ID：“${this.id}” 次数：${this.count})`
+  }
+  public toObject(): MessageSegment.BubbleFaceSegment {
+    return {
+      type: MessageSegmentEnum.SegmentType.bubbleFace,
+      data: {
+        id: this.id,
+        count: this.count
+      }
+    }
+  }
+  public static fromObject(seg: MessageSegment.BubbleFaceSegment): BubbleFace {
+    this.verify(seg, MessageSegmentEnum.SegmentType.bubbleFace)
+    return new BubbleFace(seg.data.id, seg.data.count)
   }
 }
 
@@ -807,7 +847,7 @@ class Unknown extends Segment {
 }
 
 export default {
-  Segment, Text, Image, At, Reply, Face, MarketFace, Unknown, 
+  Segment, Text, Image, At, Reply, Face, BubbleFace, MarketFace, Unknown, 
   Json, Video, Record, Weather, Music, CustomMusic, Poke, Touch,
   Share, Basketball, DeprecatedDice, DeprecatedRps, NewDice, NewRps, 
   Forward, ForwardNode, Location, Gift, File

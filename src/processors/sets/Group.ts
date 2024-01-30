@@ -65,7 +65,7 @@ export class Group {
     }
   }
 
-  public sendMessage() {}
+  public sendMessage(): void {}
 
   public _addMember(member: number): boolean
   public _addMember(member: Event.GroupMemberIncrease): boolean
@@ -75,11 +75,13 @@ export class Group {
     }
 
     let id: number
+    let uid: string | undefined = undefined
     if (typeof member == "number") {
       id = member
     }
     else {
       id = member.user_id
+      uid = member.user_uid
       if (member.group_id != this.id) {
         return false
       }
@@ -87,15 +89,27 @@ export class Group {
 
     // 兼容OpenShamrock的Bug
     // https://github.com/whitechi73/OpenShamrock/issues/150
-    // 2024年1月1日 00:27，OpenShamrock的d44150e提交中，值可能为0或-1
-    if (!id || id < 0) {
+    // 2024年1月1日 00:27，OpenShamrock的d44150e提交中，值为0
+    // 已经定位到问题，用户ID获取失败，是因为无法立即在缓存中找到UIN与UID
+    // 在b9cfe73提交中被修复
+    if (id > 0) {
+      this.members[id] = new User({
+        id,
+        groupId: this.id
+      }, this.client)
+      return true
+    }
+    
+    if (!uid) {
       return false
     }
-
-    this.members[id] = new User({
-      id,
-      groupId: this.id
-    }, this.client)
+    
+    this.client.getUserId(uid!, userIds => {
+      const userId = userIds[uid!]
+      if (userId) {
+        this._addMember(userId)
+      }
+    })
 
     return true
   }

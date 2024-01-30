@@ -5,6 +5,8 @@ import path from "node:path"
 import fs from "node:fs"
 import { FileUtils } from "../tools/FileUtils";
 import { Logger } from "../tools/Logger";
+import { FriendRequest, GroupRequest } from "../events/RequestEvent";
+import { GroupMemberDecrease, GroupMemberIncrease } from "../events/NoticeEvent";
 
 export class PluginLoader {
   public ev: CustomEventEmitter.PluginLoaderEventEmitter = new EventEmitter()
@@ -12,15 +14,32 @@ export class PluginLoader {
   private plugins: Plugin[] = []
 
   constructor() {
-    this.ev.on("message", async (ev) => this.plugins.forEach(plugin => {
-      plugin.ev.emit("message", ev)
-    }))
-    this.ev.on("notice", async (ev) => this.plugins.forEach(plugin => {
-      plugin.ev.emit("notice", ev)
-    }))
-    this.ev.on("request", async (ev) => this.plugins.forEach(plugin => {
-      plugin.ev.emit("request", ev)
-    }))
+    this.ev.on("message", async (ev) => this.plugins.forEach(plugin => plugin.ev.emit("message", ev)))
+    this.ev.on("notice", async (ev) => {
+      // 将UID转为用户ID
+      if ((ev instanceof GroupMemberIncrease || ev instanceof GroupMemberDecrease) && ev.userId < 1) {
+        ev.client.getUserId([ev.userUid, ev.operatorUid], userIds => {
+          ev.userId = userIds[ev.userUid]
+          ev.operatorId = userIds[ev.operatorUid]
+          this.ev.emit("notice", ev)
+        })
+      }
+      else {
+        this.plugins.forEach(plugin => plugin.ev.emit("notice", ev))
+      }
+    })
+    this.ev.on("request", async (ev) => {
+      // 将UID转为用户ID
+      if ((ev instanceof FriendRequest || ev instanceof GroupRequest) && ev.userId < 1) {
+        ev.client.getUserId(ev.userUid, userIds => {
+          ev.userId = userIds[ev.userUid]
+          this.ev.emit("request", ev)
+        })
+      }
+      else {
+        this.plugins.forEach(plugin => plugin.ev.emit("request", ev))
+      }
+    })
   }
 
   public load(pluginClass: typeof Plugin_): Plugin | undefined {

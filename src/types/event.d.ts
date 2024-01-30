@@ -180,6 +180,7 @@ export namespace Event {
   }
   interface FriendRequest extends ReportedRequest {
     user_id: number
+    user_uid: string
     comment: string
     flag: string
   }
@@ -190,6 +191,7 @@ export namespace Event {
   interface GroupRequest extends ReportedRequest {
     group_id: number
     user_id: number
+    user_uid: string
     comment: string
     flag: string
     sub_type: "add" | "invite"

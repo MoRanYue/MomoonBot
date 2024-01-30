@@ -31,6 +31,9 @@ export class MessageUtils {
       case MessageSegmentEnum.SegmentType.face:
         return MsgSegment.Face.fromObject(<MessageSegment.FaceSegment>seg)
 
+      case MessageSegmentEnum.SegmentType.bubbleFace:
+        return MsgSegment.BubbleFace.fromObject(<MessageSegment.BubbleFaceSegment>seg)
+
       case MessageSegmentEnum.SegmentType.marketFace:
         return MsgSegment.MarketFace.fromObject(<MessageSegment.MarketFaceSegment>seg)
 

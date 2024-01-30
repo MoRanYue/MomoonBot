@@ -46,6 +46,10 @@ export class User {
     this.permission = ListenerEnum.Permission.user
 
     if (typeof friend == "number") {
+      if (friend < 0) {
+        throw new Error("无法识别用户信息")
+      }
+
       this.id = friend
       this.client.send(ConnectionEnum.Action.getStrangerInfo, {
         user_id: this.id
@@ -62,7 +66,7 @@ export class User {
     }
     else if (Object.hasOwn(friend, "ext")) {
       friend = <ConnectionContent.ActionResponse.GetStrangerInfo>friend
-      this.id = friend.user_id
+      this.id = parseInt(friend.user_id)
       this.name = friend.nickname
       this.displayName = friend.nickname
       this.age = friend.age
@@ -160,5 +164,5 @@ export class User {
     return this.remark || this.displayName || this.name || "unknown"
   }
 
-  public sendMessage() {}
+  public sendMessage(): void {}
 }

@@ -21,6 +21,14 @@ export namespace MessageSegment {
     type: MessageSegmentEnum.SegmentType.face
     data: {
       id: number
+      big?: boolean
+    }
+  }
+  interface BubbleFaceSegment implements Segment {
+    type: MessageSegmentEnum.SegmentType.bubbleFace
+    data: {
+      id: number
+      count: number
     }
   }
   interface ReplySegment implements Segment {
@@ -46,6 +54,8 @@ export namespace MessageSegment {
     data: {
       file?: string
       url?: string
+      type?: "show" | "flash" | "original"
+      sub_type?: MessageSegmentEnum.ImageSubType
     }
   }
   interface RecordSegment implements Segment {

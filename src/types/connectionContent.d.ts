@@ -6,7 +6,7 @@ export namespace ConnectionContent {
     interface Response<T> {
       status: ConnectionEnum.ResponseStatus
       retcode: ConnectionEnum.ResponseCode
-      msg: string
+      message: string
       wording: string
       data: T
       echo: string
@@ -56,6 +56,9 @@ export namespace ConnectionContent {
     interface GetStrangerInfo {
       user_id: number
     }
+    interface GetUserInfo {
+      user_id: number
+    }
     interface GetNotJoinedGroupInfo {
       group_id: number
     }
@@ -63,10 +66,10 @@ export namespace ConnectionContent {
       group_id: number
     }
     interface GetUinByUid {
-      uid_list: number[]
+      uid_list: string[]
     }
     interface GetUid {
-      uin_list: string[]
+      uin_list: number[]
     }
     interface GetGroupMemberInfo {
       group_id: number
@@ -80,6 +83,10 @@ export namespace ConnectionContent {
     }
     interface GetEssenceMsgList {
       group_id: number
+    }
+    interface SendLike {
+      times: number
+      user_id: number
     }
     interface IsBlacklistUin {
       user_id: number
@@ -248,6 +255,16 @@ export namespace ConnectionContent {
       group_id: number
       user_id: number
     }
+    interface Poke {
+      group_id: number
+      user_id: number
+    }
+    interface SetGroupCommentFace {
+      group_id: number
+      msg_id: number
+      face_id: number
+      is_set?: boolean
+    }
     interface GetProhibitedMemberList {
       group_id: number
     }
@@ -317,6 +334,21 @@ export namespace ConnectionContent {
       dir: string
     }
 
+    interface GetCsrfToken {
+      domain?: string
+    }
+    interface GetCookies {
+      domain?: string
+    }
+    interface GetCredentials {
+      domain?: string
+    }
+    interface GetHttpCookies {
+      appid: string
+      daid: string
+      jumpurl: string
+    }
+
     interface GetWeatherCityCode {
       city: string
     }
@@ -349,6 +381,21 @@ export namespace ConnectionContent {
       user_id: number
       nickname: string
     }
+    interface Status {
+      self: {
+        platform: "qq"
+        user_id: number
+      }
+      online: boolean
+      good: boolean
+      "qq.status": string
+    }
+    interface GetSelfInfo {
+      user_id: number
+      user_name: string
+      user_displayname: string
+    }
+    type GetStatus = Status[]
     interface ModelDetail {
       model_show: string
       need_pay: boolean
@@ -367,11 +414,50 @@ export namespace ConnectionContent {
     type Sex = "unknown" | "male" | "female"
     type Gender = 0 | 1 | 2
     interface GetStrangerInfo {
-      user_id: number
+      user_id: string
       nickname: string
       age: number
       sex: Sex
+      login_days: number
+      qid: string
+      vote: number
+      wzry_honor: unknown
       ext: object
+    }
+    interface HobbyEntryItem {
+      strName: string
+      strServiceUrl: string
+      strServiceType: unknown
+      serviceType: number
+      sProfileSummaryHobbiesItem: [] & string
+    }
+    interface LocationInfo {
+      city: string
+      company: string
+      country: string
+      province: string
+      hometown: string
+      school: string
+    }
+    interface GetUserInfo {
+      user_id: number
+      user_name: string
+      user_displayname: string
+      user_remark: string
+      mail: string
+      find_method: string
+      max_vote_cnt: number
+      have_vote_cnt: number
+      vip_list: unknown[]
+      hobby_entry: HobbyEntryItem[] & string
+      level: number
+      birthday: number
+      login_day: number
+      vote_cnt: number
+      qid: number
+      is_school_verified: boolean
+      location: LocationInfo
+      cookie: number[]
     }
     interface FriendListItem {
       user_id: number
@@ -436,8 +522,8 @@ export namespace ConnectionContent {
       unfriendly: boolean
       card_changeable: boolean
     }
-    type GetUinByUid = Record<string, string>
-    type GetUid = Record<string, number>
+    type GetUinByUid = Record<string, number>
+    type GetUid = Record<string, string>
     type GetGroupMemberList = GetGroupMemberInfo[]
     interface HonorInfo {
       user_id: number
@@ -680,6 +766,31 @@ export namespace ConnectionContent {
       data: number
     }
     type Log = string
+    interface GetVersionInfo {
+      app_full_name: string
+      app_name: string
+      app_version: string
+      onebot_version: string
+    }
+    type GetSupportedActions = string[]
+
+    interface GetCsrfToken {
+      token: string
+    }
+    interface GetCookies {
+      cookies: string
+    }
+    interface GetCredentials {
+      token: string
+      cookies: string
+    }
+    interface GetHttpCookies {
+      cookies: string
+    }
+    interface Test {
+      time: number
+    }
+    type GetLatestEvents = unknown[]
 
     interface WeatherCityCodeItem {
       adcode: number

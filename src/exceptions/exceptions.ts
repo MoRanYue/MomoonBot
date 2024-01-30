@@ -6,9 +6,10 @@ export class ActionFailedError extends Error {
   public action?: string
   public code?: number
   public reason?: string
+  public responseData: object | any[] | string | null
   public isHttpError: boolean
   
-  constructor(action?: string, code?: number, isHttpStatusCode: boolean = false, reason?: string) {
+  constructor(responseData: object | any[] | string | null, action?: string, code?: number, isHttpStatusCode: boolean = false, reason?: string) {
     let message = `动作请求失败：`
     if (action) {
       message += " 动作：" + action
@@ -25,6 +26,7 @@ export class ActionFailedError extends Error {
       message += " 原因：" + reason
     }
     super(message)
+    this.responseData = responseData
     
     this.action = action
     this.code = code

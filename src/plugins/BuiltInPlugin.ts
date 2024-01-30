@@ -1,4 +1,4 @@
-import { EventEnum } from "../types/enums";
+import { EventEnum, ListenerEnum } from "../types/enums";
 import { Plugin } from "../processors/Plugin";
 import type { MessageEvent } from "src/events/MessageEvent";
 import type { 
@@ -14,6 +14,7 @@ import type {
 } from "src/events/NoticeEvent";
 import config from "../config";
 import type { FriendRequest, GroupRequest } from "src/events/RequestEvent";
+import { ActionFailedError } from "../exceptions/exceptions";
 
 export default class BuiltInPlugin extends Plugin {
   name: string = "内置插件"
@@ -27,7 +28,6 @@ export default class BuiltInPlugin extends Plugin {
 
     config.setPluginData(this, {
       autoAddMissingGroupInfo: true,
-      autoAddMissingGroupMemberInfo: true
     })
     
     const reportEvent = async (type: string, ev: MessageEvent) => {
@@ -39,22 +39,16 @@ export default class BuiltInPlugin extends Plugin {
       if (ev.messageType == EventEnum.MessageType.group) {
         const group = ev.client.groups[ev.groupId!]
         if (!group) {
-          this.logger.info(`接收到${type}：${messageContent}（${ev.messageId}） 来自群聊：${ev.groupId} 发送者：${ev.userId}`)
           if (Object.keys(ev.client.groups).length != 0 && config.getPluginData(this, "autoAddMissingGroupInfo")) {
             ev.client._addGroup(ev.groupId!)
           }
+          this.logger.info(`接收到${type}：${messageContent}（${ev.messageId}） 来自群聊：${ev.groupId} 发送者：${ev.userId}`)
           return
         }
         const member = group.members[ev.userId]
         if (member) {
           this.logger.info(`接收到${type}：${messageContent}（${ev.messageId}） 来自群聊：${group.name}（${ev.groupId}） 发送者：${member.viewedName}（${ev.userId}）`)
           return
-        }
-        if (config.getPluginData(this, "autoAddMissingGroupMemberInfo")) {
-          ev.client._addGroupMember({
-            groupId: group.id,
-            id: ev.userId
-          })
         }
         this.logger.info(`接收到${type}：${messageContent}（${ev.messageId}） 来自群聊：${group.name}（${ev.groupId}） 发送者：${ev.userId}`)
       }
@@ -115,7 +109,7 @@ export default class BuiltInPlugin extends Plugin {
         else if (ev.entry == "invite") {
           method = `被邀请，由 ${operator.viewedName}（${ev.operatorId}） 允许加入`
         }
-        this.logger.info(`接收到群聊成员加入通知：群聊：${group.name}（${ev.groupId}） 加入者：${ev.userId || ev.userId > 0 ? ev.userId : "未知"} 方式：${method}`)
+        this.logger.info(`接收到群聊成员加入通知：群聊：${group.name}（${ev.groupId}） 加入者：${ev.userId} 方式：${method}`)
       }
 
       else if (event.noticeType == EventEnum.NoticeType.groupDecrease) {
@@ -131,7 +125,7 @@ export default class BuiltInPlugin extends Plugin {
             reason = `被 ${operator.viewedName}（${ev.operatorId}） 踢出`
           }
           else {
-            reason = `被踢出`
+            reason = `被 ${ev.operatorId} 踢出`
           }
         }
         else if (ev.reason == "kick_me") {
@@ -199,7 +193,28 @@ export default class BuiltInPlugin extends Plugin {
         this.logger.info(`接收到加入群聊请求：被请求群聊：${group.name}（${ev.groupId}） 请求用户：${ev.userId} 加入类型：${joiningType} 验证信息：${ev.comment}`)
       }
     }, 999)
-    
-    this.onCommand("echo", (ev, _, args) => ev.reply(args.join(" ")))
+
+    // 调试命令
+    this.onCommand("echo", (ev, _, args) => ev.reply(args.join(" ")), undefined, 999, undefined, ListenerEnum.Permission.admin)
+    this.onCommand("testApi", (ev, _, args) => {
+      if (args.length == 0) {
+        return
+      }
+
+      const action = args.shift()!
+      const data = args.join(" ").trim()
+      let params: Record<string, any> | null = null
+      if (data) {
+        params = JSON.parse(data)
+      }
+
+      Promise.resolve().then(() => {
+        ev.client.send(action, params, (res: any) => ev.reply(JSON.stringify(res)))
+      }).catch((err: ActionFailedError) => {
+        if (err instanceof ActionFailedError) {
+          ev.reply(typeof err.responseData == "object" ? JSON.stringify(err.responseData) : String(err.responseData))
+        }
+      })
+    })
   }
 }

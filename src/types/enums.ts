@@ -90,6 +90,7 @@ export namespace MessageSegmentEnum {
     text = "text",
     at = "at",
     face = "face",
+    bubbleFace = "bubble_face",
     marketFace = "mface",
     reply = "reply",
     file = "file",
@@ -138,6 +139,18 @@ export namespace MessageSegmentEnum {
     music163 = "163",
     custom = "custom"
   }
+  export enum ImageSubType {
+    normal = 0,
+    face = 1,
+    heat = 2,
+    battle = 3,
+    smart = 4,
+    texture = 7,
+    selfie = 8,
+    ad = 9,
+    unknown = 10,
+    heatSearch = 13
+  }
 }
 export namespace AppMessageEnum {
   export enum App {
@@ -159,11 +172,18 @@ export namespace ConnectionEnum {
   export enum Action {
     getLoginInfo = "get_login_info",
     setQqProfile = "set_qq_profile",
+    getStatus = "get_status", // OpenShamrock的c7265ba提交
+    getSelfInfo = "get_self_info", // OpenShamrock的c7265ba提交
     getModelShow = "_get_model_show",
+    // getModelShowAlias = "get_model_show",
     setModelShow = "_set_model_show",
     getOnlineClients = "get_online_clients",
+    // getOnlineClientsAlias = "_get_online_clients",
 
     getStrangerInfo = "get_stranger_info",
+    // getStrangerInfoAlias = "_get_stranger_info",
+    getUserInfo = "get_user_info", // OpenShamrock的c7265ba提交
+    // getProfileCard = "get_profile_card",
     getFriendList = "get_friend_list",
     getUnidirectionalFriendList = "get_unidirectional_friend_list",
     getNotJoinedGroupInfo = "get_not_joined_group_info",
@@ -175,19 +195,27 @@ export namespace ConnectionEnum {
     getGroupMemberInfo = "get_group_member_info",
     getGroupMemberList = "get_group_member_list",
     getGroupHonorInfo = "get_group_honor_info",
+    // getTroopHonorInfo = "get_troop_honor_info",
     getGroupSystemMsg = "get_group_system_msg",
     getFriendSystemMsg = "get_friend_system_msg",
     getEssenceMsgList = "get_essence_msg_list",
+    // getEssenceMessageList = "get_essence_message_list",
+    sendLike = "send_like", // OpenShamrock的c7265ba提交
     isBlacklistUin = "is_blacklist_uin",
 
     deleteFriend = "delete_friend",
     deleteUnidirectionalFriend = "delete_unidirectional_friend",
 
     sendPrivateMsg = "send_private_msg",
+    // sendPrivateMessage = "send_private_message",
     sendGroupMsg = "send_group_msg",
+    // sendGroupMessage = "send_group_message",
     sendMsg = "send_msg",
+    // sendMessage = "send_message",
     getMsg = "get_msg",
+    // getMessage = "get_message",
     deleteMsg = "delete_msg",
+    // deleteMessage = "delete_message",
     getHistoryMsg = "get_history_msg",
     getGroupHistoryMsg = "get_group_msg_history",
     clearMsgs = "clear_msgs",
@@ -212,13 +240,22 @@ export namespace ConnectionEnum {
     setGroupBan = "set_group_ban",
     setGroupWholeBan = "set_group_whole_ban",
     setEssenceMsg = "set_essence_msg",
+    // setEssenceMessage = "set_essence_message",
     deleteEssenceMsg = "delete_essence_msg",
+    // deleteEssenceMessage = "delete_essence_message",
     sendGroupSign = "send_group_sign",
-    sendGroupNotice = "_send_group_notice",
+    sendGroupNotice = "send_group_notice",
+    // sendGroupNotice = "_send_group_notice", // 不支持
+    // sendGroupAnnouncement = "send_group_announcement",
     getGroupNotice = "_get_group_notice",
+    // getGroupNoticeAlias = "get_group_notice",
     setGroupKick = "set_group_kick",
+    // kickGroupMember = "kick_group_member",
     setGroupLeave = "set_group_leave",
-    groupTouch = "group_touch",
+    // leaveGroup = "leave_group",
+    groupTouch = "group_touch", // 不支持
+    poke = "poke",
+    setGroupCommentFace = "set_group_comment_face",
     getProhibitedMemberList = "get_prohibited_member_list",
     getGroupAtAllRemain = "get_group_at_all_remain",
 
@@ -239,8 +276,14 @@ export namespace ConnectionEnum {
     getDeviceBattery = "get_device_battery",
     getStartTime = "get_start_time",
     log = "log",
-    shell = "",
+    getVersionInfo = "get_version_info", // OpenShamrock的c7265ba提交
+    // getVersion = "get_version",
+    getSupportedActions = "get_supported_actions", // OpenShamrock的c7265ba提交
+    cleanCache = "clean_cache", // OpenShamrock的c7265ba提交
+    shell = "shell",
     shut = "shut",
+    restart = "restart_me", // 不支持
+    sancQrcode = "sanc_qrcode", // 不支持
 
     getWeatherCityCode = "get_weather_city_code",
     getWeather = "get_weather",
@@ -251,7 +294,28 @@ export namespace ConnectionEnum {
     favoriteAddTextMsg = "fav.add_text_msg",
     favoriteAddImageMsg = "fav.add_image_msg",
 
-    handleQuickOperation = ".handle_quick_operation"
+    // 从源代码中发现的API，一些API暂未被实现
+    getCsrfToken = "get_csrf_token",
+    getCookies = "get_cookies",
+    // getCookie = "get_cookie",
+    getCredentials = "get_credentials",
+    getHttpCookies = "get_http_cookies",
+    getGuildList = "get_guild_list", // 未实现
+    getGuildServiceProfile = "get_guild_service_profile", // 未实现
+    test = "test",
+    /* 被弃用的API
+    根据OpenShamrock的源代码xposed/src/main/java/moe/fuqiuluo/shamrock/remote/action/handlers/GetLatestEvents.kt文件中的注释：
+    “
+    弱智玩意，不予实现
+    请开启HTTP回调 把事件回调回去
+    而不是在我这里轮询
+    ”
+    */
+    getLatestEvents = "get_latest_events",
+
+    // 不建议使用的API（因为已实现）
+    handleQuickOperation = ".handle_quick_operation",
+    handleQuickOperationAsync = ".handle_quick_operation_async"
   }
   export enum ResponseStatus {
     ok = "ok",

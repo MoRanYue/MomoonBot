@@ -1,4 +1,3 @@
-import type { Connection } from "src/connections/Connection";
 import { Event as Ev } from "./Event";
 import type { Event } from "src/types/event";
 import { EventEnum } from "../types/enums";
@@ -279,7 +278,9 @@ export class GroupAdminChange extends NoticeEvent {
 }
 export class GroupMemberDecrease extends NoticeEvent {
   public userId: number
+  public userUid: string
   public operatorId: number
+  public operatorUid: string
   public groupId: number
   public reason: "leave" | "kick" | "kick_me"
 
@@ -287,14 +288,18 @@ export class GroupMemberDecrease extends NoticeEvent {
     super(ev, client);
 
     this.userId = ev.user_id
+    this.userUid = ev.user_uid
     this.operatorId = ev.operator_id
+    this.operatorUid = ev.operator_uid
     this.groupId = ev.group_id
     this.reason = ev.sub_type
   }
 }
 export class GroupMemberIncrease extends NoticeEvent {
   public userId: number
+  public userUid: string
   public operatorId: number
+  public operatorUid: string
   public groupId: number
   public entry: "approve" | "invite"
 
@@ -302,7 +307,9 @@ export class GroupMemberIncrease extends NoticeEvent {
     super(ev, client);
 
     this.userId = ev.user_id
+    this.userUid = ev.user_uid
     this.operatorId = ev.operator_id
+    this.operatorUid = ev.operator_uid
     this.groupId = ev.group_id
     this.entry = ev.sub_type
   }

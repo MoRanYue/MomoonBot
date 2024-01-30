@@ -36,6 +36,7 @@ export class RequestEvent extends Ev {
 
 export class FriendRequest extends RequestEvent {
   public userId: number
+  public userUid: string
   public comment: string
   public flag: string
 
@@ -43,6 +44,7 @@ export class FriendRequest extends RequestEvent {
     super(ev, client);
 
     this.userId = ev.user_id
+    this.userUid = ev.user_uid
     this.comment = ev.comment
     this.flag = ev.flag
   }
@@ -51,6 +53,7 @@ export class FriendRequest extends RequestEvent {
 export class GroupRequest extends RequestEvent {
   public groupId: number
   public userId: number
+  public userUid: string
   public comment: string
   public flag: string
   public joiningType: "add" | "invite"
@@ -60,6 +63,7 @@ export class GroupRequest extends RequestEvent {
 
     this.groupId = ev.group_id
     this.userId = ev.user_id
+    this.userUid = ev.user_uid
     this.comment = ev.comment
     this.flag = ev.flag
     this.joiningType = ev.sub_type
