@@ -285,11 +285,9 @@ class CommandListener extends Listener {
     }
     
     const receiver = this.receivers[receiverIndex]
-    if (!Object.hasOwn(conversation.state, receiver.storedKey)) {
-      if (ev) {
-        conversation.step++
-        return receiver.cb(ev, conversation.state, conversation.messageQueue)
-      }
+    if (!Object.hasOwn(conversation.state, receiver.storedKey) && ev) {
+      conversation.step++
+      return receiver.cb(ev, conversation.state, conversation.messageQueue)
     }
   }
 
