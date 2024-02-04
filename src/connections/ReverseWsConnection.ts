@@ -12,6 +12,7 @@ import { User } from "../processors/sets/User";
 import { Logger } from "../tools/Logger";
 import { ReverseWsClient } from "./ReverseWsClient";
 import { ConnectionIsClosedError } from "../exceptions/exceptions";
+import { Client } from "./Client";
 
 export class ReverseWsConnection extends Connection {
   protected clients: ReverseWsClient[] = [];
@@ -306,6 +307,10 @@ export class ReverseWsConnection extends Connection {
   
   private receivePacket(data: ws.RawData, cb: (data: string) => void) {
     cb(data.toString("utf-8"))
+  }
+  
+  public getClients(): ReverseWsClient[] {
+    return this.clients
   }
 
   // 以下函数仅被内置类调用

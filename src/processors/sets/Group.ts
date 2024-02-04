@@ -3,6 +3,8 @@ import { ConnectionEnum } from "../../types/enums"
 import { User } from "./User"
 import type { Event } from "src/types/event"
 import type { Client } from "../../connections/Client"
+import type { DataType } from "src/types/dataType"
+import { MessageUtils } from "../../tools/MessageUtils"
 
 export class Group {
   public id: number
@@ -65,7 +67,21 @@ export class Group {
     }
   }
 
-  public sendMessage(): void {}
+  public sendMessage(message: DataType.SendingMessageContent): void
+  public sendMessage(message: DataType.SendingMessageContent, cb?: DataType.SendingMessageInObjectOperationFunc): void
+  public sendMessage(message: DataType.SendingMessageContent, cb?: DataType.SendingMessageInObjectOperationFunc, recallingDelay?: number): void
+  public sendMessage(message: DataType.SendingMessageContent, cb?: DataType.SendingMessageInObjectOperationFunc, recallingDelay?: number): void {
+    const msg = MessageUtils.transferMessageSendingParameter(message)
+    const params: ConnectionContent.Params.SendGroupMsg = {
+      group_id: this.id,
+      message: msg,
+      auto_escape: true
+    }
+    if (recallingDelay) {
+      params.recall_duration = recallingDelay
+    }
+    this.client.send(ConnectionEnum.Action.sendGroupMsg, params, cb)
+  }
 
   public _addMember(member: number): boolean
   public _addMember(member: Event.GroupMemberIncrease): boolean

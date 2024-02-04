@@ -115,8 +115,8 @@ export namespace ConnectionContent {
     interface SendMsg {
       message_type: EventEnum.MessageType
       user_id: number
-      group_id: number
-      discuss_id: number
+      group_id?: number
+      discuss_id?: number
       message: MessageSegment.Segment | MessageSegment.Segment[] | string
       auto_escape?: boolean
       recall_duration?: number

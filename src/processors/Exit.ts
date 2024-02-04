@@ -59,6 +59,7 @@ export class Exit {
     this.logger.warning("至多等待10秒，以保证正常退出")
     setTimeout(() => {
       this.logger.warning("正在强制退出进程")
+      this.exit(0)
     }, 10000)
 
     callTasks().then(() => {

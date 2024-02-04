@@ -300,6 +300,10 @@ export class HttpConnection extends Connection {
     throw new ConnectionIsClosedError(`找不到客户端 ${clientIndex}`)
   }
 
+  public getClients(): HttpClient[] {
+    return this.clients
+  }
+
   public get _logger(): Logger {
     return this.logger
   }

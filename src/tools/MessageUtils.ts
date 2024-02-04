@@ -237,4 +237,22 @@ export class MessageUtils {
 
     return undefined
   }
+  
+  public static transferMessageSendingParameter(message: DataType.SendingMessageContent): MessageSegment.Segment[] | never {
+    let msg!: MessageSegment.Segment[]
+    if (Array.isArray(message) && message.length != 0 && message[0] instanceof MsgSegment.Segment) {
+      msg = MessageUtils.segmentsToObject(<Segment[]>message)
+    }
+    else if (typeof message == "string") {
+      msg = [new MsgSegment.Text(message).toObject()]
+    }
+    else if (message instanceof MsgSegment.Segment) {
+      msg = [message.toObject()]
+    }
+    else {
+      throw new TypeError(`消息类型错误，应为“SendingMessageContent”而不是“${typeof message}”`)
+    }
+
+    return msg
+  }
 }

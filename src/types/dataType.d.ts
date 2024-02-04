@@ -17,6 +17,8 @@ export namespace DataType {
   type RawResponseFunction<T> = (data: T) => void | Promise<void>
   type ResponseFunction<T> = RawResponseFunction<ConnectionContent.Connection.Response<T>>
 
+  type SendingMessageInObjectOperationFunc = (data: ConnectionContent.ActionResponse.SendMsg) => void | Promise<void>
+
   interface GroupMemberParams {
     groupId: number
     id: number

@@ -5,6 +5,7 @@ import { Utils } from "../../tools/Utils"
 import { ListenerUtils } from "../../tools/ListenerUtils"
 import type { DataType } from "src/types/dataType"
 import { Client } from "../../connections/Client"
+import { MessageUtils } from "../../tools/MessageUtils"
 
 type UserInfo = Omit<DataType.GroupMemberParams, "group">
 
@@ -164,5 +165,19 @@ export class User {
     return this.remark || this.displayName || this.name || "unknown"
   }
 
-  public sendMessage(): void {}
+  public sendMessage(message: DataType.SendingMessageContent): void
+  public sendMessage(message: DataType.SendingMessageContent, cb?: DataType.SendingMessageInObjectOperationFunc): void
+  public sendMessage(message: DataType.SendingMessageContent, cb?: DataType.SendingMessageInObjectOperationFunc, recallingDelay?: number): void
+  public sendMessage(message: DataType.SendingMessageContent, cb?: DataType.SendingMessageInObjectOperationFunc, recallingDelay?: number): void {
+    const msg = MessageUtils.transferMessageSendingParameter(message)
+    const params: ConnectionContent.Params.SendPrivateMsg = {
+      user_id: this.id,
+      message: msg,
+      auto_escape: true
+    }
+    if (recallingDelay) {
+      params.recall_duration = recallingDelay
+    }
+    this.client.send(ConnectionEnum.Action.sendPrivateMsg, params, cb)
+  }
 }

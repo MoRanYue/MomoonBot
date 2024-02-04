@@ -123,6 +123,8 @@ export abstract class Connection {
   public abstract send(action: string, data?: Record<string, any> | string | null, cb?: DataType.ResponseFunction<any> | DataType.RawResponseFunction<any>): void
   public abstract send(action: string, data?: Record<string, any> | string | null, cb?: DataType.ResponseFunction<any> | DataType.RawResponseFunction<any>): void
 
+  public abstract getClients(): Client[]
+
   public abstract getGroups(...args: any[]): Record<number, Group> | undefined
   public abstract getGroup(id: number): Group | undefined
   public abstract getFriends(...args: any[]): Record<number, User> | undefined

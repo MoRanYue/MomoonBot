@@ -7,6 +7,7 @@ import { MessageUtils } from "../tools/MessageUtils";
 import type { Connection } from "../connections/Connection";
 import type { DataType } from "src/types/dataType";
 import type { Client } from "src/connections/Client";
+import type { ConnectionContent } from "src/types/connectionContent";
 
 export class MessageEvent extends Ev {
   public client: Client;
@@ -85,20 +86,9 @@ export class MessageEvent extends Ev {
   public reply(message: DataType.SendingMessageContent, cb?: DataType.MessageEventOperationFunc): void
   public reply(message: DataType.SendingMessageContent, cb?: DataType.MessageEventOperationFunc, atSender?: boolean): void
   public reply(message: DataType.SendingMessageContent, cb?: DataType.MessageEventOperationFunc, atSender?: boolean, reply?: boolean): void
-  public reply(message: DataType.SendingMessageContent, cb?: DataType.MessageEventOperationFunc, atSender: boolean = false, reply: boolean = false): void {
-    let msg!: MessageSegment.Segment[]
-    if (Array.isArray(message) && message.length != 0 && message[0] instanceof Segment) {
-      msg = MessageUtils.segmentsToObject(<Segment[]>message)
-    }
-    else if (typeof message == "string") {
-      msg = [new MsgSegment.Text(message).toObject()]
-    }
-    else if (message instanceof Segment) {
-      msg = [message.toObject()]
-    }
-    else {
-      throw new TypeError(`消息类型错误，应为“SendingMessageContent”而不是“${typeof message}”`)
-    }
+  public reply(message: DataType.SendingMessageContent, cb?: DataType.MessageEventOperationFunc, atSender?: boolean, reply?: boolean, recallingDelay?: number): void
+  public reply(message: DataType.SendingMessageContent, cb?: DataType.MessageEventOperationFunc, atSender: boolean = false, reply: boolean = false, recallingDelay?: number): void {
+    const msg = MessageUtils.transferMessageSendingParameter(message)
     
     if (atSender && this.messageType == EventEnum.MessageType.group) {
       msg.unshift(new MsgSegment.At(this.userId).toObject(), new MsgSegment.Text(" ").toObject())
@@ -107,13 +97,18 @@ export class MessageEvent extends Ev {
       msg.unshift(new MsgSegment.Reply(this.messageId).toObject())
     }
 
-    this.client.send(ConnectionEnum.Action.sendMsg, {
+    const params: ConnectionContent.Params.SendMsg = {
       message_type: this.messageType,
       group_id: this.groupId,
       user_id: this.userId,
       message: msg,
-      auto_escape: false
-    }, cb)
+      auto_escape: true
+    }
+    if (recallingDelay) {
+      params.recall_duration = recallingDelay
+    }
+
+    this.client.send(ConnectionEnum.Action.sendMsg, params, cb)
   }
 
   public recall(): void
