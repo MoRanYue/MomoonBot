@@ -1,6 +1,6 @@
 import { Event as Ev } from "./Event";
 import { Event } from "../types/event";
-import { ConnectionEnum, EventEnum } from "../types/enums";
+import { ConnectionEnum, EventEnum, MessageSegmentEnum } from "../types/enums";
 import MsgSegment, { Segment } from "./messages/MessageSegment";
 import type { MessageSegment } from "../types/message";
 import { MessageUtils } from "../tools/MessageUtils";
@@ -15,6 +15,7 @@ export class MessageEvent extends Ev {
   public selfId: number
   public peerId: number
   public userId: number
+  public tinyId?: number
   public targetId?: number
   public groupId?: number
   public tempSource?: EventEnum.MessageTempSource
@@ -22,9 +23,10 @@ export class MessageEvent extends Ev {
   public messageSubType: EventEnum.MessageSubType
   public message: Segment[]
   public raw: string
-  public sender: {
+  public sender!: {
     nickname: string
     groupCard?: string
+    level?: number
     role?: EventEnum.GroupMemberRole
   }
   public messageId: number
@@ -48,25 +50,32 @@ export class MessageEvent extends Ev {
     this.message = MessageUtils.classify(ev.message)
     this.messageId = ev.message_id
     this.raw = ev.raw_message
-    if (Object.hasOwn(ev.sender, "role")) {
+    if (ev.message_type == EventEnum.MessageType.group) {
+      this.groupId = ev.group_id
       const senderInfo = <Event.GroupMessageSender>ev.sender
       this.sender = {
         nickname: senderInfo.nickname,
         groupCard: senderInfo.card,
-        role: senderInfo.role,
+        level: parseInt(senderInfo.level || "0"),
+        role: senderInfo.role
       }
-    }
-    else {
-      this.sender = {
-        nickname: ev.sender.nickname
-      }
-    }
-    if (ev.message_type == EventEnum.MessageType.group) {
-      this.groupId = ev.group_id
     }
     else if (ev.message_type == EventEnum.MessageType.private) {
       this.targetId = ev.target_id
       this.tempSource = ev.temp_source
+      this.sender = {
+        nickname: ev.sender.nickname
+      }
+    }
+    else if (ev.message_type == EventEnum.MessageType.guild) {
+      this.tinyId = this.userId
+      const senderInfo = <Event.GuildChannelMessageSender>ev.sender
+      this.sender = {
+        nickname: senderInfo.nickname,
+        groupCard: senderInfo.card,
+        level: parseInt(senderInfo.level || "0"),
+        role: senderInfo.role
+      }
     }
   }
 

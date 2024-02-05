@@ -122,6 +122,18 @@ export abstract class Client {
   public abstract send(action: ConnectionEnum.Action.getHttpCookies, data?: ConnectionContent.Params.GetHttpCookies, cb?: DataType.ResponseFunction<ConnectionContent.ActionResponse.GetHttpCookies>): void
   public abstract send(action: ConnectionEnum.Action.test, data?: null, cb?: DataType.ResponseFunction<ConnectionContent.ActionResponse.Test>): void
   public abstract send(action: ConnectionEnum.Action.getLatestEvents, data?: null, cb?: DataType.ResponseFunction<ConnectionContent.ActionResponse.GetLatestEvents>): void
+  public abstract send(action: ConnectionEnum.Action.createGuildRole, data: ConnectionContent.Params.CreateGuildRole, cb?: DataType.ResponseFunction<ConnectionContent.ActionResponse.CreateGuildRole>): void
+  public abstract send(action: ConnectionEnum.Action.setGuildMemberRole, data: ConnectionContent.Params.SetGuildMemberRole, cb?: DataType.ResponseFunction<null>): void
+  public abstract send(action: ConnectionEnum.Action.deleteGuildRole, data: ConnectionContent.Params.DeleteGuildRole, cb?: DataType.ResponseFunction<null>): void
+  public abstract send(action: ConnectionEnum.Action.getGuildRoles, data: ConnectionContent.Params.GetGuildRoles, cb?: DataType.ResponseFunction<ConnectionContent.ActionResponse.GetGuildRoles>): void
+  public abstract send(action: ConnectionEnum.Action.getGuildFeeds, data: ConnectionContent.Params.GetGuildFeeds, cb?: DataType.ResponseFunction<ConnectionContent.ActionResponse.GetGuildFeeds>): void
+  public abstract send(action: ConnectionEnum.Action.sendGuildChannelMsg, data: ConnectionContent.Params.SendGuildChannelMsg, cb?: DataType.ResponseFunction<ConnectionContent.ActionResponse.SendGuildChannelMsg>): void
+  public abstract send(action: ConnectionEnum.Action.getGuildMemberProfile, data: ConnectionContent.Params.GetGuildMemberProfile, cb?: DataType.ResponseFunction<ConnectionContent.ActionResponse.GetGuildMemberProfile>): void
+  public abstract send(action: ConnectionEnum.Action.getGuildMemberList, data: ConnectionContent.Params.GetGuildMemberList, cb?: DataType.ResponseFunction<ConnectionContent.ActionResponse.GetGuildMemberList>): void
+  public abstract send(action: ConnectionEnum.Action.getGuildChannelList, data: ConnectionContent.Params.GetGuildChannelList, cb?: DataType.ResponseFunction<ConnectionContent.ActionResponse.GetGuildChannelList>): void
+  public abstract send(action: ConnectionEnum.Action.getGuildMetaByGuest, data: ConnectionContent.Params.GetGuildMetaByGuest, cb?: DataType.ResponseFunction<ConnectionContent.ActionResponse.GetGuildMetaByGuest>): void
+  public abstract send(action: ConnectionEnum.Action.getGuildServiceProfile, data?: null, cb?: DataType.ResponseFunction<ConnectionContent.ActionResponse.GetGuildServiceProfile>): void
+  public abstract send(action: ConnectionEnum.Action.getGuildList, data?: null, cb?: DataType.ResponseFunction<ConnectionContent.ActionResponse.GetGuildList>): void
   public abstract send(action: string, data?: Record<string, any> | string | null, cb?: DataType.ResponseFunction<any> | DataType.RawResponseFunction<any>): void
   public abstract send(action: string, data?: Record<string, any> | string | null, cb?: DataType.ResponseFunction<any> | DataType.RawResponseFunction<any>): void
 

@@ -23,7 +23,8 @@ export namespace EventEnum {
   }
   export enum MessageType {
     private = "private",
-    group = "group"
+    group = "group",
+    guild = "guild"
   }
   export enum GroupMemberRole {
     owner = "owner",
@@ -47,7 +48,8 @@ export namespace EventEnum {
     anonymous = "anonymous",
     group = "group",
     groupSelf = "group_self",
-    notice = "notice"
+    notice = "notice",
+    channel = "channel"
   }
   export enum NoticeType {
     groupUpload = "group_upload",
@@ -112,7 +114,6 @@ export namespace MessageSegmentEnum {
     deprecatedDice = "dice",
 
     forward = "forward",
-    
     forwardNode = "node",
     xml = "xml",
     cardImage = "cardimage",
@@ -121,6 +122,7 @@ export namespace MessageSegmentEnum {
     anonymous = "anonymous",
     contact = "contact",
     redbag = "redbag",
+    markdown = "markdown",
   }
   export enum BasketballId {
     missed = 5,
@@ -235,7 +237,8 @@ export namespace ConnectionEnum {
     setGroupName = "set_group_name",
     setGroupPortrait = "set_group_portrait",
     setGroupAdmin = "set_group_admin",
-    setGroupCard = "set_group_card",
+    setGroupCard = "set_group_card", // OpenShamrock的67f52b8提交支持
+    setGroupRemark = "set_group_remark", // OpenShamrock的67f52b8提交
     setGroupSpecialTitle = "set_group_special_title",
     setGroupBan = "set_group_ban",
     setGroupWholeBan = "set_group_whole_ban",
@@ -294,14 +297,25 @@ export namespace ConnectionEnum {
     favoriteAddTextMsg = "fav.add_text_msg",
     favoriteAddImageMsg = "fav.add_image_msg",
 
+    getGuildList = "get_guild_list", // OpenShamrock的036f8a4提交
+    getGuildServiceProfile = "get_guild_service_profile", // OpenShamrock的7540ef0提交
+    getGuildMetaByGuest = "get_guild_meta_by_guest", // OpenShamrock的103381c提交
+    getGuildChannelList = "get_guild_channel_list", // OpenShamrock的e629981提交
+    getGuildMemberList = "get_guild_member_list", // OpenShamrock的a22dc50提交
+    getGuildMemberProfile = "get_guild_member_profile", // OpenShamrock的1c7f6bd提交
+    sendGuildChannelMsg = "send_guild_channel_msg", // OpenShamrock的db252b6提交
+    getGuildFeeds = "get_guild_feeds", // OpenShamrock的2f61f6d提交
+    getGuildRoles = "get_guild_roles", // OpenShamrock的7952453提交
+    deleteGuildRole = "delete_guild_role", // OpenShamrock的c436898提交
+    setGuildMemberRole = "set_guild_member_role", // OpenShamrock的7bfb9b7提交
+    createGuildRole = "create_guild_role", // OpenShamrock的fb00e5c提交
+
     // 从源代码中发现的API，一些API暂未被实现
     getCsrfToken = "get_csrf_token",
     getCookies = "get_cookies",
     // getCookie = "get_cookie",
     getCredentials = "get_credentials",
     getHttpCookies = "get_http_cookies",
-    getGuildList = "get_guild_list", // 未实现
-    getGuildServiceProfile = "get_guild_service_profile", // 未实现
     test = "test",
     /* 被弃用的API
     根据OpenShamrock的源代码xposed/src/main/java/moe/fuqiuluo/shamrock/remote/action/handlers/GetLatestEvents.kt文件中的注释：
@@ -323,6 +337,12 @@ export namespace ConnectionEnum {
   }
   export enum ResponseCode {
     ok = 0
+  }
+  export enum GuildChannelType {
+    text = 1,
+    voice = 2,
+    stream = 5,
+    topic = 7
   }
 }
 

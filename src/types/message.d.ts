@@ -169,22 +169,28 @@ export namespace MessageSegment {
     type: MessageSegmentEnum.SegmentType.deprecatedDice
     data: {}
   }
-  interface ForwardSegment {
+  interface ForwardSegment implements Segment {
     type: MessageSegmentEnum.SegmentType.forward
     data: {
       id: string
     }
   }
-  interface ForwardNodeSegment {
+  interface ForwardNodeSegment implements Segment {
     type: MessageSegmentEnum.SegmentType.forwardNode
     data: {
       id: number
     }
   }
-  interface MarketFaceSegment {
+  interface MarketFaceSegment implements Segment {
     type: MessageSegmentEnum.SegmentType.marketFace
     data: {
       id: string
+    }
+  }
+  interface MarkdownSegment implements Segment {
+    type: MessageSegmentEnum.SegmentType.markdown
+    data: {
+      content: string
     }
   }
 }

@@ -292,6 +292,18 @@ export class HttpConnection extends Connection {
   public send(action: ConnectionEnum.Action.getHttpCookies, data?: ConnectionContent.Params.GetHttpCookies | undefined, cb?: DataType.ResponseFunction<ConnectionContent.ActionResponse.GetHttpCookies> | undefined, clientIndex?: number): void;
   public send(action: ConnectionEnum.Action.test, data?: null | undefined, cb?: DataType.ResponseFunction<ConnectionContent.ActionResponse.Test> | undefined, clientIndex?: number): void;
   public send(action: ConnectionEnum.Action.getLatestEvents, data?: null | undefined, cb?: DataType.ResponseFunction<ConnectionContent.ActionResponse.GetLatestEvents> | undefined, clientIndex?: number): void;
+  public send(action: ConnectionEnum.Action.createGuildRole, data: ConnectionContent.Params.CreateGuildRole, cb?: DataType.ResponseFunction<ConnectionContent.ActionResponse.CreateGuildRole>, clientIndex?: number): void
+  public send(action: ConnectionEnum.Action.setGuildMemberRole, data: ConnectionContent.Params.SetGuildMemberRole, cb?: DataType.ResponseFunction<null>, clientIndex?: number): void
+  public send(action: ConnectionEnum.Action.deleteGuildRole, data: ConnectionContent.Params.DeleteGuildRole, cb?: DataType.ResponseFunction<null>, clientIndex?: number): void
+  public send(action: ConnectionEnum.Action.getGuildRoles, data: ConnectionContent.Params.GetGuildRoles, cb?: DataType.ResponseFunction<ConnectionContent.ActionResponse.GetGuildRoles>, clientIndex?: number): void
+  public send(action: ConnectionEnum.Action.getGuildFeeds, data: ConnectionContent.Params.GetGuildFeeds, cb?: DataType.ResponseFunction<ConnectionContent.ActionResponse.GetGuildFeeds>, clientIndex?: number): void
+  public send(action: ConnectionEnum.Action.sendGuildChannelMsg, data: ConnectionContent.Params.SendGuildChannelMsg, cb?: DataType.ResponseFunction<ConnectionContent.ActionResponse.SendGuildChannelMsg>, clientIndex?: number): void
+  public send(action: ConnectionEnum.Action.getGuildMemberProfile, data: ConnectionContent.Params.GetGuildMemberProfile, cb?: DataType.ResponseFunction<ConnectionContent.ActionResponse.GetGuildMemberProfile>, clientIndex?: number): void
+  public send(action: ConnectionEnum.Action.getGuildMemberList, data: ConnectionContent.Params.GetGuildMemberList, cb?: DataType.ResponseFunction<ConnectionContent.ActionResponse.GetGuildMemberList>, clientIndex?: number): void
+  public send(action: ConnectionEnum.Action.getGuildChannelList, data: ConnectionContent.Params.GetGuildChannelList, cb?: DataType.ResponseFunction<ConnectionContent.ActionResponse.GetGuildChannelList>, clientIndex?: number): void
+  public send(action: ConnectionEnum.Action.getGuildMetaByGuest, data: ConnectionContent.Params.GetGuildMetaByGuest, cb?: DataType.ResponseFunction<ConnectionContent.ActionResponse.GetGuildMetaByGuest>, clientIndex?: number): void
+  public send(action: ConnectionEnum.Action.getGuildServiceProfile, data?: null, cb?: DataType.ResponseFunction<ConnectionContent.ActionResponse.GetGuildServiceProfile>, clientIndex?: number): void
+  public send(action: ConnectionEnum.Action.getGuildList, data?: null, cb?: DataType.ResponseFunction<ConnectionContent.ActionResponse.GetGuildList>, clientIndex?: number): void
   public send(action: string, data?: string | Record<string, any> | null | undefined, cb?: DataType.ResponseFunction<any> | DataType.RawResponseFunction<any> | undefined, clientIndex?: number): void;
   public send(action: string, data?: string | Record<string, any> | null | undefined, cb?: DataType.ResponseFunction<any> | DataType.RawResponseFunction<any> | undefined, clientIndex: number = 0): void {
     if (this.clients[clientIndex]) {

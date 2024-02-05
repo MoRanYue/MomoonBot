@@ -1,3 +1,4 @@
+import { interceptors } from "axios"
 import type { ConnectionEnum, EventEnum } from "./enums"
 import type { MessageSegment } from "./message"
 
@@ -212,6 +213,10 @@ export namespace ConnectionContent {
       user_id: number
       card: string
     }
+    interface SetGroupRemark {
+      group_id: number
+      remark: string
+    }
     interface SetGroupSpecialTitle {
       group_id: number
       user_id: number
@@ -374,6 +379,54 @@ export namespace ConnectionContent {
     }
     interface FavoriteAddImageMsg {
       file: string
+    }
+    interface GetGuildMetaByGuest {
+      guild_id: number
+    }
+    interface GetGuildChannelList {
+      guild_id: number
+      refresh?: boolean // 是否刷新数据，默认为false
+    }
+    interface GetGuildMemberList {
+      guild_id: number
+      next_token?: string
+      all?: boolean // 获取所有，默认为false
+      refresh?: boolean // 是否刷新数据，默认为false
+    }
+    interface GetGuildMemberProfile {
+      guild_id: number
+      user_id: number // 用户的Tiny ID
+    }
+    interface SendGuildChannelMsg {
+      guild_id: number
+      channel_id: number
+      message: string
+      auto_escape?: boolean
+      retry_cnt?: number
+      recall_duration?: number
+    }
+    interface GetGuildFeeds {
+      guild_id: number
+      from: number
+    }
+    interface GetGuildRoles {
+      guild_id: number
+    }
+    interface DeleteGuildRole {
+      guild_id: number
+      role_id: number
+    }
+    interface SetGuildMemberRole {
+      guild_id: number
+      role_id: number
+      set?: boolean // 设置或移除，默认false（移除）
+      users: string | number[]
+    }
+    interface CreateGuildRole {
+      guild_id: number
+      name: string
+      color: number
+      initial_users: string | number[]
     }
   }
   namespace ActionResponse {
@@ -820,6 +873,126 @@ export namespace ConnectionContent {
     }
     interface FavoriteAddImageMsg {
       id: string
+    }
+    interface GuildItem {
+      guild_id: number
+      guild_name: string
+      guild_display_id: string
+      profile: string
+      status: {
+        is_enable: boolean
+        is_banned: boolean
+        is_frozen: boolean
+      }
+      owner_id: number
+      shutup_expire_time: number
+      allow_search: boolean
+    }
+    interface GetGuildList {
+      guild_list: GuildItem[]
+    }
+    interface GetGuildServiceProfile {
+      nickname: string
+      tiny_id: number
+      avatar_url: string
+    }
+    interface GetGuildMetaByGuest {
+      guild_id: number
+      guild_name: string
+      guild_profile: string
+      create_time: number
+      max_member_count: number
+      max_robot_count: number
+      max_admin_count: number
+      member_count: number
+      owner_id: number
+      guild_display_id: string
+    }
+    interface GuildChannelSlowModeInfo {
+      slow_mode_key: number
+      slow_mode_text: string
+      speak_frequency: number
+      slow_mode_circle: number
+    }
+    interface GetGuildChannelList {
+      owner_guild_id: number
+      channel_id: number
+      channel_uin: number
+      guild_id: string
+      channel_type: ConnectionEnum.GuildChannelType
+      channel_name: string
+      create_time: number
+      max_member_count: number
+      creator_tiny_id: number
+      talk_permission: number // 1
+      visible_type: number
+      current_slow_mode: number
+      slow_modes: GuildChannelSlowModeInfo[]
+      icon_url: string
+      jump_switch: number
+      jump_type: number
+      jump_url: string
+      category_id: number
+      my_talk_permission: number
+    }
+    interface GuildMemberInfo {
+      tiny_id: number
+      title: string
+      nickname: string
+      role_id: number
+      role_name: string
+      role_color: number
+      join_time: number
+      robot_type: number
+      type: number
+      in_black: boolean
+      platform: number
+    }
+    interface GetGuildMemberList {
+      members: GuildMemberInfo[]
+      next_token: string
+      finished: boolean
+    }
+    interface GuildMemberPermission {
+      root_id: number
+      child_ids: number[]
+    }
+    interface GuildMemberRoleInfo {
+      role_id: string
+      role_name: string
+      color: number
+      permission: GuildMemberPermission[]
+      type: number
+      display_name: string
+    }
+    interface GetGuildMemberProfile {
+      tiny_id: number
+      nickname: string
+      avatar_url: string
+      join_time: number
+      roles: GuildMemberRoleInfo[]
+    }
+    interface SendGuildChannelMsg {
+      message_id: number
+      time: number
+    }
+    type GetGuildFeeds = object // 大量原生响应数据
+    interface GuildRoleInfo {
+      argb_color: number
+      disabled: boolean
+      independent: boolean
+      max_count: number
+      member_count: number
+      owned: boolean
+      role_id: number
+      role_name: string
+      permission: GuildMemberPermission[]
+    }
+    interface GetGuildRoles {
+      roles: GuildRoleInfo[]
+    }
+    interface CreateGuildRole {
+      role_id: number
     }
   }
 }

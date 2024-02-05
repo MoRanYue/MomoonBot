@@ -660,7 +660,82 @@ class Image extends Segment {
   }
 
   public toPlainText(): string {
-    return `(图片 文件：“${this.file}” URL：“${this.url}” 类型：${this.imageType} 子类型：${this.subType})`
+    let type: string
+    if (this.imageType) {
+      switch (this.imageType) {
+        case "show":
+          type = "正常"
+          break;
+
+        case "flash":
+          type = "闪图"
+          break
+
+        case "original":
+          type = "原图"
+          break
+      
+        default:
+          type = `未知（${this.imageType}）`
+          break;
+      }
+    }
+    else {
+      type = "未定义"
+    }
+
+    let subType: string
+    if (typeof this.subType == "number") {
+      switch (this.subType) {
+        case MessageSegmentEnum.ImageSubType.normal:
+          subType = "正常"
+          break;
+
+        case MessageSegmentEnum.ImageSubType.face:
+          subType = "表情包"
+          break
+
+        case MessageSegmentEnum.ImageSubType.heat:
+          subType = "热图"
+          break
+
+        case MessageSegmentEnum.ImageSubType.battle:
+          subType = "斗图"
+          break
+
+        case MessageSegmentEnum.ImageSubType.smart:
+          subType = "智图"
+          break
+        
+        case MessageSegmentEnum.ImageSubType.texture:
+          subType = "贴图"
+          break
+
+        case MessageSegmentEnum.ImageSubType.selfie:
+          subType = "自拍"
+          break
+
+        case MessageSegmentEnum.ImageSubType.ad:
+          subType = "贴图广告"
+          break
+
+        case MessageSegmentEnum.ImageSubType.unknown:
+          subType = "未知"
+          break
+
+        case MessageSegmentEnum.ImageSubType.heatSearch:
+          subType = "热搜图"
+          break
+      
+        default:
+          subType = `未知（${this.subType}）`
+          break;
+      }
+    }
+    else {
+      subType = "未定义"
+    }
+    return `(图片 文件：“${this.file}” URL：“${this.url ?? "无URL"}” 类型：${type} 子类型：${subType})`
   }
   public toObject(): MessageSegment.ImageSegment {
     const obj: MessageSegment.ImageSegment = {
@@ -823,21 +898,23 @@ class MarketFace extends Segment {
 
 class Unknown extends Segment {
   public data: object
+  public messageSegmentType: string
 
   constructor(seg: MessageSegment.Segment) {
     super();
 
+    this.messageSegmentType = seg.type
     this.data = seg.data
   }
 
   public toPlainText(): string {
-    return `(未知 数据：“${Utils.dataToJson(this.data)}”)`
+    return `(未知 类型：“${this.messageSegmentType}” 数据：“${Utils.dataToJson(this.data)}”)`
   }
   public toObject(): MessageSegment.Segment {
     return {
       type: MessageSegmentEnum.SegmentType.text,
       data: {
-        text: `[${this.data}]`
+        text: this.toPlainText()
       }
     }
   }
@@ -846,9 +923,34 @@ class Unknown extends Segment {
   }
 }
 
+class Markdown extends Segment {
+  public content: string
+
+  constructor(seg: MessageSegment.MarkdownSegment) {
+    super();
+
+    this.content = seg.data.content
+  }
+
+  public toPlainText(): string {
+    return `(Markdown 内容：“${this.content}”)`
+  }
+  public toObject(): MessageSegment.MarkdownSegment {
+    return {
+      type: MessageSegmentEnum.SegmentType.markdown,
+      data: {
+        content: this.content
+      }
+    }
+  }
+  public static fromObject(seg: MessageSegment.MarkdownSegment): Markdown {
+    return new Markdown(seg)
+  }
+}
+
 export default {
   Segment, Text, Image, At, Reply, Face, BubbleFace, MarketFace, Unknown, 
   Json, Video, Record, Weather, Music, CustomMusic, Poke, Touch,
   Share, Basketball, DeprecatedDice, DeprecatedRps, NewDice, NewRps, 
-  Forward, ForwardNode, Location, Gift, File
+  Forward, ForwardNode, Location, Gift, File, Markdown
 }

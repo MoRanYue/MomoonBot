@@ -23,6 +23,7 @@ export class HttpClient extends Client {
   declare protected _conn: HttpConnection;
 
   protected inst: axios.AxiosInstance = axios.create({
+    timeout: 10000,
     headers: {
       "Content-Encoding": "utf-8",
       "Content-Type": "application/json",
@@ -62,6 +63,12 @@ export class HttpClient extends Client {
 
   public getAddress(): string {
     return Utils.showHostWithPort(this._address, this._port)
+  }
+
+  public getGroupMember(groupId: number, userId: number): User | undefined {
+    if (this.groups[groupId]) {
+      return this.groups[groupId].members[userId]
+    }
   }
 
   public send(action: ConnectionEnum.Action.uploadGroupImage, data: ConnectionContent.Params.UploadGroupImage, cb?: DataType.RawResponseFunction<null> | undefined): void;
@@ -160,6 +167,18 @@ export class HttpClient extends Client {
   public send(action: ConnectionEnum.Action.getHttpCookies, data?: ConnectionContent.Params.GetHttpCookies | undefined, cb?: DataType.ResponseFunction<ConnectionContent.ActionResponse.GetHttpCookies> | undefined): void;
   public send(action: ConnectionEnum.Action.test, data?: null | undefined, cb?: DataType.ResponseFunction<ConnectionContent.ActionResponse.Test> | undefined): void;
   public send(action: ConnectionEnum.Action.getLatestEvents, data?: null | undefined, cb?: DataType.ResponseFunction<ConnectionContent.ActionResponse.GetLatestEvents> | undefined): void;
+  public send(action: ConnectionEnum.Action.createGuildRole, data: ConnectionContent.Params.CreateGuildRole, cb?: DataType.ResponseFunction<ConnectionContent.ActionResponse.CreateGuildRole> | undefined): void;
+  public send(action: ConnectionEnum.Action.setGuildMemberRole, data: ConnectionContent.Params.SetGuildMemberRole, cb?: DataType.ResponseFunction<null> | undefined): void;
+  public send(action: ConnectionEnum.Action.deleteGuildRole, data: ConnectionContent.Params.DeleteGuildRole, cb?: DataType.ResponseFunction<null> | undefined): void;
+  public send(action: ConnectionEnum.Action.getGuildRoles, data: ConnectionContent.Params.GetGuildRoles, cb?: DataType.ResponseFunction<ConnectionContent.ActionResponse.GetGuildRoles> | undefined): void;
+  public send(action: ConnectionEnum.Action.getGuildFeeds, data: ConnectionContent.Params.GetGuildFeeds, cb?: DataType.ResponseFunction<object> | undefined): void;
+  public send(action: ConnectionEnum.Action.sendGuildChannelMsg, data: ConnectionContent.Params.SendGuildChannelMsg, cb?: DataType.ResponseFunction<ConnectionContent.ActionResponse.SendGuildChannelMsg> | undefined): void;
+  public send(action: ConnectionEnum.Action.getGuildMemberProfile, data: ConnectionContent.Params.GetGuildMemberProfile, cb?: DataType.ResponseFunction<ConnectionContent.ActionResponse.GetGuildMemberProfile> | undefined): void;
+  public send(action: ConnectionEnum.Action.getGuildMemberList, data: ConnectionContent.Params.GetGuildMemberList, cb?: DataType.ResponseFunction<ConnectionContent.ActionResponse.GetGuildMemberList> | undefined): void;
+  public send(action: ConnectionEnum.Action.getGuildChannelList, data: ConnectionContent.Params.GetGuildChannelList, cb?: DataType.ResponseFunction<ConnectionContent.ActionResponse.GetGuildChannelList> | undefined): void;
+  public send(action: ConnectionEnum.Action.getGuildMetaByGuest, data: ConnectionContent.Params.GetGuildMetaByGuest, cb?: DataType.ResponseFunction<ConnectionContent.ActionResponse.GetGuildMetaByGuest> | undefined): void;
+  public send(action: ConnectionEnum.Action.getGuildServiceProfile, data?: null | undefined, cb?: DataType.ResponseFunction<ConnectionContent.ActionResponse.GetGuildServiceProfile> | undefined): void;
+  public send(action: ConnectionEnum.Action.getGuildList, data?: null | undefined, cb?: DataType.ResponseFunction<ConnectionContent.ActionResponse.GetGuildList> | undefined): void;
   public send(action: string, data?: string | Record<string, any> | null | undefined, cb?: DataType.ResponseFunction<any> | DataType.RawResponseFunction<any> | undefined): void;
   public send(action: string, data?: string | Record<string, any> | null | undefined, cb?: DataType.ResponseFunction<any> | DataType.RawResponseFunction<any> | undefined): void {
     if (!this.host) {
@@ -205,12 +224,6 @@ export class HttpClient extends Client {
         throw err
       }
     })
-  }
-
-  public getGroupMember(groupId: number, userId: number): User | undefined {
-    if (this.groups[groupId]) {
-      return this.groups[groupId].members[userId]
-    }
   }
 
   public _addGroup(group: number): void {

@@ -85,6 +85,7 @@ Momoon Bot目前兼容[OneBotV12](https://onebot.dev)内容，所有的API均根
 该项目内置以下插件：
 
 - 内置插件（`BuiltInPlugin`）
+- 调试器（`Debugger`）
 
 该项目内置以下示例插件：
 

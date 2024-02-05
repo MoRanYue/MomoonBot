@@ -12,7 +12,10 @@ export namespace Event {
     role: EventEnum.GroupMemberRole
     title: string
   }
-  type MessageSender = PrivateMessageSender | GroupMessageSender
+  interface GuildChannelMessageSender extends GroupMessageSender {
+    tiny_id: string
+  }
+  type MessageSender = PrivateMessageSender | GroupMessageSender | GuildChannelMessageSender
 
   interface Reported {
     time: number

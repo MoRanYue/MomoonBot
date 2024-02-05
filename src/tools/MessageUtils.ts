@@ -3,9 +3,6 @@ import { MessageSegment } from "../types/message";
 import MsgSegment, { type Segment } from "../events/messages/MessageSegment"
 import type { DataType } from "src/types/dataType";
 import config from "../config";
-import { Utils } from "./Utils";
-import AppMessage from "../events/messages/AppMessage"
-import type { AppMessageContent } from "src/types/AppMessageContent";
 
 export class MessageUtils {
   public static classify(message: MessageSegment.Segment[]) {
@@ -50,22 +47,7 @@ export class MessageUtils {
         return MsgSegment.Share.fromObject(<MessageSegment.ShareSegment>seg)
 
       case MessageSegmentEnum.SegmentType.json:
-        try {
-          const data = Utils.jsonToData((<MessageSegment.JsonSegment>seg).data.data)
-          if (data.app && data.app == AppMessageEnum.App.structuredMessage) {
-            const metaContent: any = (<AppMessageContent.StructuredMessage<object>>data).meta
-            if (Object.hasOwn(metaContent, "news")) {
-              switch (metaContent.news.appid) {
-                case AppMessageEnum.AppId.bilibiliVideoShare:
-                  return new AppMessage.BilibiliVideoShare(data)
-              }
-            }
-            return new AppMessage.AppMessage(data)
-          }
-        }
-        catch (err) {
-          return MsgSegment.Json.fromObject(<MessageSegment.JsonSegment>seg)
-        }
+        return MsgSegment.Json.fromObject(<MessageSegment.JsonSegment>seg)
 
       case MessageSegmentEnum.SegmentType.basketball:
         return MsgSegment.Basketball.fromObject(<MessageSegment.BasketballSegment>seg)
@@ -105,6 +87,9 @@ export class MessageUtils {
 
       case MessageSegmentEnum.SegmentType.weather:
         return MsgSegment.Weather.fromObject(<MessageSegment.WeatherSegment>seg)
+
+      case MessageSegmentEnum.SegmentType.markdown:
+        return MsgSegment.Markdown.fromObject(<MessageSegment.MarkdownSegment>seg)
     
       default:
         return MsgSegment.Unknown.fromObject(seg)
@@ -159,9 +144,18 @@ export class MessageUtils {
     }
   }
   public static matchMessageSegment(a: Segment, b: Segment, ignoreCase: boolean = true): boolean {
-    if (Object.getPrototypeOf(a) === Object.getPrototypeOf(b) || (a instanceof AppMessage.AppMessage && b instanceof MsgSegment.Json)) {
+    if (Object.getPrototypeOf(a) === Object.getPrototypeOf(b)) {
       if (a instanceof MsgSegment.Text && b instanceof MsgSegment.Text) {
         return MessageUtils.matchText(a.text, b.text, ignoreCase)
+      }
+      else if (a instanceof MsgSegment.Face && b instanceof MsgSegment.Face && b.id != 0) {
+        return a.id == b.id
+      }
+      else if (a instanceof MsgSegment.BubbleFace && b instanceof MsgSegment.BubbleFace && b.id != 0) {
+        return a.id == b.id
+      }
+      else if (a instanceof MsgSegment.Markdown && b instanceof MsgSegment.Markdown) {
+        return a.content == b.content
       }
 
       return true

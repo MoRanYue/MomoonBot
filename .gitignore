@@ -23,6 +23,7 @@ src/plugins/*
 !src/plugins/RandomAnimPicture.ts
 !src/plugins/TodayNumber.ts
 !src/plugins/BilibiliVideoDetails
+!src/plugins/Debugger.ts
 
 # Editor directories and files
 .vscode/*

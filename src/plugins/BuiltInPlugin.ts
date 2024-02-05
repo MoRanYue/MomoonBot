@@ -60,6 +60,10 @@ export default class BuiltInPlugin extends Plugin {
         }
         this.logger.info(`接收到${type}：${messageContent}（${ev.messageId}） 来自私聊 发送者：${ev.userId}`)
       }
+      else if (ev.messageType == EventEnum.MessageType.guild) {
+        // const guild: Guild
+        this.logger.info(`接收到${type}：${messageContent}（${ev.messageId}） 来自频道 发送者：${ev.sender.groupCard}（${ev.tinyId}）`)
+      }
     }
 
     this.onMessage("", ev => reportEvent("消息", ev), undefined, 999, undefined, undefined, undefined, undefined, undefined, true)
@@ -196,25 +200,5 @@ export default class BuiltInPlugin extends Plugin {
 
     // 调试命令
     this.onCommand("echo", (ev, _, args) => ev.reply(args.join(" ")), undefined, 999, undefined, ListenerEnum.Permission.admin)
-    this.onCommand("testApi", (ev, _, args) => {
-      if (args.length == 0) {
-        return
-      }
-
-      const action = args.shift()!
-      const data = args.join(" ").trim()
-      let params: Record<string, any> | null = null
-      if (data) {
-        params = JSON.parse(data)
-      }
-
-      Promise.resolve().then(() => {
-        ev.client.send(action, params, (res: any) => ev.reply(JSON.stringify(res)))
-      }).catch((err: ActionFailedError) => {
-        if (err instanceof ActionFailedError) {
-          ev.reply(typeof err.responseData == "object" ? JSON.stringify(err.responseData) : String(err.responseData))
-        }
-      })
-    })
   }
 }

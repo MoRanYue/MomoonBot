@@ -16,6 +16,8 @@ export class ReverseWsClient extends Client {
   public groups: Record<number, Group> = {};
   public friends: Record<number, User> = {};
 
+  public packetTimeout: number = 100000
+
   protected connectable: boolean;
   protected _address: string;
   protected _port: number;
@@ -142,6 +144,18 @@ export class ReverseWsClient extends Client {
   public send(action: ConnectionEnum.Action.getHttpCookies, data?: ConnectionContent.Params.GetHttpCookies | undefined, cb?: DataType.ResponseFunction<ConnectionContent.ActionResponse.GetHttpCookies> | undefined): void;
   public send(action: ConnectionEnum.Action.test, data?: null | undefined, cb?: DataType.ResponseFunction<ConnectionContent.ActionResponse.Test> | undefined): void;
   public send(action: ConnectionEnum.Action.getLatestEvents, data?: null | undefined, cb?: DataType.ResponseFunction<ConnectionContent.ActionResponse.GetLatestEvents> | undefined): void;
+  public send(action: ConnectionEnum.Action.createGuildRole, data: ConnectionContent.Params.CreateGuildRole, cb?: DataType.ResponseFunction<ConnectionContent.ActionResponse.CreateGuildRole> | undefined): void;
+  public send(action: ConnectionEnum.Action.setGuildMemberRole, data: ConnectionContent.Params.SetGuildMemberRole, cb?: DataType.ResponseFunction<null> | undefined): void;
+  public send(action: ConnectionEnum.Action.deleteGuildRole, data: ConnectionContent.Params.DeleteGuildRole, cb?: DataType.ResponseFunction<null> | undefined): void;
+  public send(action: ConnectionEnum.Action.getGuildRoles, data: ConnectionContent.Params.GetGuildRoles, cb?: DataType.ResponseFunction<ConnectionContent.ActionResponse.GetGuildRoles> | undefined): void;
+  public send(action: ConnectionEnum.Action.getGuildFeeds, data: ConnectionContent.Params.GetGuildFeeds, cb?: DataType.ResponseFunction<object> | undefined): void;
+  public send(action: ConnectionEnum.Action.sendGuildChannelMsg, data: ConnectionContent.Params.SendGuildChannelMsg, cb?: DataType.ResponseFunction<ConnectionContent.ActionResponse.SendGuildChannelMsg> | undefined): void;
+  public send(action: ConnectionEnum.Action.getGuildMemberProfile, data: ConnectionContent.Params.GetGuildMemberProfile, cb?: DataType.ResponseFunction<ConnectionContent.ActionResponse.GetGuildMemberProfile> | undefined): void;
+  public send(action: ConnectionEnum.Action.getGuildMemberList, data: ConnectionContent.Params.GetGuildMemberList, cb?: DataType.ResponseFunction<ConnectionContent.ActionResponse.GetGuildMemberList> | undefined): void;
+  public send(action: ConnectionEnum.Action.getGuildChannelList, data: ConnectionContent.Params.GetGuildChannelList, cb?: DataType.ResponseFunction<ConnectionContent.ActionResponse.GetGuildChannelList> | undefined): void;
+  public send(action: ConnectionEnum.Action.getGuildMetaByGuest, data: ConnectionContent.Params.GetGuildMetaByGuest, cb?: DataType.ResponseFunction<ConnectionContent.ActionResponse.GetGuildMetaByGuest> | undefined): void;
+  public send(action: ConnectionEnum.Action.getGuildServiceProfile, data?: null | undefined, cb?: DataType.ResponseFunction<ConnectionContent.ActionResponse.GetGuildServiceProfile> | undefined): void;
+  public send(action: ConnectionEnum.Action.getGuildList, data?: null | undefined, cb?: DataType.ResponseFunction<ConnectionContent.ActionResponse.GetGuildList> | undefined): void;
   public send(action: string, data?: string | Record<string, any> | null | undefined, cb?: DataType.ResponseFunction<any> | DataType.RawResponseFunction<any> | undefined): void;
   public send(action: string, data?: string | Record<string, any> | null | undefined, cb?: DataType.ResponseFunction<any> | DataType.RawResponseFunction<any> | undefined): void {
     const id: string = Utils.randomChar()
@@ -168,6 +182,13 @@ export class ReverseWsClient extends Client {
       if (err) {
         throw err
       }
+
+      setTimeout(() => {
+        if (Object.hasOwn(this.messageCbs, id)) {
+          delete this.messageCbs[id]
+          throw new ActionFailedError(null, action, undefined, undefined, "动作超时")
+        }
+      }, this.packetTimeout)
     })
   }
   public _processResponse(data: ConnectionContent.Connection.Response<any>): void {

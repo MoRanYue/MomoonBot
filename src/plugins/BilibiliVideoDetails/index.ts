@@ -5,7 +5,6 @@ import { MessageEvent } from "../../events/MessageEvent";
 import { Api } from "./interfaces";
 import https from "node:https"
 import { Tools } from "./tools";
-import AppMessage from "../../events/messages/AppMessage";
 import type { ApiContent } from "./types/ApiContent";
 
 export default class BilibiliVideoDetails extends Plugin {
@@ -79,8 +78,8 @@ ${data.desc}
       if (message instanceof MessageSegment.Text) {
         getVideoDetails(ev, message.text)
       }
-      else if (message instanceof AppMessage.BilibiliVideoShare) {
-        getVideoDetails(ev, message.url)
+      else if (message instanceof MessageSegment.Json) {
+        getVideoDetails(ev, message.data.meta.news.jumpUrl)
       }
     }
 
