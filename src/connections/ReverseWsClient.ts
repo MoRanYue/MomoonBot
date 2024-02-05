@@ -16,7 +16,7 @@ export class ReverseWsClient extends Client {
   public groups: Record<number, Group> = {};
   public friends: Record<number, User> = {};
 
-  public packetTimeout: number = 100000
+  public packetTimeout: number = 10000
 
   protected connectable: boolean;
   protected _address: string;
