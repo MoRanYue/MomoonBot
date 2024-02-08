@@ -1,4 +1,3 @@
-import { interceptors } from "axios"
 import type { ConnectionEnum, EventEnum } from "./enums"
 import type { MessageSegment } from "./message"
 
@@ -400,7 +399,7 @@ export namespace ConnectionContent {
     interface SendGuildChannelMsg {
       guild_id: number
       channel_id: number
-      message: string
+      message: MessageSegment.Segment | MessageSegment.Segment[] | string
       auto_escape?: boolean
       retry_cnt?: number
       recall_duration?: number

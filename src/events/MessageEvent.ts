@@ -18,6 +18,8 @@ export class MessageEvent extends Ev {
   public tinyId?: number
   public targetId?: number
   public groupId?: number
+  public guildId?: number
+  public channelId?: number
   public tempSource?: EventEnum.MessageTempSource
   public messageType: EventEnum.MessageType
   public messageSubType: EventEnum.MessageSubType
@@ -69,6 +71,8 @@ export class MessageEvent extends Ev {
     }
     else if (ev.message_type == EventEnum.MessageType.guild) {
       this.tinyId = this.userId
+      this.guildId = ev.guild_id
+      this.channelId = ev.channel_id
       const senderInfo = <Event.GuildChannelMessageSender>ev.sender
       this.sender = {
         nickname: senderInfo.nickname,
@@ -96,7 +100,8 @@ export class MessageEvent extends Ev {
   public reply(message: DataType.SendingMessageContent, cb?: DataType.MessageEventOperationFunc, atSender?: boolean): void
   public reply(message: DataType.SendingMessageContent, cb?: DataType.MessageEventOperationFunc, atSender?: boolean, reply?: boolean): void
   public reply(message: DataType.SendingMessageContent, cb?: DataType.MessageEventOperationFunc, atSender?: boolean, reply?: boolean, recallingDelay?: number): void
-  public reply(message: DataType.SendingMessageContent, cb?: DataType.MessageEventOperationFunc, atSender: boolean = false, reply: boolean = false, recallingDelay?: number): void {
+  public reply(message: DataType.SendingMessageContent, cb?: DataType.MessageEventOperationFunc, atSender?: boolean, reply?: boolean, recallingDelay?: number, retryingCount?: number): void
+  public reply(message: DataType.SendingMessageContent, cb?: DataType.MessageEventOperationFunc, atSender: boolean = false, reply: boolean = false, recallingDelay?: number, retryingCount?: number): void {
     const msg = MessageUtils.transferMessageSendingParameter(message)
     
     if (atSender && this.messageType == EventEnum.MessageType.group) {
@@ -105,19 +110,37 @@ export class MessageEvent extends Ev {
     if (reply) {
       msg.unshift(new MsgSegment.Reply(this.messageId).toObject())
     }
-
-    const params: ConnectionContent.Params.SendMsg = {
-      message_type: this.messageType,
-      group_id: this.groupId,
-      user_id: this.userId,
-      message: msg,
-      auto_escape: true
+    
+    if (this.messageType == EventEnum.MessageType.guild) {
+      const params: ConnectionContent.Params.SendGuildChannelMsg = {
+        guild_id: this.guildId!, // 因数字ID过长，OpenShamrock的代码中，实际使用字符串
+        channel_id: this.channelId!,
+        message: msg,
+        auto_escape: true
+      }
+      if (recallingDelay) {
+        params.recall_duration = recallingDelay
+      }
+      if (retryingCount) {
+        params.retry_cnt = retryingCount
+      }
+      
+      this.client.send(ConnectionEnum.Action.sendGuildChannelMsg, params, cb)
     }
-    if (recallingDelay) {
-      params.recall_duration = recallingDelay
+    else {
+      const params: ConnectionContent.Params.SendMsg = {
+        message_type: this.messageType,
+        group_id: this.groupId,
+        user_id: this.userId,
+        message: msg,
+        auto_escape: true
+      }
+      if (recallingDelay) {
+        params.recall_duration = recallingDelay
+      }
+      
+      this.client.send(ConnectionEnum.Action.sendMsg, params, cb)
     }
-
-    this.client.send(ConnectionEnum.Action.sendMsg, params, cb)
   }
 
   public recall(): void

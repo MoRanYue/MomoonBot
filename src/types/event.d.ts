@@ -26,15 +26,17 @@ export namespace Event {
     message_type: EventEnum.MessageType
     sub_type: EventEnum.MessageSubType
     message_id: number
-    user_id: number
+    user_id: number // 可能为频道的Tiny ID
     message: MessageSegment.Segment[]
     raw_message: string
-    temp_source: EventEnum.MessageTempSource
+    temp_source?: EventEnum.MessageTempSource
     font: number
     sender: MessageSender
     group_id: number
     target_id: number
     peer_id: number
+    guild_id?: number
+    channel_id?: number
   }
   interface MessageQuickReply {
     reply: string

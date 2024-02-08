@@ -62,7 +62,7 @@ export default class BuiltInPlugin extends Plugin {
       }
       else if (ev.messageType == EventEnum.MessageType.guild) {
         // const guild: Guild
-        this.logger.info(`接收到${type}：${messageContent}（${ev.messageId}） 来自频道 发送者：${ev.sender.groupCard}（${ev.tinyId}）`)
+        this.logger.info(`接收到${type}：${messageContent}（${ev.messageId}） 来自频道 发送者：${ev.sender.groupCard}（${ev.tinyId}）`) // 临时解决办法，直到GuildUser类加入
       }
     }
 
