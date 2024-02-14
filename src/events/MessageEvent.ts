@@ -73,6 +73,7 @@ export class MessageEvent extends Ev {
       this.tinyId = this.userId
       this.guildId = ev.guild_id
       this.channelId = ev.channel_id
+      this.groupId = this.channelId
       const senderInfo = <Event.GuildChannelMessageSender>ev.sender
       this.sender = {
         nickname: senderInfo.nickname,

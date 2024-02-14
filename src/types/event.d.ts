@@ -23,6 +23,7 @@ export namespace Event {
     post_type: EventEnum.EventType
   }
   interface Message extends Reported {
+    post_type: EventEnum.EventType.message | EventEnum.EventType.messageSent
     message_type: EventEnum.MessageType
     sub_type: EventEnum.MessageSubType
     message_id: number
@@ -32,8 +33,8 @@ export namespace Event {
     temp_source?: EventEnum.MessageTempSource
     font: number
     sender: MessageSender
-    group_id: number
-    target_id: number
+    group_id?: number
+    target_id?: number
     peer_id: number
     guild_id?: number
     channel_id?: number
