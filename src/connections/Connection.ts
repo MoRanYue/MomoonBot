@@ -33,7 +33,8 @@ export abstract class Connection {
   public abstract send(action: ConnectionEnum.Action.getStartTime, data?: null, cb?: DataType.RawResponseFunction<ConnectionContent.ActionResponse.GetStartTime>): void
   public abstract send(action: ConnectionEnum.Action.getDeviceBattery, data?: null, cb?: DataType.RawResponseFunction<ConnectionContent.ActionResponse.GetDeviceBattery>): void
   public abstract send(action: ConnectionEnum.Action.downloadFile, data: ConnectionContent.Params.DownloadFile, cb?: DataType.RawResponseFunction<ConnectionContent.ActionResponse.DownloadFile>): void
-  public abstract send(action: ConnectionEnum.Action.uploadFile, data: string, cb?: DataType.RawResponseFunction<ConnectionContent.ActionResponse.UploadFile>): void
+  public abstract send(action: ConnectionEnum.Action.uploadFile, data: ConnectionContent.Params.UploadFile, cb?: DataType.RawResponseFunction<ConnectionContent.ActionResponse.UploadFile>): void
+  public abstract send(action: ConnectionEnum.Action.uploadFileToShamrock, data: ConnectionContent.Params.UploadFileToShamrock, cb?: DataType.RawResponseFunction<ConnectionContent.ActionResponse.UploadFileToShamrock>): void
   public abstract send(action: ConnectionEnum.Action.switchAccount, data: ConnectionContent.Params.SwitchAccount, cb?: DataType.ResponseFunction<null>): void
   public abstract send(action: ConnectionEnum.Action.sendLike, data: ConnectionContent.Params.SendLike, cb?: DataType.ResponseFunction<null>): void
   public abstract send(action: ConnectionEnum.Action.getGroupFileUrl, data: ConnectionContent.Params.GetGroupFileUrl, cb?: DataType.ResponseFunction<ConnectionContent.ActionResponse.GetGroupFileUrl>): void

@@ -35,7 +35,8 @@ export abstract class Client {
   public abstract send(action: ConnectionEnum.Action.getStartTime, data?: null, cb?: DataType.RawResponseFunction<ConnectionContent.ActionResponse.GetStartTime>): void
   public abstract send(action: ConnectionEnum.Action.getDeviceBattery, data?: null, cb?: DataType.RawResponseFunction<ConnectionContent.ActionResponse.GetDeviceBattery>): void
   public abstract send(action: ConnectionEnum.Action.downloadFile, data: ConnectionContent.Params.DownloadFile, cb?: DataType.RawResponseFunction<ConnectionContent.ActionResponse.DownloadFile>): void
-  public abstract send(action: ConnectionEnum.Action.uploadFile, data: string, cb?: DataType.RawResponseFunction<ConnectionContent.ActionResponse.UploadFile>): void
+  public abstract send(action: ConnectionEnum.Action.uploadFile, data: ConnectionContent.Params.UploadFile, cb?: DataType.RawResponseFunction<ConnectionContent.ActionResponse.UploadFile>): void
+  public abstract send(action: ConnectionEnum.Action.uploadFileToShamrock, data: ConnectionContent.Params.UploadFileToShamrock, cb?: DataType.RawResponseFunction<ConnectionContent.ActionResponse.UploadFileToShamrock>): void
   public abstract send(action: ConnectionEnum.Action.switchAccount, data: ConnectionContent.Params.SwitchAccount, cb?: DataType.ResponseFunction<null>): void
   public abstract send(action: ConnectionEnum.Action.sendLike, data: ConnectionContent.Params.SendLike, cb?: DataType.ResponseFunction<null>): void
   public abstract send(action: ConnectionEnum.Action.getGroupFileUrl, data: ConnectionContent.Params.GetGroupFileUrl, cb?: DataType.ResponseFunction<ConnectionContent.ActionResponse.GetGroupFileUrl>): void
@@ -149,6 +150,16 @@ export abstract class Client {
       uin_list: typeof userIds == "number" ? [userIds] : userIds
     }, data => cb(data.data))
   }
+  
+  /**
+   * 上传文件到OpenShamrock的缓存目录
+   * @param file 文件内容
+   * @param segmentedUplodingThreshold 分段上传阈值（单位：字节）（默认为10MB）
+   * @param segmentSize 文件块大小（单位：字节）（默认为10MB）
+   * @param finishingCb 完成时的回调函数
+   * @param uplodingCb 每个文件块上传时的回调函数
+   */
+  public abstract uploadFileToCache(file: string | Buffer, segmentedUplodingThreshold?: number, segmentSize?: number, finishingCb?: DataType.RawResponseFunction<ConnectionContent.ActionResponse.UploadFile | ConnectionContent.ActionResponse.UploadFileToShamrock>, uploadingCb?: DataType.RawResponseFunction<ConnectionContent.ActionResponse.UploadFile | ConnectionContent.ActionResponse.UploadFileToShamrock>): void
 
   // 以下函数仅被内置类调用
   public abstract _addGroup(group: number): void

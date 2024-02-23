@@ -3,7 +3,7 @@
     "start": "npx ts-node ./index.ts",
     "build": "npx tsc"
   },
-  "version": "0.8.0",
+  "version": "0.8.4",
   "author": "MoRanYue",
   "description": "Momoon Bot → OpenShamrock",
   "license": "AGPL-3.0",
@@ -13,7 +13,6 @@
   },
   "devDependencies": {
     "@types/follow-redirects": "^1.14.4",
-    "@types/md5": "^2.3.5",
     "@types/node": "^20.11.19",
     "@types/ws": "^8.5.10",
     "ts-node": "^10.9.2",
@@ -21,7 +20,7 @@
   },
   "dependencies": {
     "axios": "^1.6.7",
-    "md5": "^2.3.0",
+    "js-md5": "^0.8.3",
     "ws": "^8.16.0"
   }
 }

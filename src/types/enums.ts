@@ -274,7 +274,8 @@ export namespace ConnectionEnum {
     getGroupFileUrl = "get_group_file_url",
 
     switchAccount = "switch_account",
-    uploadFile = "upload_file",
+    uploadFile = "upload_file", // 仅HTTP
+    uploadFileToShamrock = "upload_file_to_shamrock", // 仅WebSocket，OpenShamrock的00b355b提交
     downloadFile = "download_file",
     getDeviceBattery = "get_device_battery",
     getStartTime = "get_start_time",

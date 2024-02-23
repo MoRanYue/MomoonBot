@@ -209,7 +209,8 @@ export class ReverseWsConnection extends Connection {
   public send(action: ConnectionEnum.Action.getStartTime, data?: null | undefined, cb?: DataType.RawResponseFunction<ConnectionContent.ActionResponse.GetStartTime> | undefined, clientIndex?: number): void;
   public send(action: ConnectionEnum.Action.getDeviceBattery, data?: null | undefined, cb?: DataType.RawResponseFunction<ConnectionContent.ActionResponse.GetDeviceBattery> | undefined, clientIndex?: number): void;
   public send(action: ConnectionEnum.Action.downloadFile, data: ConnectionContent.Params.DownloadFile, cb?: DataType.RawResponseFunction<ConnectionContent.ActionResponse.DownloadFile> | undefined, clientIndex?: number): void;
-  public send(action: ConnectionEnum.Action.uploadFile, data: string, cb?: DataType.RawResponseFunction<ConnectionContent.ActionResponse.UploadFile> | undefined, clientIndex?: number): void;
+  public send(action: ConnectionEnum.Action.uploadFile, data: ConnectionContent.Params.UploadFile, cb?: DataType.RawResponseFunction<ConnectionContent.ActionResponse.UploadFile>, clientIndex?: number): void
+  public send(action: ConnectionEnum.Action.uploadFileToShamrock, data: ConnectionContent.Params.UploadFileToShamrock, cb?: DataType.RawResponseFunction<ConnectionContent.ActionResponse.UploadFileToShamrock>, clientIndex?: number): void
   public send(action: ConnectionEnum.Action.switchAccount, data: ConnectionContent.Params.SwitchAccount, cb?: DataType.ResponseFunction<null> | undefined, clientIndex?: number): void;
   public send(action: ConnectionEnum.Action.sendLike, data: ConnectionContent.Params.SendLike, cb?: DataType.ResponseFunction<null> | undefined, clientIndex?: number): void;
   public send(action: ConnectionEnum.Action.getGroupFileUrl, data: ConnectionContent.Params.GetGroupFileUrl, cb?: DataType.ResponseFunction<ConnectionContent.ActionResponse.GetGroupFileUrl> | undefined, clientIndex?: number): void;

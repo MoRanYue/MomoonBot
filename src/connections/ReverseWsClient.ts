@@ -11,6 +11,8 @@ import ws from "ws"
 import { launcher } from "../app";
 import type { ReverseWsConnection } from "./ReverseWsConnection";
 import { Connection } from "./Connection";
+import { FileUtils } from "../tools/FileUtils";
+import { md5 } from "js-md5"
 
 export class ReverseWsClient extends Client {
   public groups: Record<number, Group> = {};
@@ -48,6 +50,51 @@ export class ReverseWsClient extends Client {
     return Utils.showHostWithPort(this._address, this._port)
   }
 
+  /**
+   * 上传文件到OpenShamrock的缓存目录
+   * @param file 文件内容
+   * @param segmentedUplodingThreshold 分段上传阈值（单位：字节）（默认为10MB）
+   * @param segmentSize 文件块大小（单位：字节）（默认为10MB）
+   * @param finishingCb 完成时的回调函数
+   * @param uplodingCb 每个文件块上传时的回调函数
+   */
+  public uploadFileToCache(file: string | Buffer, segmentedUplodingThreshold: number = 10485760, segmentSize: number = 10485760, finishingCb?: DataType.RawResponseFunction<ConnectionContent.ActionResponse.UploadFileToShamrock>, uploadingCb?: DataType.RawResponseFunction<ConnectionContent.ActionResponse.UploadFileToShamrock>): void {
+    const content: string = FileUtils.toBase64(file).slice(9)
+    const size: number = content.length
+    const hash = md5.create()
+    hash.update(content)
+    const fileMd5 = hash.hex()
+    const cb = (data: ConnectionContent.ActionResponse.UploadFileToShamrock) => {
+      if (uploadingCb) {
+        uploadingCb(data)
+      }
+      if (data.finish && finishingCb) {
+        finishingCb(data)
+      }
+    }
+    if (size > segmentedUplodingThreshold) {
+      const segmentCount: number = Math.ceil(size / segmentSize)
+      
+      for (let offset = 0; offset < segmentCount; offset++) {
+        const start: number = segmentSize * offset
+        const chunk = content.slice(start, start + segmentSize + 1)
+        if (chunk.length > 0) {
+          this.uploadSegment(chunk, fileMd5, size, offset, cb)
+        }
+      }
+      return
+    }
+    this.uploadSegment(content, fileMd5, size, undefined, cb)
+  }
+  private uploadSegment(chunk: string, fileMd5: string, totalSize: number, offset: number = 0, cb?: DataType.RawResponseFunction<ConnectionContent.ActionResponse.UploadFileToShamrock>): void {
+    this.send(ConnectionEnum.Action.uploadFileToShamrock, <ConnectionContent.Params.UploadFileToShamrock>{
+      file_size: totalSize,
+      md5: fileMd5,
+      offset,
+      chunk
+    }, cb)
+  }
+
   public send(action: ConnectionEnum.Action.uploadGroupImage, data: ConnectionContent.Params.UploadGroupImage, cb?: DataType.RawResponseFunction<null> | undefined): void;
   public send(action: ConnectionEnum.Action.getWeather, data: ConnectionContent.Params.GetWeather, cb?: DataType.RawResponseFunction<object> | undefined): void;
   public send(action: ConnectionEnum.Action.getWeatherCityCode, data: ConnectionContent.Params.GetWeatherCityCode, cb?: DataType.RawResponseFunction<ConnectionContent.ActionResponse.GetWeatherCityCode> | undefined): void;
@@ -57,7 +104,8 @@ export class ReverseWsClient extends Client {
   public send(action: ConnectionEnum.Action.getStartTime, data?: null | undefined, cb?: DataType.RawResponseFunction<ConnectionContent.ActionResponse.GetStartTime> | undefined): void;
   public send(action: ConnectionEnum.Action.getDeviceBattery, data?: null | undefined, cb?: DataType.RawResponseFunction<ConnectionContent.ActionResponse.GetDeviceBattery> | undefined): void;
   public send(action: ConnectionEnum.Action.downloadFile, data: ConnectionContent.Params.DownloadFile, cb?: DataType.RawResponseFunction<ConnectionContent.ActionResponse.DownloadFile> | undefined): void;
-  public send(action: ConnectionEnum.Action.uploadFile, data: string, cb?: DataType.RawResponseFunction<ConnectionContent.ActionResponse.UploadFile> | undefined): void;
+  public send(action: ConnectionEnum.Action.uploadFile, data: ConnectionContent.Params.UploadFile, cb?: DataType.RawResponseFunction<ConnectionContent.ActionResponse.UploadFile>): void
+  public send(action: ConnectionEnum.Action.uploadFileToShamrock, data: ConnectionContent.Params.UploadFileToShamrock, cb?: DataType.RawResponseFunction<ConnectionContent.ActionResponse.UploadFileToShamrock>): void
   public send(action: ConnectionEnum.Action.switchAccount, data: ConnectionContent.Params.SwitchAccount, cb?: DataType.ResponseFunction<null> | undefined): void;
   public send(action: ConnectionEnum.Action.sendLike, data: ConnectionContent.Params.SendLike, cb?: DataType.ResponseFunction<null> | undefined): void;
   public send(action: ConnectionEnum.Action.getGroupFileUrl, data: ConnectionContent.Params.GetGroupFileUrl, cb?: DataType.ResponseFunction<ConnectionContent.ActionResponse.GetGroupFileUrl> | undefined): void;

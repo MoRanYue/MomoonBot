@@ -10,6 +10,7 @@ import { User } from "../processors/sets/User";
 import { ActionFailedError } from "../exceptions/exceptions";
 import type { Event } from "src/types/event";
 import type { HttpConnection } from "./HttpConnection";
+import { FileUtils } from "../tools/FileUtils";
 
 export class HttpClient extends Client {
   public groups: Record<number, Group> = {};
@@ -71,6 +72,18 @@ export class HttpClient extends Client {
     }
   }
 
+  /**
+   * 上传文件到OpenShamrock的缓存目录
+   * @param file 文件内容
+   * @param segmentedUplodingThreshold 分段上传阈值（单位：字节）（默认为10MB）
+   * @param segmentSize 文件块大小（单位：字节）（默认为10MB）
+   * @param finishingCb 完成时的回调函数
+   * @param uplodingCb 每个文件块上传时的回调函数
+   */
+  public uploadFileToCache(file: string | Buffer, segmentedUplodingThreshold: number = 10485760, segmentSize: number = 10485760, finishingCb?: DataType.RawResponseFunction<ConnectionContent.ActionResponse.UploadFile>, uploadingCb?: DataType.RawResponseFunction<ConnectionContent.ActionResponse.UploadFile>): void {
+    this.send(ConnectionEnum.Action.uploadFile, FileUtils.toBase64(file), finishingCb)
+  }
+
   public send(action: ConnectionEnum.Action.uploadGroupImage, data: ConnectionContent.Params.UploadGroupImage, cb?: DataType.RawResponseFunction<null> | undefined): void;
   public send(action: ConnectionEnum.Action.getWeather, data: ConnectionContent.Params.GetWeather, cb?: DataType.RawResponseFunction<object> | undefined): void;
   public send(action: ConnectionEnum.Action.getWeatherCityCode, data: ConnectionContent.Params.GetWeatherCityCode, cb?: DataType.RawResponseFunction<ConnectionContent.ActionResponse.GetWeatherCityCode> | undefined): void;
@@ -80,7 +93,8 @@ export class HttpClient extends Client {
   public send(action: ConnectionEnum.Action.getStartTime, data?: null | undefined, cb?: DataType.RawResponseFunction<ConnectionContent.ActionResponse.GetStartTime> | undefined): void;
   public send(action: ConnectionEnum.Action.getDeviceBattery, data?: null | undefined, cb?: DataType.RawResponseFunction<ConnectionContent.ActionResponse.GetDeviceBattery> | undefined): void;
   public send(action: ConnectionEnum.Action.downloadFile, data: ConnectionContent.Params.DownloadFile, cb?: DataType.RawResponseFunction<ConnectionContent.ActionResponse.DownloadFile> | undefined): void;
-  public send(action: ConnectionEnum.Action.uploadFile, data: string, cb?: DataType.RawResponseFunction<ConnectionContent.ActionResponse.UploadFile> | undefined): void;
+  public send(action: ConnectionEnum.Action.uploadFile, data: ConnectionContent.Params.UploadFile, cb?: DataType.RawResponseFunction<ConnectionContent.ActionResponse.UploadFile>): void
+  public send(action: ConnectionEnum.Action.uploadFileToShamrock, data: ConnectionContent.Params.UploadFileToShamrock, cb?: DataType.RawResponseFunction<ConnectionContent.ActionResponse.UploadFileToShamrock>): void
   public send(action: ConnectionEnum.Action.switchAccount, data: ConnectionContent.Params.SwitchAccount, cb?: DataType.ResponseFunction<null> | undefined): void;
   public send(action: ConnectionEnum.Action.sendLike, data: ConnectionContent.Params.SendLike, cb?: DataType.ResponseFunction<null> | undefined): void;
   public send(action: ConnectionEnum.Action.getGroupFileUrl, data: ConnectionContent.Params.GetGroupFileUrl, cb?: DataType.ResponseFunction<ConnectionContent.ActionResponse.GetGroupFileUrl> | undefined): void;

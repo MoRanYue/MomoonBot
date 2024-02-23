@@ -322,6 +322,13 @@ export namespace ConnectionContent {
     interface SwitchAccount {
       user_id: number
     }
+    type UploadFile = string
+    interface UploadFileToShamrock {
+      md5: string
+      offset?: number
+      chunk: string // Base64格式，无需base64://开头
+      file_size: number
+    }
     interface DownloadFile {
       url?: string
       base64?: string
@@ -803,6 +810,11 @@ export namespace ConnectionContent {
 
     interface UploadFile {
       file: string
+    }
+    interface UploadFileToShamrock {
+      file_size: number
+      finish: boolean
+      path: string
     }
     interface DownloadFile {
       file: string

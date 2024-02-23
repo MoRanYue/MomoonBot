@@ -44,4 +44,19 @@ export class FileUtils {
   public static toSlash(path: string): string {
     return path.replaceAll("\\", "/")
   }
+  public static toBase64(file: string | Buffer): string {
+    let content: string
+    if (typeof file == "string") {
+      if (file.startsWith("base64://")) {
+        content = file
+      }
+      else {
+        content = Buffer.from(file, "utf-8").toString("base64url")
+      }
+    }
+    else {
+      content = file.toString("base64url")
+    }
+    return content
+  }
 }
