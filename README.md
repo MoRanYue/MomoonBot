@@ -78,7 +78,7 @@ Momoon Bot目前兼容[OneBotV12](https://onebot.dev)内容，所有的API均根
 
 ### 关于频道
 
-目前，OpenShamrock的频道功能尚未完善，还在变化之中，故不支持。
+正在制作频道相关功能。
 
 ## 插件
 
@@ -100,7 +100,7 @@ Momoon Bot目前兼容[OneBotV12](https://onebot.dev)内容，所有的API均根
 
 ### 插件开发
 
-_TODO_
+文档未完成
 
 ## 脚手架（CLI）
 
@@ -108,8 +108,9 @@ Momoon Bot目前正在计划增加`Molunar CLI`，作为脚手架。
 
 ## 使用模块
 
-- Axios.js - （核心）主要用于发出HTTP请求
-- js-md5 - （核心）主要用于面向OpenShamrock实现文件分片上传功能
+- Axios.js - 主要用于支持HTTP通信。
+- ws - 主要用于支持主动WebSocket与被动WebSocket通信。
+- js-md5 - 主要用于面向OpenShamrock实现文件分片上传功能。
 
 ## 许可证
 
