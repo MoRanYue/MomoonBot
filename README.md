@@ -95,8 +95,8 @@ Momoon Bot目前兼容[OneBotV12](https://onebot.dev)内容，所有的API均根
 
 - 今日数字（`TodayNumber`） - 最简单的示例插件，在用户输入命令后，将输出发送者在近24小时内所得到的随机数字。与“今日人品”差不多。
 - Q群管家反制（`GroupStewardFucker`） - 用于对部分群聊中，Q群管家撤回带有二维码或链接的“违规”消息的行为进行反制。
-- 随机动漫图片（`RandomAnimePicture`） ⇐ `follow-redirects` - 通过调用公布在网络上的随机图片API，获取动漫图片。
-- 哔哩哔哩视频详情获取（`BilibiliVideoDetails`） ⇐ `follow-redirects`、`md5` - 在用户发送带有哔哩哔哩视频链接、哔哩哔哩短链接或哔哩哔哩视频分享卡片消息等消息时，将调用哔哩哔哩API获取视频详细信息。
+- 随机动漫图片（`RandomAnimePicture`） ⇐ `axios` - 通过调用公布在网络上的随机图片API，获取动漫图片。
+- 哔哩哔哩视频详情获取（`BilibiliVideoDetails`） ⇐ `axios`、`js-md5` - 在用户发送带有哔哩哔哩视频链接、哔哩哔哩短链接或哔哩哔哩视频分享卡片消息等消息时，将调用哔哩哔哩API获取视频详细信息。
 
 ### 插件开发
 
@@ -105,6 +105,11 @@ _TODO_
 ## 脚手架（CLI）
 
 Momoon Bot目前正在计划增加`Molunar CLI`，作为脚手架。
+
+## 使用模块
+
+- Axios.js - （核心）主要用于发出HTTP请求
+- js-md5 - （核心）主要用于面向OpenShamrock实现文件分片上传功能
 
 ## 许可证
 
