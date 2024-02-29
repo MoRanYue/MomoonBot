@@ -1,8 +1,7 @@
 import http from "follow-redirects"
 import { Utils } from "../../tools/Utils"
 import type { IncomingMessage } from "http"
-import type { DataType } from "../../types/dataType"
-import { md5 } from "js-md5"
+import { createHash } from "node:crypto"
 import url from "node:url"
 import { Logger } from "../../tools/Logger"
 import type { ApiContent } from "./types/ApiContent"
@@ -47,7 +46,7 @@ export class Api {
     params.wts = Utils.getCurrentTimestamp()
     const rawWRid = new url.URLSearchParams(params)
     rawWRid.sort()
-    params.w_rid = md5(rawWRid.toString())
+    params.w_rid = createHash("md5").update(rawWRid.toString()).digest("hex")
 
     cb(params)
   }

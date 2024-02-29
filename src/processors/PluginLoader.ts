@@ -3,6 +3,7 @@ import { CustomEventEmitter } from "src/types/CustomEventEmitter";
 import { Plugin, Plugin_ } from "./Plugin";
 import path from "node:path"
 import fs from "node:fs"
+import crypto from "node:crypto"
 import { FileUtils } from "../tools/FileUtils";
 import { Logger } from "../tools/Logger";
 import { FriendRequest, GroupRequest } from "../events/RequestEvent";

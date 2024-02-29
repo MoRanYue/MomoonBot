@@ -10,9 +10,8 @@ import type { Event } from "src/types/event";
 import ws from "ws"
 import { launcher } from "../app";
 import type { ReverseWsConnection } from "./ReverseWsConnection";
-import { Connection } from "./Connection";
+import { createHash } from "node:crypto";
 import { FileUtils } from "../tools/FileUtils";
-import { md5 } from "js-md5"
 
 export class ReverseWsClient extends Client {
   public groups: Record<number, Group> = {};
@@ -61,9 +60,7 @@ export class ReverseWsClient extends Client {
   public uploadFileToCache(file: string | Buffer, segmentedUplodingThreshold: number = 10485760, segmentSize: number = 10485760, finishingCb?: DataType.RawResponseFunction<ConnectionContent.ActionResponse.UploadFileToShamrock>, uploadingCb?: DataType.RawResponseFunction<ConnectionContent.ActionResponse.UploadFileToShamrock>): void {
     const content: string = FileUtils.toBase64(file).slice(9)
     const size: number = content.length
-    const hash = md5.create()
-    hash.update(content)
-    const fileMd5 = hash.hex()
+    const fileMd5 = createHash("md5").update(content).digest("hex")
     const cb = (data: ConnectionContent.ActionResponse.UploadFileToShamrock) => {
       if (uploadingCb) {
         uploadingCb(data)
