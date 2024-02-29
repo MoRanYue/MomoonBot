@@ -1,6 +1,10 @@
 import type { ConnectionContent } from "src/types/connectionContent"
 import { isIPv4, isIPv6 } from "node:net"
 
+/**
+ * 实用函数类
+ * @since 0.0.1
+ */
 export class Utils {
   public static splitToArray(data: string): string[] {
     return data.split(/, */)

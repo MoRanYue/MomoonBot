@@ -9,6 +9,10 @@ import { MessageUtils } from "../../tools/MessageUtils"
 
 type UserInfo = Omit<DataType.GroupMemberParams, "group">
 
+/**
+ * 用户类
+ * @since 0.1.3
+ */
 export class User {
   public id: number
   public name: string

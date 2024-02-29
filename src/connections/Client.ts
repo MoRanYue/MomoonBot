@@ -154,12 +154,13 @@ export abstract class Client {
   /**
    * 上传文件到OpenShamrock的缓存目录
    * @param file 文件内容
-   * @param segmentedUplodingThreshold 分段上传阈值（单位：字节）（默认为10MB）
-   * @param segmentSize 文件块大小（单位：字节）（默认为10MB）
-   * @param finishingCb 完成时的回调函数
-   * @param uplodingCb 每个文件块上传时的回调函数
+   * @param [segmented=true] 是否分片上传
+   * @param [segmentedUplodingThreshold=10485760] 分段上传阈值（单位：字节）（默认为10MB）
+   * @param [segmentSize=10485760] 文件块大小（单位：字节）（默认为10MB）
+   * @param [finishingCb] 完成时的回调函数
+   * @param [uplodingCb] 每个文件块上传时的回调函数
    */
-  public abstract uploadFileToCache(file: string | Buffer, segmentedUplodingThreshold?: number, segmentSize?: number, finishingCb?: DataType.RawResponseFunction<ConnectionContent.ActionResponse.UploadFile | ConnectionContent.ActionResponse.UploadFileToShamrock>, uploadingCb?: DataType.RawResponseFunction<ConnectionContent.ActionResponse.UploadFile | ConnectionContent.ActionResponse.UploadFileToShamrock>): void
+  public abstract uploadFileToCache(file: string | Buffer, segmented?: boolean, segmentedUplodingThreshold?: number, segmentSize?: number, finishingCb?: DataType.RawResponseFunction<ConnectionContent.ActionResponse.UploadFileToShamrock>, uploadingCb?: DataType.RawResponseFunction<ConnectionContent.ActionResponse.UploadFileToShamrock>): void
 
   // 以下函数仅被内置类调用
   public abstract _addGroup(group: number): void

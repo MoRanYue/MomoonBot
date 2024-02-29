@@ -4,6 +4,10 @@ import path from "node:path"
 import { FileUtils } from "./FileUtils"
 import config from "../config"
 
+/**
+ * 日志记录器类
+ * @since 0.1.1
+ */
 const logLevels: Record<LoggerEnum.LogLevel, number> = {
   error: 0,
   warning: 1,

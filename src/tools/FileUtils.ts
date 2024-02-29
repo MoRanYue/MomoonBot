@@ -1,6 +1,10 @@
 import fs from "node:fs"
 import path from "node:path"
 
+/**
+ * 文件实用函数类
+ * @since 0.1.4
+ */
 export class FileUtils {
   public static createFolderIfNotExists(path: string) {
     fs.stat(path, (err, stats) => {

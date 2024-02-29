@@ -1,6 +1,11 @@
 import { ListenerEnum } from "../types/enums";
 import config from "../config";
 
+/**
+ * 权限等级的具体值
+ * @readonly
+ * @enum {number}
+ */
 const permissionLevels: Record<ListenerEnum.Permission, number> = {
   superuser: 100,
   owner: 2,
@@ -8,6 +13,10 @@ const permissionLevels: Record<ListenerEnum.Permission, number> = {
   user: 0
 }
 
+/**
+ * 监听器实用函数类
+ * @since 0.1.0
+ */
 export class ListenerUtils {
   public static comparePermission(a: ListenerEnum.Permission, b: ListenerEnum.Permission): boolean {
     return permissionLevels[a] >= permissionLevels[b]

@@ -11,6 +11,7 @@ import { ActionFailedError } from "../exceptions/exceptions";
 import type { Event } from "src/types/event";
 import type { HttpConnection } from "./HttpConnection";
 import { FileUtils } from "../tools/FileUtils";
+import { createHash } from "node:crypto";
 
 export class HttpClient extends Client {
   public groups: Record<number, Group> = {};
@@ -75,13 +76,45 @@ export class HttpClient extends Client {
   /**
    * 上传文件到OpenShamrock的缓存目录
    * @param file 文件内容
-   * @param segmentedUplodingThreshold 分段上传阈值（单位：字节）（默认为10MB）
-   * @param segmentSize 文件块大小（单位：字节）（默认为10MB）
-   * @param finishingCb 完成时的回调函数
-   * @param uplodingCb 每个文件块上传时的回调函数
+   * @param [segmented=true] 是否分片上传
+   * @param [segmentedUplodingThreshold=10485760] 分段上传阈值（单位：字节）（默认为10MB）
+   * @param [segmentSize=10485760] 文件块大小（单位：字节）（默认为10MB）
+   * @param [finishingCb] 完成时的回调函数
+   * @param [uplodingCb] 每个文件块上传时的回调函数
    */
-  public uploadFileToCache(file: string | Buffer, segmentedUplodingThreshold: number = 10485760, segmentSize: number = 10485760, finishingCb?: DataType.RawResponseFunction<ConnectionContent.ActionResponse.UploadFile>, uploadingCb?: DataType.RawResponseFunction<ConnectionContent.ActionResponse.UploadFile>): void {
-    this.send(ConnectionEnum.Action.uploadFile, FileUtils.toBase64(file), finishingCb)
+  public uploadFileToCache(file: string | Buffer, segmented: boolean = true, segmentedUplodingThreshold: number = 10485760, segmentSize: number = 10485760, finishingCb?: DataType.RawResponseFunction<ConnectionContent.ActionResponse.UploadFileToShamrock>, uploadingCb?: DataType.RawResponseFunction<ConnectionContent.ActionResponse.UploadFileToShamrock>): void {
+    const content: string = FileUtils.toBase64(file).slice(9)
+    const size: number = content.length
+    const fileMd5 = createHash("md5").update(content).digest("hex")
+    const cb = (data: ConnectionContent.ActionResponse.UploadFileToShamrock) => {
+      if (uploadingCb) {
+        uploadingCb(data)
+      }
+      if (data.finish && finishingCb) {
+        finishingCb(data)
+      }
+    }
+    if (segmented && size > segmentedUplodingThreshold) {
+      const segmentCount: number = Math.ceil(size / segmentSize)
+      
+      for (let offset = 0; offset < segmentCount; offset++) {
+        const start: number = segmentSize * offset
+        const chunk = content.slice(start, start + segmentSize + 1)
+        if (chunk.length > 0) {
+          this.uploadSegment(chunk, fileMd5, size, offset, cb)
+        }
+      }
+      return
+    }
+    this.uploadSegment(content, fileMd5, size, undefined, cb)
+  }
+  private uploadSegment(chunk: string, fileMd5: string, totalSize: number, offset: number = 0, cb?: DataType.RawResponseFunction<ConnectionContent.ActionResponse.UploadFileToShamrock>): void {
+    this.send(ConnectionEnum.Action.uploadFileToShamrock, <ConnectionContent.Params.UploadFileToShamrock>{
+      file_size: totalSize,
+      md5: fileMd5,
+      offset,
+      chunk
+    }, cb)
   }
 
   public send(action: ConnectionEnum.Action.uploadGroupImage, data: ConnectionContent.Params.UploadGroupImage, cb?: DataType.RawResponseFunction<null> | undefined): void;

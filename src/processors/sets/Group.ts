@@ -6,6 +6,10 @@ import type { Client } from "../../connections/Client"
 import type { DataType } from "src/types/dataType"
 import { MessageUtils } from "../../tools/MessageUtils"
 
+/**
+ * 群聊类
+ * @since 0.1.3
+ */
 export class Group {
   public id: number
   public name!: string

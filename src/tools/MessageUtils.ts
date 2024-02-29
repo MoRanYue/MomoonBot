@@ -4,6 +4,10 @@ import MsgSegment, { type Segment } from "../events/messages/MessageSegment"
 import type { DataType } from "src/types/dataType";
 import config from "../config";
 
+/**
+ * 消息实用函数类
+ * @since 0.1.0
+ */
 export class MessageUtils {
   public static classify(message: MessageSegment.Segment[]) {
     const msg: Segment[] = []
