@@ -81,6 +81,7 @@ export class HttpClient extends Client {
    * @param [segmentSize=10485760] 文件块大小（单位：字节）（默认为10MB）
    * @param [finishingCb] 完成时的回调函数
    * @param [uplodingCb] 每个文件块上传时的回调函数
+   * @since 0.8.7
    */
   public uploadFileToCache(file: string | Buffer, segmented: boolean = true, segmentedUplodingThreshold: number = 10485760, segmentSize: number = 10485760, finishingCb?: DataType.RawResponseFunction<ConnectionContent.ActionResponse.UploadFileToShamrock>, uploadingCb?: DataType.RawResponseFunction<ConnectionContent.ActionResponse.UploadFileToShamrock>): void {
     const content: string = FileUtils.toBase64(file).slice(9)

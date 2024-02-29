@@ -159,6 +159,7 @@ export abstract class Client {
    * @param [segmentSize=10485760] 文件块大小（单位：字节）（默认为10MB）
    * @param [finishingCb] 完成时的回调函数
    * @param [uplodingCb] 每个文件块上传时的回调函数
+   * @since 0.8.7
    */
   public abstract uploadFileToCache(file: string | Buffer, segmented?: boolean, segmentedUplodingThreshold?: number, segmentSize?: number, finishingCb?: DataType.RawResponseFunction<ConnectionContent.ActionResponse.UploadFileToShamrock>, uploadingCb?: DataType.RawResponseFunction<ConnectionContent.ActionResponse.UploadFileToShamrock>): void
 
