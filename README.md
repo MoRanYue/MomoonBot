@@ -60,7 +60,13 @@ Momoon Bot尚处于快速开发阶段。
 
 ### 兼容协议
 
-Momoon Bot目前兼容[OneBotV12](https://onebot.dev)内容，所有的API均根据[OpenShamrock文档](https://whitechi73.github.io/OpenShamrock/)进行编写。
+Momoon Bot目前兼容以下协议：
+
+- [OneBotV12](https://onebot.dev)（OpenShamrock客户端） - 所有的API均根据[OpenShamrock文档](https://whitechi73.github.io/OpenShamrock)进行编写。
+
+计划支持以下协议：
+
+- [Kritor](https://github.com/whitechi73/Kritor) - 由于OpenShamrock的[协议更新计划](https://github.com/whitechi73/OpenShamrock/discussions/272)，此处计划于0.9.0版本加入支持。
 
 ### 连接方式
 
