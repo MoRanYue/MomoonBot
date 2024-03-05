@@ -33,6 +33,9 @@
   <a href="https://github.com/whitechi73/OpenShamrock">
     <img alt="OpenShamrock" src="https://img.shields.io/badge/OpenShamrock-red?style=plastic&logo=https%3A%2F%2Fwhitechi73.github.io%2FOpenShamrock%2Fshamrock.jpg&labelColoe=silver">
   </a>
+  <a href="https://github.com/whitechi73/kritor">
+    <img alt="Kritor" src="https://img.shields.io/badge/Kritor-red?style=plastic&labelColoe=gold">
+  </a>
   <a href="https://onebot.dev">
     <img alt="OneBotV11" src="https://img.shields.io/badge/OneBot-v11-white?style=plastic&logo=data%3Aimage%2Fpng%3Bbase64%2CiVBORw0KGgoAAAANSUhEUgAAAEAAAABABAMAAABYR2ztAAAAIVBMVEUAAAAAAAADAwMHBwceHh4UFBQNDQ0ZGRkoKCgvLy8iIiLWSdWYAAAAAXRSTlMAQObYZgAAAQVJREFUSMftlM0RgjAQhV%2B0ATYK6i1Xb%2BiMd0qgBEqgBEuwBOxU2QDKsjvojQPvkJ%2FZL5sXkgWrFirK4MibYUdE3OR2nEpuKz1%2Fq8CdNxNQgthZCXYVLjyoDQftaKuniHHWRnPh2GCUetR2%2F9HsMAXyUT4%2F3UHwtQT2AggSCGKeSAsFnxBIOuAggdh3AKTL7pDuCyABcMb0aQP7aM4AnAbc%2FwHwA5D2wDHTTe56gIIOUA%2F4YYV2e1sg713PXdZJAuncdZMAGkAukU9OAn40O849%2B0ornPwT93rphWF0mgAbauUrEOthlX8Zu7P5A6kZyKCJy75hhw1Mgr9RAUvX7A3csGqZegEdniCx30c3agAAAABJRU5ErkJggg%3D%3D&labelColor=deepblue">
   </a>
@@ -66,7 +69,7 @@ Momoon Bot目前兼容以下协议：
 
 计划支持以下协议：
 
-- [Kritor](https://github.com/whitechi73/Kritor) - 由于OpenShamrock的[协议更新计划](https://github.com/whitechi73/OpenShamrock/discussions/272)，此处计划于0.9.0版本加入支持。
+- [Kritor](https://github.com/whitechi73/kritor) - 由于OpenShamrock的[协议更新计划](https://github.com/whitechi73/OpenShamrock/discussions/272)，此处计划于0.9.0版本加入支持。
 
 ### 连接方式
 
