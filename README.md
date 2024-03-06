@@ -33,6 +33,9 @@
   <a href="https://github.com/whitechi73/OpenShamrock">
     <img alt="OpenShamrock" src="https://img.shields.io/badge/OpenShamrock-red?style=plastic&logo=https%3A%2F%2Fwhitechi73.github.io%2FOpenShamrock%2Fshamrock.jpg&labelColoe=silver">
   </a>
+  <a href="https://github.com/whitechi73/kritor">
+    <img alt="Kritor" src="https://img.shields.io/badge/Kritor-red?style=plastic&labelColoe=gold">
+  </a>
   <a href="https://onebot.dev">
     <img alt="OneBotV11" src="https://img.shields.io/badge/OneBot-v11-white?style=plastic&logo=data%3Aimage%2Fpng%3Bbase64%2CiVBORw0KGgoAAAANSUhEUgAAAEAAAABABAMAAABYR2ztAAAAIVBMVEUAAAAAAAADAwMHBwceHh4UFBQNDQ0ZGRkoKCgvLy8iIiLWSdWYAAAAAXRSTlMAQObYZgAAAQVJREFUSMftlM0RgjAQhV%2B0ATYK6i1Xb%2BiMd0qgBEqgBEuwBOxU2QDKsjvojQPvkJ%2FZL5sXkgWrFirK4MibYUdE3OR2nEpuKz1%2Fq8CdNxNQgthZCXYVLjyoDQftaKuniHHWRnPh2GCUetR2%2F9HsMAXyUT4%2F3UHwtQT2AggSCGKeSAsFnxBIOuAggdh3AKTL7pDuCyABcMb0aQP7aM4AnAbc%2FwHwA5D2wDHTTe56gIIOUA%2F4YYV2e1sg713PXdZJAuncdZMAGkAukU9OAn40O849%2B0ornPwT93rphWF0mgAbauUrEOthlX8Zu7P5A6kZyKCJy75hhw1Mgr9RAUvX7A3csGqZegEdniCx30c3agAAAABJRU5ErkJggg%3D%3D&labelColor=deepblue">
   </a>
@@ -46,35 +49,41 @@
 
 # Momoon Bot
 
-**_★ 基于Node.js并对接[OpenShamrock](https://github.com/whitechi73/OpenShamrock)客户端的Bot后端实现 ☆_**
+**_★ 基于 Node.js 并对接 [OpenShamrock](https://github.com/whitechi73/OpenShamrock) 客户端的 Bot 后端实现 ☆_**
 
 </div>
 
 ## 简介
 
-Momoon Bot是一个使用TypeScript（JavaScript）编写的跨平台、可被拓展、自由灵活的QQ聊天机器人框架，Node.js事件驱动贯穿其本身。
+Momoon Bot 是一个使用 TypeScript（JavaScript）编写的跨平台、可被拓展、自由灵活的 QQ 聊天机器人框架，Node.js 事件驱动贯穿其本身。
 
 ## 功能
 
-Momoon Bot尚处于快速开发阶段。
+Momoon Bot 尚处于快速开发阶段。
 
 ### 兼容协议
 
-Momoon Bot目前兼容[OneBotV12](https://onebot.dev)内容，所有的API均根据[OpenShamrock文档](https://whitechi73.github.io/OpenShamrock/)进行编写。
+Momoon Bot 目前兼容以下协议：
+
+- [OneBotV12](https://onebot.dev)（OpenShamrock 客户端） - 所有的 API 均根据 [OpenShamrock 文档](https://whitechi73.github.io/OpenShamrock)进行编写。
+
+计划支持以下协议：
+
+- [Kritor](https://github.com/whitechi73/kritor) - 由于 OpenShamrock 的[协议更新计划](https://github.com/whitechi73/OpenShamrock/discussions/272)，此项目计划于 0.9.0 版本加入支持。
 
 ### 连接方式
 
-- [x] HTTP通信
-- [ ] 主动WebSocket
-- [x] 被动WebSocket
+- [x] HTTP 通信
+- [ ] 主动 WebSocket
+- [x] 被动 WebSocket
 
-### 关于消息CQ码
+### 关于消息 CQ 码
 
-因为发送带有CQ码消息的操作，实在过于原始。
+因为发送带有 CQ 码消息的操作，实在过于原始。
 
-因此，CQ码相关的操作将不会被添加，包括解析CQ码与生成CQ码。本项目在解析上报的消息时，仅通过消息段解析。
+因此，CQ 码相关的操作将不会被添加，包括解析 CQ 码与生成 CQ 码。本项目在解析上报的消息时，仅通过消息段解析。
 
-**温馨提示**：虽然OpenShamrock本身支持发送带有CQ码的消息，但为了代码可读性，请务必不要使用任何CQ码。
+**提示**：虽然 OpenShamrock 本身支持发送带有 CQ 码的消息，但为了代码可读性，请务必不要使用任何 CQ 码。
 
 ### 关于频道
 
@@ -93,10 +102,10 @@ Momoon Bot目前兼容[OneBotV12](https://onebot.dev)内容，所有的API均根
 
 该项目内置以下示例插件：
 
-- 今日数字（`TodayNumber`） - 最简单的示例插件，在用户输入命令后，将输出发送者在近24小时内所得到的随机数字。与“今日人品”差不多。
-- Q群管家反制（`GroupStewardFucker`） - 用于对部分群聊中，Q群管家撤回带有二维码或链接的“违规”消息的行为进行反制。
-- 随机动漫图片（`RandomAnimePicture`） ⇐ `axios` - 通过调用公布在网络上的随机图片API，获取动漫图片。
-- 哔哩哔哩视频详情获取（`BilibiliVideoDetails`） ⇐ `axios`、`js-md5` - 在用户发送带有哔哩哔哩视频链接、哔哩哔哩短链接或哔哩哔哩视频分享卡片消息等消息时，将调用哔哩哔哩API获取视频详细信息。
+- 今日数字（`TodayNumber`） - 最简单的示例插件，在用户输入命令后，将输出发送者在近 24 小时内所得到的随机数字。与“今日人品”差不多。
+- 防撤回（`AntiRecalling`） - 用于重新发出群聊中被撤回的消息。
+- 随机动漫图片（`RandomAnimePicture`） ⇐ `axios` - 通过调用公布在网络上的随机图片 API，获取动漫图片。
+- 哔哩哔哩视频详情获取（`BilibiliVideoDetails`） ⇐ `axios` - 在用户发送带有哔哩哔哩视频链接、哔哩哔哩短链接或哔哩哔哩视频分享卡片消息等消息时，将调用哔哩哔哩 API 获取视频详细信息。
 
 ### 插件开发
 
@@ -104,13 +113,12 @@ Momoon Bot目前兼容[OneBotV12](https://onebot.dev)内容，所有的API均根
 
 ## 脚手架（CLI）
 
-Momoon Bot目前正在计划增加`Molunar CLI`，作为脚手架。
+Momoon Bot 目前正在计划增加 `Molunar CLI`，作为脚手架。
 
 ## 使用模块
 
-- Axios.js - 主要用于支持HTTP通信。
-- ws - 主要用于支持主动WebSocket与被动WebSocket通信。
-- js-md5 - 主要用于面向OpenShamrock实现文件分片上传功能。
+- axios - 主要用于支持 HTTP 通信。
+- ws - 主要用于支持主动 WebSocket 与被动 WebSocket 通信。
 
 ## 许可证
 

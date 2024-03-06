@@ -121,6 +121,15 @@ export namespace ConnectionContent {
       auto_escape?: boolean
       recall_duration?: number
     }
+    /**
+     * 通过 Res Id 发送消息
+     * @description OpenShamrock 实验性接口
+     */
+    interface SendMsgByResId {
+      resid: string
+      peer: number
+      message_type: EventEnum.MessageType
+    }
     interface GetMsg {
       message_id: number
     }
@@ -344,6 +353,25 @@ export namespace ConnectionContent {
       cmd: string | string[]
       dir: string
     }
+    /**
+     * 扫描二维码
+     * @description OpenShamrock 实验性接口
+     * @deprecated OpenShamrock 弃用
+     */
+    interface SancQrcode {
+      /**
+       * 图片的 Base64 代码
+       */
+      pic: string
+    }
+    /**
+     * 为卡片Json签名
+     * @description OpenShamrock 实验性接口
+     * @todo
+     */
+    interface SignArkMessage {
+      json: string
+    }
 
     interface GetCsrfToken {
       domain?: string
@@ -367,6 +395,10 @@ export namespace ConnectionContent {
       code: string
       city?: string
     }
+    /**
+     * 上传群聊图片资源
+     * @description OpenShamrock 实验性接口
+     */
     interface UploadGroupImage {
       pic: string
       sender: number

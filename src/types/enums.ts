@@ -213,6 +213,11 @@ export namespace ConnectionEnum {
     sendGroupMsg = "send_group_msg",
     // sendGroupMessage = "send_group_message",
     sendMsg = "send_msg",
+    /**
+     * 通过 Res Id 发送消息
+     * @description OpenShamrock 实验性接口
+     */
+    sendMsgByResId = "send_msg_by_resid",
     // sendMessage = "send_message",
     getMsg = "get_msg",
     // getMessage = "get_message",
@@ -286,12 +291,80 @@ export namespace ConnectionEnum {
     cleanCache = "clean_cache", // OpenShamrock的c7265ba提交
     shell = "shell",
     shut = "shut",
-    restart = "restart_me", // 不支持
-    sancQrcode = "sanc_qrcode", // 不支持
+    restart = "restart_me", 
+    /**
+     * 扫描二维码
+     * @description OpenShamrock 实验性接口
+     * @deprecated OpenShamrock 弃用
+     */
+    sancQrcode = "sanc_qrcode", 
+    /**
+     * 为卡片Json签名
+     * @description OpenShamrock 实验性接口
+     * @todo
+     */
+    signArkMessage = "sign_ark_message",
+    /**
+     * 重置签名服务器
+     * @description OpenShamrock 实验性接口
+     */
+    resetQsign = "reset_qsign",
+    /**
+     * 获取QQ正在运行的服务
+     * @description OpenShamrock 实验性接口
+     */
+    getRunningService = "get_running_service",
+    /**
+     * 获取 QSign 白名单
+     * @description OpenShamrock 实验性接口
+     */
+    getCmdWhitelist = "get_cmd_whitelist",
+    /**
+     * 获取 xw_debug_id
+     * @description OpenShamrock 实验性接口
+     */
+    getXwDebugId = "get_xw_debug_id",
 
     getWeatherCityCode = "get_weather_city_code",
     getWeather = "get_weather",
+    /**
+     * 上传群聊图片资源
+     * @description OpenShamrock 实验性接口
+     */
     uploadGroupImage = "upload_group_image",
+
+    /**
+     * @description OpenShamrock 签名服务器接口
+     */
+    sign = "sign",
+    /**
+     * @borrows sign
+     */
+    energy = "energy",
+    /**
+     * @borrows sign
+     */
+    customEnergy = "custom_energy",
+    /**
+     * @borrows sign
+     */
+    getByte = "get_byte",
+    /**
+     * @borrows sign
+     */
+    friendSign = "friend_sign",
+    /**
+     * @borrows sign
+     */
+    groupSign = "group_sign",
+
+    configSetBoolean = "config/set_boolean",
+    configSetInt = "config/set_int",
+    configSetString = "config/set_string",
+    sendPacket = "send_packet",
+    setGuid = "send_guid",
+    getMsfInfo = "get_msf_info",
+    getAllTicket = "get_all_ticket",
 
     favoriteGetItemList = "fav.get_item_list",
     favoriteGetItemContent = "fav.get_item_content",
