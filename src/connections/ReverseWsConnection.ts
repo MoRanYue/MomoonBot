@@ -21,7 +21,7 @@ export class ReverseWsConnection extends Connection {
   protected server!: ws.Server;
   protected messageCbs: Record<string, DataType.ResponseFunction<any> | DataType.RawResponseFunction<any>> = {}
 
-  readonly ev: CustomEventEmitter.ReverseWsEventEmitter = new EventEmitter()
+  public readonly ev: CustomEventEmitter.ReverseWsEventEmitter = new EventEmitter()
   
   constructor() {
     super();

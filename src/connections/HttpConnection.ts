@@ -22,7 +22,7 @@ export class HttpConnection extends Connection {
   protected api?: string
   protected server?: http.Server
   protected clients: HttpClient[] = []
-  readonly ev: CustomEventEmitter.HttpEventEmitter = new EventEmitter()
+  public readonly ev: CustomEventEmitter.HttpEventEmitter = new EventEmitter()
 
   public createServer(port: number): this
   public createServer(port: number, host?: string): this

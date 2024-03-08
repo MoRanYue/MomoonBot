@@ -3,7 +3,7 @@
     "start": "npx ts-node ./index.ts",
     "build": "npx tsc"
   },
-  "version": "0.8.7",
+  "version": "0.9.0-adapter-dev",
   "author": "MoRanYue",
   "description": "Momoon Bot → OpenShamrock",
   "license": "AGPL-3.0",

@@ -20,7 +20,7 @@ export abstract class Plugin {
     notice: new Map(),
     request: new Map()
   }
-  readonly ev: CustomEventEmitter.PluginEventEmitter = new EventEmitter()
+  public readonly ev: CustomEventEmitter.PluginEventEmitter = new EventEmitter()
 
   constructor() {
     this.ev.on("message", ev => {

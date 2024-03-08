@@ -14,6 +14,34 @@ import type { ReverseWsClient } from "src/connections/ReverseWsClient";
 export namespace CustomEventEmitter {
   interface CustomEventEmitter extends EventEmitter {}
 
+  interface AdapterEventEmitter {
+    on(eventName: "report", listener: (ev: unknown, client: Client) => void): this
+    on(eventName: "result", listener: (ev: Ev, client: Client) => void): this
+    on(eventName: string | symbol, listener: DataType.AnyFunction): this
+
+    once(eventName: "report", listener: (ev: unknown, client: Client) => void): this
+    once(eventName: "result", listener: (ev: Ev, client: Client) => void): this
+    once(eventName: string | symbol, listener: DataType.AnyFunction): this
+    
+    emit(eventName: "report", ev: unknown, client: Client): boolean
+    emit(eventName: "result", ev: Ev, client: Client): boolean
+    emit(eventName: string | symbol, ...args: any[]): boolean;
+  }
+  interface OneBotV11EventEmitter extends AdapterEventEmitter {
+    on(eventName: "report", listener: (ev: Event.Unknown, client: Client) => void): this
+    on(eventName: "result", listener: (ev: Ev, client: Client) => void): this
+    on(eventName: string | symbol, listener: DataType.AnyFunction): this
+
+    once(eventName: "report", listener: (ev: Event.Unknown, client: Client) => void): this
+    once(eventName: "result", listener: (ev: Ev, client: Client) => void): this
+    once(eventName: string | symbol, listener: DataType.AnyFunction): this
+    
+    emit(eventName: "report", ev: Event.Unknown, client: Client): boolean
+    emit(eventName: "result", ev: Ev, client: Client): boolean
+    emit(eventName: string | symbol, ...args: any[]): boolean;
+  }
+  interface KritorEventEmitter extends AdapterEventEmitter {}
+
   interface ConnectionEventEmitter {
     on(eventName: "message", listener: (ev: Event.Message, client: Client) => void): this
     on(eventName: "notice", listener: (ev: Event.Notice, client: Client) => void): this
