@@ -6,6 +6,10 @@ import { User } from "../processors/sets/User";
 import { Group } from "../processors/sets/Group";
 import type { Event } from "src/types/event";
 
+/**
+ * 客户端（Bot 端）
+ * @since 0.6.0
+ */
 export abstract class Client {
   protected abstract connectable: boolean
   protected abstract _address: string

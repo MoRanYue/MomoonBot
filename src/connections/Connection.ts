@@ -8,6 +8,10 @@ import type { Logger } from "../tools/Logger"
 import type { ConnectionContent } from "src/types/connectionContent"
 import type { Client } from "./Client"
 
+/**
+ * 服务器
+ * @since 0.1.0
+ */
 export abstract class Connection {
   protected abstract server?: unknown
   protected abstract clients: Client[]
