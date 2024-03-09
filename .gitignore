@@ -24,6 +24,7 @@ src/plugins/*
 !src/plugins/TodayNumber.ts
 !src/plugins/BilibiliVideoDetails
 !src/plugins/Debugger.ts
+config.json
 
 # Editor directories and files
 .vscode/*
@@ -35,4 +36,3 @@ src/plugins/*
 *.njsproj
 *.sln
 *.sw?
-Automatic HoYoLab Sign.code-workspace
