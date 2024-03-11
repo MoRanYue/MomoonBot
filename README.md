@@ -109,7 +109,46 @@ Momoon Bot 目前兼容以下协议：
 
 ### 插件开发
 
-文档未完成
+在不久的未来，将会在[该仓库的维基](https://github.com/MoRanYue/MomoonBot/wiki/%E6%8F%92%E4%BB%B6%E5%BC%80%E5%8F%91)上发布插件开发教程。
+
+## 快速开始
+
+请确保设备上已经安装 Node.js，若尚未安装，需要进入[官方网站](https://nodejs.org/en/download)，下载 Node.js 16.0 以上的版本。
+
+可以通过从[发布](https://github.com/MoRanYue/MomoonBot/releases)页面中下载稳定版本的代码，亦可克隆仓库源代码，并进行编译。
+
+下载完成后，解压压缩包，输入以下命令启动：
+
+```sh
+node .
+```
+
+它将在运行目录中，创建文件名为`config.json`的配置文件。完成配置后，重新运行命令即可启动。
+
+更多信息见[使用](https://github.com/MoRanYue/MomoonBot/wiki/%E4%BD%BF%E7%94%A8)。
+
+### 编译源代码
+
+若想要编译源代码，请首先克隆该仓库：
+
+```sh
+git clone https://github.com/MoRanYue/MomoonBot.git
+cd MomoonBot
+```
+
+若正在使用 NPM：
+
+```sh
+npm run build
+```
+
+若正在使用 Yarn：
+
+```sh
+yarn build
+```
+
+编译完成后，编译的结果将被放置于`<Momoon Bot 源代码>/dist`目录中。
 
 ## 脚手架（CLI）
 
