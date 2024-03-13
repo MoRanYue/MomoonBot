@@ -8,6 +8,10 @@ import fs from "node:fs"
 import path from 'node:path'
 
 type Validation = Record<string, string | string[]>
+/**
+ * 配置文件类
+ * @since 0.7.0
+ */
 export class Config {
   private readonly version: number = 1
   private filePath: string
@@ -15,7 +19,7 @@ export class Config {
 
   constructor(filePath: string = "./config.json") {
     if (FileUtils.getExtendedName(filePath)?.toLowerCase() != ".json") {
-      throw new Error("文件类型不正确，应为JSON文件")
+      throw new Error("文件类型不正确，应为 JSON 文件")
     }
     this.filePath = path.resolve(filePath)
     let fileContent: string
@@ -43,6 +47,11 @@ export class Config {
     }
   }
 
+  /**
+   * 检验配置文件内容
+   * @param config 配置文件内容
+   * @returns 是否完全检验成功
+   */
   private validateConfig(config: Record<string, unknown> | Partial<Configuration> | undefined): boolean {
     if (!config) {
       console.log("配置文件不存在")
@@ -173,6 +182,12 @@ export class Config {
 
     return true
   }
+  /**
+   * 检验配置文件中的内容是否正确
+   * @param target 被检验的内容
+   * @param keys 将要检验的类型
+   * @returns 检验是否成功
+   */
   private validateOne(target: Record<string, unknown> | undefined, keys: Validation): boolean {
     if (!target) {
       return false
@@ -202,6 +217,12 @@ export class Config {
     }
     return true
   }
+  /**
+   * 检验单个配置文件值
+   * @param target 被检验的内容
+   * @param type 将要检验的类型
+   * @returns 检验是否成功
+   */
   private validateFactor(target: unknown, type: string): boolean {
     if (type == "null" && typeof target == "object" && !target) {
       return true
@@ -215,6 +236,10 @@ export class Config {
     return false
   }
 
+  /**
+   * 保存配置文件
+   * @param cb 保存完成后将执行的回调函数
+   */
   public _save(cb?: () => void): void {
     fs.writeFile(this.filePath, Utils.dataToJson(this.config, 2), {
       encoding: "utf-8",
@@ -230,9 +255,17 @@ export class Config {
     })
   }
 
+  /**
+   * 获取配置文件内容
+   * @returns 配置文件内容
+   */
   public getConfig(): Configuration {
     return this.config
   }
+  /**
+   * 获取默认配置文件内容
+   * @returns 默认配置文件内容
+   */
   public getDefaultConfig(): Configuration {
     return {
       configVersion: this.version,
@@ -282,6 +315,12 @@ export class Config {
     }
   }
 
+  /**
+   * 获取插件数据
+   * @param plugin 将获取数据的插件
+   * @param key 配置文件中，该插件存储数据的键
+   * @returns 若取得，则为数据，否则为未定义
+   */
   public getPluginData(plugin: string | Plugin_): Record<string, any> | undefined
   public getPluginData(plugin: string | Plugin_, key: string): any | undefined
   public getPluginData(plugin: string | Plugin_, key?: string): any | Record<string, any> | undefined {
@@ -298,8 +337,28 @@ export class Config {
     return undefined
   }
 
+  /**
+   * 设置插件数据
+   * @param plugin 将获取数据的插件
+   * @param data 插件数据
+   * @returns 存储后，该插件的数据
+   */
   public setPluginData(plugin: string | Plugin_, data: Record<string, any>): Record<string, any>
+  /**
+   * 设置插件数据
+   * @param plugin 将获取数据的插件
+   * @param key 将要存储的键
+   * @param value 将要存储的值
+   * @returns 存储后，该插件的数据
+   */
   public setPluginData(plugin: string | Plugin_, key: string, value: any): Record<string, any>
+  /**
+   * 设置插件数据
+   * @param plugin 将获取数据的插件
+   * @param key 将要存储的键
+   * @param value 将要存储的值
+   * @returns 存储后，该插件的数据
+   */
   public setPluginData(plugin: string | Plugin_, key: string | Record<string, any>, value?: any): Record<string, any> {
     if (typeof plugin == "object") {
       plugin = plugin.constructor.name

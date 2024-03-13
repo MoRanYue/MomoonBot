@@ -7,6 +7,10 @@ import { ListenerEnum } from "../types/enums"
 import { Logger } from "../tools/Logger"
 import { Segment } from "../events/messages/MessageSegment"
 
+/**
+ * 插件抽象类
+ * @since 0.0.1
+ */
 export abstract class Plugin {
   public readonly abstract name: string
   public readonly abstract description: string
@@ -14,6 +18,13 @@ export abstract class Plugin {
   public readonly abstract version: string
   protected logger: Logger = new Logger("插件")
 
+  /**
+   * 该插件注册的所有监听器
+   * @property {Map} message 消息监听器映射
+   * @property {Map} command 命令监听器映射
+   * @property {Map} notice 通知监听器映射
+   * @property {Map} request 请求监听器映射
+   */
   protected listeners: DataType.ListenerList = {
     message: new Map(),
     command: new Map(),
@@ -23,6 +34,10 @@ export abstract class Plugin {
   public readonly ev: CustomEventEmitter.PluginEventEmitter = new EventEmitter()
 
   constructor() {
+    if (!config.getPluginData(this, "_enable")) {
+      config.setPluginData(this, "_enable", true)
+    }
+
     this.ev.on("message", ev => {
       const messageListeners = this.listeners.message
       for (const message of messageListeners.keys()) {
@@ -109,7 +124,7 @@ export abstract class Plugin {
               listener.trigger(ev)
             }
             catch (err) {
-              this.logger.error(`在触发通知监听器“${request}”（优先级：${listener.priority}，执行顺序：${i + 1}）时捕获到错误`)
+              this.logger.error(`在触发请求监听器“${request}”（优先级：${listener.priority}，执行顺序：${i + 1}）时捕获到错误`)
               this.logger.error(err)
             }
 

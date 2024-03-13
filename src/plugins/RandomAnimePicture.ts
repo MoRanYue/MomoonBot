@@ -13,7 +13,7 @@ import type { Client } from "src/connections/Client";
 
 export default class RandomAnimePicture extends Plugin {
   readonly name: string = "随机动漫图片";
-  readonly description: string = "调用多个API来获取动漫图片";
+  readonly description: string = "调用多个 API 来获取动漫图片";
   readonly instruction: string = "命令：randomPic、rdpic、anime";
   readonly version: string = "1.0.0";
 
