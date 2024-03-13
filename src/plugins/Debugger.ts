@@ -6,7 +6,7 @@ import { ActionFailedError } from "../exceptions/exceptions";
 
 export default class Debugger extends Plugin {
   public name: string = "调试器";
-  public description: string = "用于对Momoon Bot进行调试";
+  public description: string = "用于对 Momoon Bot 进行调试";
   public instruction: string = "需要在配置文件中开启调试模式。\n命令：testApi";
   public version: string = "1";
 

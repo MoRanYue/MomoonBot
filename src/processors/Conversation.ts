@@ -5,6 +5,10 @@ import { ConnectionEnum, EventEnum, ListenerEnum, MessageSegmentEnum } from "../
 import type { ConnectionContent } from "src/types/connectionContent";
 import type { DataType } from "src/types/dataType";
 
+/**
+ * 连续对话类
+ * @since 0.7.0
+ */
 export class Conversation {
   protected origin: number
   protected userId!: number
