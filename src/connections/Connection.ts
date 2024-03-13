@@ -17,7 +17,7 @@ export abstract class Connection {
   protected abstract clients: Client[]
   protected abstract token: string | null | undefined
   
-  readonly abstract ev: CustomEventEmitter.ConnectionEventEmitter
+  public readonly abstract ev: CustomEventEmitter.ConnectionEventEmitter
   protected readonly abstract logger: Logger
 
   public abstract createServer(port: number): this
