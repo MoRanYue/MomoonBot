@@ -69,7 +69,7 @@ Momoon Bot 目前兼容以下协议：
 
 计划支持以下协议：
 
-- [Kritor](https://github.com/whitechi73/kritor) - 由于 OpenShamrock 的[协议更新计划](https://github.com/whitechi73/OpenShamrock/discussions/272)，此项目计划于 0.9.0 版本加入支持。
+- [Kritor](https://github.com/KarinJS/kritor) - 由于 OpenShamrock 的[协议更新计划](https://github.com/whitechi73/OpenShamrock/discussions/272)，此项目计划于 0.9.0 版本加入支持。
 
 ### 连接方式
 
