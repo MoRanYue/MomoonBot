@@ -1,4 +1,4 @@
-import http from "follow-redirects"
+import axios from "axios"
 import { Utils } from "../../tools/Utils"
 import type { IncomingMessage } from "http"
 import { createHash } from "node:crypto"
@@ -63,7 +63,7 @@ export class Api {
     return this.searchParamsToObject(new url.URLSearchParams(query))
   }
 
-  public videoDetailsInfo(id: string, isBvId: boolean, cb?: (data: ApiContent.Response.Response<ApiContent.Response.VideoDetails>, res: IncomingMessage & http.FollowResponse) => (void | Promise<void>), catchCb?: (err: Error, res?: IncomingMessage & http.FollowResponse) => (void | Promise<void>)): void | never {
+  public videoDetailsInfo(id: string, isBvId: boolean, cb?: (data: ApiContent.Response.Response<ApiContent.Response.VideoDetails>, res: axios.AxiosResponse) => (void | Promise<void>), catchCb?: (err: Error, res?: axios.AxiosResponse) => (void | Promise<void>)): void | never {
     if (cb) {
       const params: Record<string, string> = {}
       if (isBvId) {
@@ -78,7 +78,7 @@ export class Api {
     }
   }
 
-  public get(target: string | url.URL, params?: url.URLSearchParams | Record<string, any> | string, needSign: boolean = true, cb?: (data: Buffer, res: IncomingMessage & http.FollowResponse) => (void | Promise<void>), catchCb?: (err: Error, res?: IncomingMessage & http.FollowResponse) => (void | Promise<void>), followRedirects: boolean = true): void {
+  public get(target: string | url.URL, params?: url.URLSearchParams | Record<string, any> | string, needSign: boolean = true, cb?: (data: Buffer, res: axios.AxiosResponse) => (void | Promise<void>), catchCb?: (err: Error, res?: axios.AxiosResponse) => (void | Promise<void>)): void {
     try {
       const target_: url.URL = typeof target == "string" ? new url.URL(target) : target
       let params_: Record<string, string> = {}
@@ -100,33 +100,17 @@ export class Api {
       }
       target_.search = this.objectToQueryString(params_)
 
-      const req = http.https.get(target_, {
+      const req = axios.get(target_.toString(), {
+        responseType: "arraybuffer",
         headers: {
-          "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36 Edg/120.0.0.0",
-          "referer": "https://www.bilibili.com/"
-        },
-        followRedirects
-      }, res => {
-        if (catchCb) {
-          res.on("error", err => {
-            if (err) {
-              catchCb(err, res)
-            }
-          })
+          "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36 Edg/120.0.0.0",
+          "Referer": "https://www.bilibili.com"
         }
+      }).then(res => {
         if (cb) {
-          let data: any[] = []
-          res.on("data", chunk => data.push(Buffer.from(chunk, "binary")))
-          res.on("end", () => cb(Buffer.concat(data), res))
+          cb(res.data, res)
         }
-      })
-      if (catchCb) {
-        req.on("error", err => {
-          if (err) {
-            catchCb(err)
-          }
-        })
-      }
+      }).catch(catchCb)
     }
     catch (err) {
       if (catchCb) {

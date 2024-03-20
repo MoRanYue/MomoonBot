@@ -1,9 +1,7 @@
 import MessageSegment, { type Segment } from "../../events/messages/MessageSegment";
 import { Plugin } from "../../processors/Plugin"
-import { Logger } from "../../tools/Logger";
 import { MessageEvent } from "../../events/MessageEvent";
 import { Api } from "./interfaces";
-import https from "node:https"
 import { Tools } from "./tools";
 import type { ApiContent } from "./types/ApiContent";
 
@@ -88,7 +86,7 @@ ${data.desc}
 
   private resolveShortLink(link: string, cb: (link: string) => void) {
     this.api.get(link, undefined, false, (_, res) => {
-      if (res.statusCode?.toString().startsWith("3")) {
+      if (res.status.toString().startsWith("3")) {
         cb(res.headers.location!)
       }
       else {
@@ -97,6 +95,6 @@ ${data.desc}
     }, err => {
       this.logger.error("获取短链接的真实链接时出现错误")
       this.logger.error(link)
-    }, false)
+    })
   }
 }

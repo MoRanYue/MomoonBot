@@ -59,17 +59,17 @@ Momoon Bot 是一个使用 TypeScript（JavaScript）编写的跨平台、可被
 
 ## 功能
 
-Momoon Bot 尚处于快速开发阶段。
+Momoon Bot 尚处于开发阶段，已经基本可用。
 
 ### 兼容协议
 
 Momoon Bot 目前兼容以下协议：
 
-- [OneBotV12](https://onebot.dev)（OpenShamrock 客户端） - 所有的 API 均根据 [OpenShamrock 文档](https://whitechi73.github.io/OpenShamrock)进行编写。
+- [OneBot/v12](https://onebot.dev)（OpenShamrock 客户端） - 所有的 API 均根据 [OpenShamrock 文档](https://whitechi73.github.io/OpenShamrock)进行编写。
 
 计划支持以下协议：
 
-- [Kritor](https://github.com/KarinJS/kritor) - 由于 OpenShamrock 的[协议更新计划](https://github.com/whitechi73/OpenShamrock/discussions/272)，此项目计划于 0.9.0 版本加入支持。
+- [Kritor](https://github.com/KarinJS/kritor) - 由于 OpenShamrock 的[协议更新计划](https://github.com/whitechi73/OpenShamrock/discussions/272)，此项目计划于 0.9.1 版本加入支持。
 
 ### 连接方式
 
@@ -84,6 +84,8 @@ Momoon Bot 目前兼容以下协议：
 因此，CQ 码相关的操作将不会被添加，包括解析 CQ 码与生成 CQ 码。本项目在解析上报的消息时，仅通过消息段解析。
 
 **提示**：虽然 OpenShamrock 本身支持发送带有 CQ 码的消息，但为了代码可读性，请务必不要使用任何 CQ 码。
+
+**关于 OpenShamrock 的提示**：OpenShamrock 计划在其升级至 1.1.0 以上版本后，弃用 OneBot 协议，而改用 Kritor 协议，彼时亦将停止 CQ 码支持。Momoon Bot 将保留 OneBot 协议支持，并使其更加通用（即支持任何使用 OneBot 协议的 11 与 12 版本的客户端）。
 
 ### 关于频道
 

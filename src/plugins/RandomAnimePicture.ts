@@ -3,7 +3,7 @@ import type { MessageEvent } from "src/events/MessageEvent";
 import { Plugin } from "../processors/Plugin";
 import { ConnectionEnum, EventEnum, ListenerEnum } from "../types/enums";
 import { Utils } from "../tools/Utils";
-import http from "follow-redirects"
+import axios from "axios";
 import path from "node:path"
 import { FileUtils } from "../tools/FileUtils";
 import type { ConnectionContent } from "src/types/connectionContent";
@@ -69,11 +69,10 @@ export default class RandomAnimePicture extends Plugin {
       const get = () => {
         const url = Utils.randomChoice(apis)
         this.httpGet(url, (data, res) => {
-          const imgUrl = res.responseUrl
-          this.logger.info(`正在处理第${index + 1}张图片：“${imgUrl}”（“${url}”）`)
-          let format = imgUrl.split(".").pop()?.toLowerCase()
-          if (!format || !["jpg", "jpeg", "png", "webp", "webm"].includes(format)) {
-            format = "png"
+          this.logger.info(`正在处理第 ${index + 1} 张图片：${url}`)
+          let format = "png"
+          if (Object.prototype.hasOwnProperty.call(res.headers, "Content-Type")) {
+            format = res.headers["Content-Type"]!.toString().split("/").pop()!
           }
 
           messages.push(this.buildForwardNode([new MessageSegment.Image(data)]))
@@ -85,12 +84,7 @@ export default class RandomAnimePicture extends Plugin {
           const stream = FileUtils.writeFileWithStream(path.join(this.dataFolder, Utils.randomChar(7) + "." + format))
           stream.write(data)
         }, (err, res) => {
-          if (res) {
-            this.logger.error(`请求“${res.responseUrl}”（“${url}”）时出错，正在重试`)
-          }
-          else {
-            this.logger.error(`请求“${url}”时出错，正在重试`)
-          }
+          this.logger.error(`请求“${url}”时出错，正在重试`)
           this.logger.error(err)
           get()
         })
@@ -185,34 +179,19 @@ export default class RandomAnimePicture extends Plugin {
     }
   }
 
-  public httpGet(target: string, cb?: (data: Buffer, res: IncomingMessage & http.FollowResponse) => (void | Promise<void>), catchCb?: (err: Error, res?: IncomingMessage & http.FollowResponse) => (void | Promise<void>)): void {
+  public httpGet(target: string, cb?: (data: Buffer, res: axios.AxiosResponse) => (void | Promise<void>), catchCb?: (err: Error, res?: axios.AxiosResponse) => (void | Promise<void>)): void {
     try {
-      const req = http.https.get(target, {
+      const req = axios.get(target, {
         timeout: 20000,
+        responseType: "arraybuffer",
         headers: {
-          "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36 Edg/120.0.0.0"
+          "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36 Edg/120.0.0.0"
         }
-      }, res => {
-        if (catchCb) {
-          res.on("error", err => {
-            if (err) {
-              catchCb(err, res)
-            }
-          })
-        }
+      }).then(res => {
         if (cb) {
-          let data: any[] = []
-          res.on("data", chunk => data.push(Buffer.from(chunk, "binary")))
-          res.on("end", () => cb(Buffer.concat(data), res))
+          cb(res.data, res)
         }
-      })
-      if (catchCb) {
-        req.on("error", err => {
-          if (err) {
-            catchCb(err)
-          }
-        })
-      }
+      }).catch(catchCb)
     }
     catch (err) {
       if (catchCb) {

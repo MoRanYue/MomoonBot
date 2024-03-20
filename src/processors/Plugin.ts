@@ -253,6 +253,11 @@ export abstract class Plugin {
   }
 }
 
+/**
+ * 插件类
+ * @deprecated 因 TS 类型问题，该类仅用作继承 Plugin 抽象类的任何类的类型提示
+ * @since 0.0.1
+ */
 export class Plugin_ extends Plugin {
   readonly name: string = "Plugin_"
   readonly description: string = "Plugin_"

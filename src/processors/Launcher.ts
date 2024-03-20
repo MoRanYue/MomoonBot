@@ -18,7 +18,7 @@ export class Launcher {
   protected loader!: PluginLoader
   protected logger: Logger = new Logger()
   
-  public readonly version = "0.8.0"
+  public readonly version = "0.9.0-adapter-dev"
 
   public launch() {
     process.on("unhandledRejection", (reason: Error, promise: Promise<unknown>) => {

@@ -3,16 +3,23 @@ import { CustomEventEmitter } from "src/types/CustomEventEmitter";
 import { Plugin, Plugin_ } from "./Plugin";
 import path from "node:path"
 import fs from "node:fs"
-import crypto from "node:crypto"
 import { FileUtils } from "../tools/FileUtils";
 import { Logger } from "../tools/Logger";
 import { FriendRequest, GroupRequest } from "../events/RequestEvent";
 import { GroupMemberDecrease, GroupMemberIncrease } from "../events/NoticeEvent";
+import config from "../config";
 
 export class PluginLoader {
   public ev: CustomEventEmitter.PluginLoaderEventEmitter = new EventEmitter()
   private logger: Logger = new Logger("插件加载器")
   private plugins: Plugin[] = []
+
+  /**
+   * 无论如何设置配置文件，类名为其中的插件不应该被关闭
+   */
+  private builtInPluginClassNames: string[] = [
+    "BuiltInPlugin"
+  ]
 
   constructor() {
     this.ev.on("message", async (ev) => this.plugins.forEach(plugin => plugin.ev.emit("message", ev)))
@@ -44,6 +51,12 @@ export class PluginLoader {
   }
 
   public load(pluginClass: typeof Plugin_): Plugin | undefined {
+    const enabled: boolean | undefined | null = config.getPluginData(pluginClass.name, "_enable")
+    if ((typeof enabled == "boolean" && !enabled) && !this.builtInPluginClassNames.includes(pluginClass.name)) {
+      this.logger.warning(`插件“${pluginClass.name}”在配置文件中被关闭，将不会被加载`)
+      return
+    }
+
     for (let i = 0; i < this.plugins.length; i++) {
       const plugin = this.plugins[i];
 

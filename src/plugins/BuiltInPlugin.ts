@@ -14,13 +14,12 @@ import type {
 } from "src/events/NoticeEvent";
 import config from "../config";
 import type { FriendRequest, GroupRequest } from "src/events/RequestEvent";
-import { ActionFailedError } from "../exceptions/exceptions";
 
 export default class BuiltInPlugin extends Plugin {
-  name: string = "内置插件"
-  description: string = "内置插件，不应移除"
-  instruction: string = ""
-  version: string = "1.0.0"
+  public name: string = "内置插件"
+  public description: string = "内置插件，不应移除"
+  public instruction: string = "内置插件，不应移除"
+  public version: string = "1.0.0"
 
   constructor() {
     super();
