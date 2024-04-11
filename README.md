@@ -33,7 +33,7 @@
   <a href="https://github.com/whitechi73/OpenShamrock">
     <img alt="OpenShamrock" src="https://img.shields.io/badge/OpenShamrock-red?style=plastic&logo=https%3A%2F%2Fwhitechi73.github.io%2FOpenShamrock%2Fshamrock.jpg&labelColoe=silver">
   </a>
-  <a href="https://github.com/whitechi73/kritor">
+  <a href="https://github.com/KarinJS/kritor">
     <img alt="Kritor" src="https://img.shields.io/badge/Kritor-red?style=plastic&labelColoe=gold">
   </a>
   <a href="https://onebot.dev">
