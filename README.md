@@ -1,3 +1,7 @@
+# 由于架构内部几乎没有可扩展性，该项目已被弃用！
+
+---
+
 <p align="center">
   <a href="https://github.com/MoRanYue/MomoonBot">
     <!-- <img src="" height="" alt="Momoon Bot"> -->
